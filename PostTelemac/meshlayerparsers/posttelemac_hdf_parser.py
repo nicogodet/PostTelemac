@@ -22,13 +22,12 @@ Versions :
 """
 import time
 import numpy as np
-import gdal
+from osgeo import gdal
 
 # import gdal_array
 import subprocess
 
 from .posttelemac_abstract_parser import PostTelemacAbstractParser
-
 
 MESHX = "x"
 MESHY = "y"
@@ -37,15 +36,6 @@ TIME = "time"
 BATHY = "elevation"
 
 TYPENDVAR = 1  # 0 for 1d array 1 for ReadAsArray
-
-"""
-try:
-    #import h5py
-    import h5py
-except Exception as e :
-    print('error h5py ' + str(e))
-"""
-
 
 class PostTelemacHDFParser(PostTelemacAbstractParser):
 

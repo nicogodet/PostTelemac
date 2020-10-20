@@ -13,7 +13,11 @@
 """
 
 # import QT
-from qgis.PyQt import QtCore, QtGui, QtWidgets
+from qgis.PyQt import (
+    QtCore,
+    QtGui,
+    QtWidgets,
+    )
 
 # import qgis
 import qgis
@@ -91,14 +95,15 @@ class PostTelemac:
         # TODO: We are going to let the user set this up in a future iteration
         # toolbar
         toolbars = self.iface.mainWindow().findChildren(QtWidgets.QToolBar)
-
+        test = True
         for toolbar1 in toolbars:
             if toolbar1.windowTitle() == u"Telemac":
                 self.toolbar = toolbar1
                 test = False
                 break
-        self.toolbar = self.iface.addToolBar(u"Telemac")
-        self.toolbar.setObjectName(u"Telemac")
+        if test:
+            self.toolbar = self.iface.addToolBar(u"Telemac")
+            self.toolbar.setObjectName(u"Telemac")
 
         self.dlg_about = None
 

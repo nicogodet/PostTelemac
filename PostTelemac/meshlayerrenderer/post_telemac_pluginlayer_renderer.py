@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import qgis.core
 
-# from PyQt4 import QtGui, QtCore
 from qgis.PyQt import QtGui, QtCore
 
 
@@ -16,7 +15,6 @@ class PostTelemacPluginLayerRenderer(qgis.core.QgsMapLayerRenderer):
         self.rendererContext = rendererContext
 
     def render(self):
-
         try:
             if (
                 self.meshlayer.hydrauparser != None
@@ -39,7 +37,7 @@ class PostTelemacPluginLayerRenderer(qgis.core.QgsMapLayerRenderer):
             return bool1
 
         except Exception as e:
-            self.meshlayer.propertiesdialog.errorMessage("Renderer Error")
+            self.meshlayer.propertiesdialog.errorMessage("Renderer Error : " + str(e))
             return False
 
     def onTimeout(self):

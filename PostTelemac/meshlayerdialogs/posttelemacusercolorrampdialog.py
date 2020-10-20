@@ -25,13 +25,15 @@
 # unicode behaviour
 from __future__ import unicode_literals
 
-# from PyQt4 import uic, QtGui
-from qgis.PyQt import uic, QtCore, QtGui
-
-try:
-    from qgis.PyQt.QtGui import QDialog, QTableWidgetItem
-except:
-    from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem
+from qgis.PyQt import (
+    uic,
+    QtCore,
+    QtGui,
+    )
+from qgis.PyQt.QtWidgets import (
+    QDialog,
+    QTableWidgetItem,
+    )
 
 import os, sys
 import qgis.gui
@@ -70,14 +72,8 @@ class UserColorRampDialog(QDialog, FORM_CLASS):
         if self.meshlayer.propertiesdialog.tabWidget_lvl_vel.currentIndex() == 0:  # contour
             self.tableWidget.setRowCount(len(self.meshlayer.meshrenderer.lvl_contour) - 1)
             for i in range(len(self.meshlayer.meshrenderer.lvl_contour) - 1):
-                try:
-                    colorwdg = qgis.gui.QgsColorButtonV2()
-                except:
-                    colorwdg = qgis.gui.QgsColorButton()
-                if sys.version_info.major == 2:
-                    colorwdg.setAllowAlpha(True)
-                elif sys.version_info.major == 3:
-                    colorwdg.setAllowOpacity(True)
+                colorwdg = qgis.gui.QgsColorButton()
+                colorwdg.setAllowOpacity(True)
                 colorwdg.setColor(
                     QtGui.QColor(
                         self.meshlayer.meshrenderer.cmap_contour_leveled[i][0] * 255,
@@ -92,10 +88,7 @@ class UserColorRampDialog(QDialog, FORM_CLASS):
         elif self.meshlayer.propertiesdialog.tabWidget_lvl_vel.currentIndex() == 1:  # velocity
             self.tableWidget.setRowCount(len(self.meshlayer.meshrenderer.lvl_vel) - 1)
             for i in range(len(self.meshlayer.meshrenderer.lvl_vel) - 1):
-                try:
-                    colorwdg = qgis.gui.QgsColorButtonV2()
-                except:
-                    colorwdg = qgis.gui.QgsColorButton()
+                colorwdg = qgis.gui.QgsColorButton()
                 colorwdg.setAllowAlpha(True)
                 colorwdg.setColor(
                     QtGui.QColor(
@@ -112,10 +105,7 @@ class UserColorRampDialog(QDialog, FORM_CLASS):
     def addrow(self):
         introw = self.tableWidget.currentRow()
         self.tableWidget.insertRow(introw + 1)
-        try:
-            colorwdg = qgis.gui.QgsColorButtonV2()
-        except:
-            colorwdg = qgis.gui.QgsColorButton()
+        colorwdg = qgis.gui.QgsColorButton()
         self.tableWidget.setCellWidget(introw + 1, 0, colorwdg)
         self.tableWidget.setItem(introw + 1, 1, QTableWidgetItem(self.tableWidget.item(introw, 2)))
         self.tableWidget.setItem(introw + 1, 2, QTableWidgetItem(self.tableWidget.item(introw + 2, 1)))

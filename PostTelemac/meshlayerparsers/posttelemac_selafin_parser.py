@@ -63,24 +63,13 @@ class PostTelemacSelafinParser(PostTelemacAbstractParser):
         return np.array[varname, typevar (0 : elem, 1 : facenode, 2 : face)]
         """
         paramnamesfinal = []
-
-        if False:
+        if isinstance(self.hydraufile.VARNAMES[0], str):
             remove_punctuation_map = dict((ord(char), ord(u"_")) for char in string.punctuation)
-
             for name in self.hydraufile.VARNAMES:
                 paramnamesfinal.append([unicode(name).translate(remove_punctuation_map), 1])
-
-        if True:
-
-            if isinstance(self.hydraufile.VARNAMES[0], str):
-                remove_punctuation_map = dict((ord(char), ord(u"_")) for char in string.punctuation)
-
-                for name in self.hydraufile.VARNAMES:
-                    paramnamesfinal.append([unicode(name).translate(remove_punctuation_map), 1])
-
-            elif isinstance(self.hydraufile.VARNAMES[0], bytes):
-                for name in self.hydraufile.VARNAMES:
-                    paramnamesfinal.append([name.strip().decode("utf-8"), 1])
+        elif isinstance(self.hydraufile.VARNAMES[0], bytes):
+            for name in self.hydraufile.VARNAMES:
+                paramnamesfinal.append([name.strip().decode("utf-8"), 1])
 
         paramnamesfinal = [[param[0].rstrip(), param[1]] for param in paramnamesfinal]
 
@@ -140,26 +129,19 @@ class PostTelemacSelafinParser(PostTelemacAbstractParser):
         return np.array([facenodeindex linked with the face ])
         """
         if not isinstance(self.facesindex, np.ndarray) and self.facesindex == None:
-            if False:
-                try:
-                    self.facesindex = np.array([(edge[0], edge[1]) for edge in self.triangulation.edges])
-                    return self.facesindex
-                except Exception as e:
-                    return np.array([])
-            if True:
-                ikle = self.getElemFaces()
-                faceindex = []
-                for tri in ikle:
-                    faceindex.append([tri[0], tri[1]])
-                    faceindex.append([tri[1], tri[2]])
-                    faceindex.append([tri[2], tri[0]])
-                faceindex = np.array(faceindex)
-                self.facesindex = (
-                    np.unique(faceindex.view(np.dtype((np.void, faceindex.dtype.itemsize * faceindex.shape[1]))))
-                    .view(faceindex.dtype)
-                    .reshape(-1, faceindex.shape[1])
-                )
-                return self.facesindex
+            ikle = self.getElemFaces()
+            faceindex = []
+            for tri in ikle:
+                faceindex.append([tri[0], tri[1]])
+                faceindex.append([tri[1], tri[2]])
+                faceindex.append([tri[2], tri[0]])
+            faceindex = np.array(faceindex)
+            self.facesindex = (
+                np.unique(faceindex.view(np.dtype((np.void, faceindex.dtype.itemsize * faceindex.shape[1]))))
+                .view(faceindex.dtype)
+                .reshape(-1, faceindex.shape[1])
+            )
+            return self.facesindex
 
         else:
             return self.facesindex

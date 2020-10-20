@@ -35,7 +35,7 @@ from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import *
 from processing.core.outputs import OutputVector
 from processing.tools import dataobjects, vector
-from processing.core.GeoAlgorithmExecutionException import  GeoAlgorithmExecutionException
+from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 from ..libs.posttelemac_util_extractshp import InitSelafinContour2Shp
 
 

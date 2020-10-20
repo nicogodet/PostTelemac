@@ -24,18 +24,18 @@ Versions :
 from __future__ import unicode_literals
 
 # import Qt
-from qgis.PyQt import uic, QtCore
+from qgis.PyQt import (
+    uic,
+    QtCore,
+    )
 
-try:
-    from qgis.PyQt.QtGui import QDockWidget, QFileDialog, QTreeWidgetItem, QTableWidgetItem, QApplication
-except:
-    from qgis.PyQt.QtWidgets import (
-        QDockWidget,
-        QFileDialog,
-        QTreeWidgetItem,
-        QTableWidgetItem,
-        QApplication,
-        QMessageBox,
+from qgis.PyQt.QtWidgets import (
+    QDockWidget,
+    QFileDialog,
+    QTreeWidgetItem,
+    QTableWidgetItem,
+    QApplication,
+    QMessageBox,
     )
 
 # other import
@@ -83,15 +83,9 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         self.qfiledlg = QFileDialog(self)  # the filedialog for opening res file
         self.predeflevels = []  # the levels in classes.txt
         self.lastscolorparams = None  # used to save the color ramp state
-        # self.threadcompare = None                       # The compare file class
         self.canvas = self.meshlayer.canvas
-        # self.postutils = PostTelemacUtils(layer1)       # the utils class
         self.maptooloriginal = self.canvas.mapTool()  # Initial map tool (ie mouse behaviour)
-        # self.clickTool = QgsMapToolEmitPoint(self.canvas)   # specific map tool (ie mouse behaviour)
-        if int(qgis.PyQt.QtCore.QT_VERSION_STR[0]) == 4:  # qgis2
-            self.crsselector = qgis.gui.QgsGenericProjectionSelector()
-        elif int(qgis.PyQt.QtCore.QT_VERSION_STR[0]) == 5:  # qgis3
-            self.crsselector = qgis.gui.QgsProjectionSelectionDialog()
+        self.crsselector = qgis.gui.QgsProjectionSelectionDialog()
         self.playstep = None
         self.playactive = False
 
@@ -410,12 +404,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
                 str1 += " *." + extension
             str1 += " );;"
         # show dialog
-        if int(qgis.PyQt.QtCore.QT_VERSION_STR[0]) == 4:
-            tempname, extension = self.qfiledlg.getOpenFileNameAndFilter(
-                None, "Choose the file", self.loaddirectory, str1, str1.split(";;")[0]
-            )
-        elif int(qgis.PyQt.QtCore.QT_VERSION_STR[0]) == 5:
-            tempname, extension = self.qfiledlg.getOpenFileName(None, "Choose the file", self.loaddirectory, str1)
+        tempname, extension = self.qfiledlg.getOpenFileName(None, "Choose the file", self.loaddirectory, str1)
 
         # something selected
         if tempname:
@@ -445,10 +434,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """
         source = self.sender()
         self.crsselector.exec_()
-        if int(qgis.PyQt.QtCore.QT_VERSION_STR[0]) == 4:  # qgis2
-            crs = self.crsselector.selectedAuthId()
-        elif int(qgis.PyQt.QtCore.QT_VERSION_STR[0]) == 5:  # qgis3
-            crs = self.crsselector.crs().authid()
+        crs = self.crsselector.crs().authid()
         if source == self.pushButton_crs:
             self.label_selafin_crs.setText(crs)
         else:
@@ -701,7 +687,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         self.comboBox_levelstype.currentIndexChanged.connect(self.stackedWidget_colorramp.setCurrentIndex)
         self.comboBox_levelstype.currentIndexChanged.connect(self.colorRampChooserType)
         # 1
-        # self.comboBox_clrgame.currentIndexChanged.connect(self.color_palette_changed_contour)
         self.comboBox_clrgame.currentIndexChanged.connect(self.color_palette_changed)
         self.comboBox_clrgame.currentIndexChanged.connect(self.comboBox_clrgame2.setCurrentIndex)
         self.checkBox_inverse_clr.stateChanged.connect(self.color_palette_changed)
@@ -744,20 +729,17 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         if self.meshlayer.meshrenderer != None:
             if item == 0:
                 if self.tabWidget_lvl_vel.currentIndex() == 0:  # contour
-                    # self.color_palette_changed_contour(0)
                     self.color_palette_changed(0)
                     self.meshlayer.meshrenderer.change_lvl_contour(
                         self.predeflevels[self.comboBox_genericlevels.currentIndex()][1]
                     )
                 elif self.tabWidget_lvl_vel.currentIndex() == 1:  # velocity
-                    # self.color_palette_changed_vel(0)
                     self.color_palette_changed(0)
                     self.meshlayer.meshrenderer.change_lvl_vel(
                         self.predeflevels[self.comboBox_genericlevels.currentIndex()][1]
                     )
             elif item == 1:
                 pass
-                # self.stackedWidget_colorramp.setCurrentIndex(1)
             elif item == 2:
                 self.loadMapRamp(self.comboBox_clrramp_preset.currentText())
             else:
@@ -824,11 +806,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """
         change color map of selafin layer (matplotlib's style) when color palette combobox is changed
         """
-
-        try:
-            temp1 = qgis.core.QgsStyleV2.defaultStyle().colorRamp(self.comboBox_clrgame.currentText())
-        except:
-            temp1 = qgis.core.QgsStyle.defaultStyle().colorRamp(self.comboBox_clrgame.currentText())
+        temp1 = qgis.core.QgsStyle.defaultStyle().colorRamp(self.comboBox_clrgame.currentText())
 
         inverse = self.checkBox_inverse_clr.isChecked()
         if self.meshlayer.meshrenderer != None:
@@ -1050,17 +1028,11 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """
         Populate colorpalette combobox on dialog creation
         """
-        try:
-            style = qgis.core.QgsStyleV2.defaultStyle()
-        except:
-            style = qgis.core.QgsStyle.defaultStyle()
+        style = qgis.core.QgsStyle.defaultStyle()
         rampIconSize = QtCore.QSize(50, 20)
         for rampName in style.colorRampNames():
             ramp = style.colorRamp(rampName)
-            try:
-                icon = qgis.core.QgsSymbolLayerV2Utils.colorRampPreviewIcon(ramp, rampIconSize)
-            except:
-                icon = qgis.core.QgsSymbolLayerUtils.colorRampPreviewIcon(ramp, rampIconSize)
+            icon = qgis.core.QgsSymbolLayerUtils.colorRampPreviewIcon(ramp, rampIconSize)
             self.comboBox_clrgame.addItem(icon, rampName)
             # self.comboBox_clrgame_2.addItem(icon, rampName)
             self.comboBox_clrgame2.addItem(icon, rampName)
@@ -1081,13 +1053,13 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
 
     def tr(self, message):
         """Used for translation"""
-        if False:
-            try:
-                return QtCore.QCoreApplication.translate(
-                    "PostTelemacPropertiesDialog", message, None, QApplication.UnicodeUTF8
-                )
-            except Exception as e:
-                return message
+        # if False:
+            # try:
+                # return QtCore.QCoreApplication.translate(
+                    # "PostTelemacPropertiesDialog", message, None, QApplication.UnicodeUTF8
+                # )
+            # except Exception as e:
+                # return message
         if True:
             return message
 

@@ -32,12 +32,19 @@ The plug-in creates new attributes in the existing shapefile.
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 """
-from qgis.PyQt import QtCore, QtGui, uic
+from qgis.PyQt import (
+    QtCore,
+    QtGui,
+    uic,
+    )
+from qgis.PyQt.QtWidgets import (
+    QDialog,
+    QComboBox,
+    QVBoxLayout,
+    QDialogButtonBox,
+    QLabel,
+    )
 
-try:  # qt4
-    from qgis.PyQt.QtGui import QDialog, QComboBox, QVBoxLayout, QDialogButtonBox, QLabel
-except:  # qt5
-    from qgis.PyQt.QtWidgets import QDialog, QComboBox, QVBoxLayout, QDialogButtonBox, QLabel
 import os
 from qgis.core import *
 

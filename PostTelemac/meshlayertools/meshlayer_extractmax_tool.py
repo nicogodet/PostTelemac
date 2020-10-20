@@ -23,8 +23,6 @@ Versions :
  ***************************************************************************/
 """
 
-
-# from PyQt4 import uic, QtCore, QtGui
 from qgis.PyQt import uic, QtCore, QtGui
 from .meshlayer_abstract_tool import *
 import qgis, sys
@@ -79,24 +77,16 @@ class ExtractMaxTool(AbstractMeshLayerTool, FORM_CLASS):
 
     def chargerSelafin(self, path):
         if path and self.checkBox_8.isChecked():
-            if sys.version_info.major == 2:
-                slf = qgis.core.QgsPluginLayerRegistry.instance().pluginLayerType("selafin_viewer").createLayer()
-                # slf.setRealCrs(iface.mapCanvas().mapSettings().destinationCrs())
+            if qgis.utils.iface is not None:
+                slf = (
+                    qgis.core.QgsApplication.instance()
+                    .pluginLayerRegistry()
+                    .pluginLayerType("selafin_viewer")
+                    .createLayer()
+                )
                 slf.setRealCrs(self.meshlayer.crs())
                 slf.load_selafin(path, "TELEMAC")
-                qgis.core.QgsMapLayerRegistry.instance().addMapLayer(slf)
-            elif sys.version_info.major == 3:
-                # slf = qgis.core.QgsPluginLayerRegistry.pluginLayerType('selafin_viewer').createLayer()
-                if qgis.utils.iface is not None:
-                    slf = (
-                        qgis.core.QgsApplication.instance()
-                        .pluginLayerRegistry()
-                        .pluginLayerType("selafin_viewer")
-                        .createLayer()
-                    )
-                    slf.setRealCrs(self.meshlayer.crs())
-                    slf.load_selafin(path, "TELEMAC")
-                    qgis.core.QgsProject.instance().addMapLayer(slf)
+                qgis.core.QgsProject.instance().addMapLayer(slf)
 
 
 class runGetMax(QtCore.QObject):
@@ -129,7 +119,6 @@ class runGetMax(QtCore.QObject):
       """
 
         ## Creation de la variable au format Serafin
-        # try:
         if True:
             resin = Serafin(name=self.name_res, mode="rb")
             resout = Serafin(name=self.name_res_out, mode="wb")
@@ -307,13 +296,6 @@ class runGetMax(QtCore.QObject):
             except Exception, e:
                 self.status.emit('getmax error : ' + str(e))
             """
-
-        """
-        except Exception as e:
-            print('***', e)
-            self.status.emit(str(e))
-            self.finished.emit('')
-        """
 
     status = QtCore.pyqtSignal(str)
     finished = QtCore.pyqtSignal(str)

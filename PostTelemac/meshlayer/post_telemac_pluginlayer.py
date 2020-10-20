@@ -600,7 +600,7 @@ class SelafinPluginLayer(qgis.core.QgsPluginLayer):
         """
         prj = qgis.core.QgsProject.instance()
         element = node.toElement()
-		if self.hydrauparser.SOFTWARE:
+        if self.hydrauparser.SOFTWARE:
             element.setAttribute("filetype", self.hydrauparser.SOFTWARE)
         element.setAttribute("crs", self.realCRS.authid())
         element.setAttribute("type", "plugin")

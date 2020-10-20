@@ -8,11 +8,8 @@ from qgis.gui import *
 from qgis.utils import *
 import sys
 
-if sys.version_info.major == 2:
-    from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
-    from processing.tools.vector import VectorWriter
-elif sys.version_info.major == 3:
-    from qgis.core import QgsVectorFileWriter
+from qgis.core import QgsVectorFileWriter
+
 # import numpy
 import numpy as np
 
@@ -22,12 +19,7 @@ import matplotlib.pyplot as plt
 from matplotlib import tri
 
 # import PyQT
-"""
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtCore import SIGNAL, Qt
-from PyQt4 import QtCore, QtGui
-"""
+
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
 from qgis.PyQt import QtCore, QtGui
@@ -42,31 +34,11 @@ from os import path
 import sys
 import os.path
 
-"""
-try:
-    #sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),'..','libs_telemac'))
-    sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),'..','libs_telemac'))
-    #import telemac python
-    from utils.files import getFileContent
-    from parsers.parserSortie import getValueHistorySortie
-    from parsers.parserSELAFIN import getValueHistorySLF,   getValuePolylineSLF,subsetVariablesSLF
-    from parsers.parserStrings import parseArrayPaires
-    from parsers.parserSELAFIN import SELAFIN
-    #print 'import '  + os.path.join(os.path.dirname(os.path.realpath(__file__)),'libs_telemac')
-
-
-except Exception, e :
-    print str(e)
-    print 'import '  + os.path.join(os.path.dirname(os.path.realpath(__file__)),'libs_telemac')
-"""
-
 from ...meshlayerparsers.posttelemac_selafin_parser import *
 
 debug = False
 
-
 # *************************************************************************
-
 
 def isFileLocked(file, readLockCheck=False):
     """
@@ -103,7 +75,6 @@ def isFileLocked(file, readLockCheck=False):
 
 
 def workerFinished(str1):
-    # progress.setText(str(ctime()) +" - Fin du thread - Chargement du fichier resultat")
     vlayer = QgsVectorLayer(str1, os.path.basename(str1).split(".")[0], "ogr")
     QgsMapLayerRegistry.instance().addMapLayer(vlayer)
 
@@ -139,33 +110,16 @@ class SelafinContour2Shp(QtCore.QObject):
         self.parserhydrau = PostTelemacSelafinParser()
         self.parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
 
-        # slf = SELAFIN(os.path.normpath(selafinfilepath))
         slf = self.parserhydrau.hydraufile
-        """
-        self.slf_x = slf.MESHX
-        self.slf_y = slf.MESHY
-        self.slf_mesh = np.array(slf.IKLE3)
-        """
-        # self.slf_x, self.slf_y  = self.parserhydrau.getMesh()
         self.slf_x, self.slf_y = self.parserhydrau.getFacesNodes()
         self.slf_x = self.slf_x + translatex
         self.slf_y = self.slf_y + translatey
 
-        # self.slf_mesh  = np.array( self.parserhydrau.getIkle() )
         self.slf_mesh = np.array(self.parserhydrau.getElemFaces())
-
-        # slf_time = [time,slf.tags["times"][time]]
-        # slf_time = [time,slf.tags["times"][time]]
         slf_time = [time, self.parserhydrau.getTimes()[time]]
 
-        # print('parameter',parameter)
 
         if parameter is not None:
-            # self.slf_param = [parameter,slf.VARNAMES[parameter]]
-            # self.slf_value = slf.getVALUES(slf_time[0])[self.slf_param[0]]
-
-            # print('param',parameter, self.parserhydrau.getVarNames())
-
             self.slf_param = [parameter, self.parserhydrau.getVarNames()[parameter]]
             self.slf_value = slf.getVALUES(slf_time[0])[self.slf_param[0]]
         else:
@@ -205,43 +159,25 @@ class SelafinContour2Shp(QtCore.QObject):
         self.slf_crs = selafincrs
         if selafintransformedcrs:
             self.slf_shpcrs = selafintransformedcrs
-            if sys.version_info.major == 2:
-                self.xform = QgsCoordinateTransform(
-                    QgsCoordinateReferenceSystem(str(self.slf_crs)), QgsCoordinateReferenceSystem(str(self.slf_shpcrs))
-                )
-            elif sys.version_info.major == 3:
-                self.xform = QgsCoordinateTransform(
-                    QgsCoordinateReferenceSystem(str(self.slf_crs)),
-                    QgsCoordinateReferenceSystem(str(self.slf_shpcrs)),
-                    qgis.core.QgsProject.instance(),
-                )
+            self.xform = QgsCoordinateTransform(
+                QgsCoordinateReferenceSystem(str(self.slf_crs)),
+                QgsCoordinateReferenceSystem(str(self.slf_shpcrs)),
+                qgis.core.QgsProject.instance(),
+            )
         else:
             self.slf_shpcrs = self.slf_crs
             self.xform = None
 
         if self.processtype in [0, 1, 3, 4]:
-            if sys.version_info.major == 2:
-                geomtype = QGis.WKBMultiPolygon
-            elif sys.version_info.major == 3:
-                geomtype = qgis.core.QgsWkbTypes.MultiPolygon
-            if sys.version_info.major == 2:
-                self.writerw_shp = QgsVectorFileWriter(
-                    self.outputshpfile,
-                    None,
-                    champs,
-                    geomtype,
-                    QgsCoordinateReferenceSystem(self.slf_shpcrs),
-                    "ESRI Shapefile",
-                )
-            elif sys.version_info.major == 3:
-                self.writerw_shp = QgsVectorFileWriter(
-                    self.outputshpfile,
-                    "utf-8",
-                    champs,
-                    geomtype,
-                    QgsCoordinateReferenceSystem(self.slf_shpcrs),
-                    driverName="ESRI Shapefile",
-                )
+            geomtype = qgis.core.QgsWkbTypes.MultiPolygon
+            self.writerw_shp = QgsVectorFileWriter(
+                self.outputshpfile,
+                "utf-8",
+                champs,
+                geomtype,
+                QgsCoordinateReferenceSystem(self.slf_shpcrs),
+                driverName="ESRI Shapefile",
+            )
 
         # donnees shp - processing result
         try:
@@ -294,20 +230,12 @@ class SelafinContour2Shp(QtCore.QObject):
 
             geom = []
 
-            if sys.version_info.major == 2:
-                geom.append(QgsPoint(self.slf_x[self.slf_mesh[i][0]], self.slf_y[self.slf_mesh[i][0]]))
-                geom.append(QgsPoint(self.slf_x[self.slf_mesh[i][1]], self.slf_y[self.slf_mesh[i][1]]))
-                geom.append(QgsPoint(self.slf_x[self.slf_mesh[i][2]], self.slf_y[self.slf_mesh[i][2]]))
-                f1geom = QgsGeometry.fromPolygon([geom])
-                if self.xform:
-                    f1geom.transform(self.xform)
-            elif sys.version_info.major == 3:
-                geom.append(QgsPointXY(self.slf_x[self.slf_mesh[i][0]], self.slf_y[self.slf_mesh[i][0]]))
-                geom.append(QgsPointXY(self.slf_x[self.slf_mesh[i][1]], self.slf_y[self.slf_mesh[i][1]]))
-                geom.append(QgsPointXY(self.slf_x[self.slf_mesh[i][2]], self.slf_y[self.slf_mesh[i][2]]))
-                f1geom = QgsGeometry.fromPolygonXY([geom])
-                if self.xform:
-                    f1geom.transform(self.xform)
+            geom.append(QgsPointXY(self.slf_x[self.slf_mesh[i][0]], self.slf_y[self.slf_mesh[i][0]]))
+            geom.append(QgsPointXY(self.slf_x[self.slf_mesh[i][1]], self.slf_y[self.slf_mesh[i][1]]))
+            geom.append(QgsPointXY(self.slf_x[self.slf_mesh[i][2]], self.slf_y[self.slf_mesh[i][2]]))
+            f1geom = QgsGeometry.fromPolygonXY([geom])
+            if self.xform:
+                f1geom.transform(self.xform)
             fet.setGeometry(f1geom)
 
             if self.slf_value is not None:
@@ -404,14 +332,12 @@ class InitSelafinMesh2Shp(QtCore.QObject):
         self.processtype = processtype
 
         try:
-            # slf = SELAFIN(os.path.normpath(selafinfilepath))
             parserhydrau = PostTelemacSelafinParser()
             parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
             slf = parserhydrau.hydraufile
         except:
             self.raiseError("fichier selafin n existe pas")
 
-        # times = slf.tags["times"]
         times = parserhydrau.getTimes()
         if isinstance(time, int):  # cas des plugins et scripts
             if not time in range(len(times)):
@@ -423,12 +349,9 @@ class InitSelafinMesh2Shp(QtCore.QObject):
                 self.raiseError(str(ctime()) + " Time non trouve dans  " + str(times))
 
         if parameter is not None:
-            # parameters=[str(slf.VARNAMES[i]).strip() for i in range(len(slf.VARNAMES))]
-            # parameters=[str(parserhydrau.getVarNames()[i]).strip() for i in range(len(parserhydrau.getVarNames()))]
             parameters = [param[0] for param in parserhydrau.getVarNames()]
             if not parameter.isdigit():
                 if parameter in parameters:
-                    # self.slf_param = [parameters.index(parameter), parameter ]
                     parameter = parameters.index(parameter)
                 else:
                     self.raiseError(str(parameter) + " parameter pas trouve dans " + str(parameters))
@@ -494,7 +417,6 @@ class InitSelafinMesh2Shp(QtCore.QObject):
 
 
 if __name__ == "__main__":
-    # unless doesnt work outisde qgis
     qgishome = os.environ["QGIS_PREFIX_PATH"]
     app = QgsApplication([], True)
     QgsApplication.setPrefixPath(qgishome, True)

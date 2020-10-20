@@ -23,8 +23,10 @@ Versions :
  ***************************************************************************/
 """
 
-# from PyQt4 import QtGui, QtCore
-from qgis.PyQt import QtGui, QtCore
+from qgis.PyQt import (
+    QtGui,
+    QtCore,
+    )
 import numpy as np
 from .post_telemac_pluginlayer_colormanager import *
 import qgis
@@ -121,65 +123,18 @@ class AbstractMeshRenderer(QtCore.QObject):
             self.meshlayer.propertiesdialog.errorMessage("Abstract get image - changeTriangulationCRS : " + str(e))
 
     def getTransformedCoords(self, xcoords, ycoords, direction=True):
-        if True:
-            if int(qgis.PyQt.QtCore.QT_VERSION_STR[0]) == 4:
-                coordinatesAsPoints = [qgis.core.QgsPoint(xcoords[i], ycoords[i]) for i in range(len(xcoords))]
-            elif int(qgis.PyQt.QtCore.QT_VERSION_STR[0]) == 5:
-                coordinatesAsPoints = [qgis.core.QgsPointXY(xcoords[i], ycoords[i]) for i in range(len(xcoords))]
-            if direction:
-                transformedCoordinatesAsPoints = [
-                    self.meshlayer.xform.transform(point) for point in coordinatesAsPoints
-                ]
-            else:
-                transformedCoordinatesAsPoints = [
-                    self.meshlayer.xform.transform(point, qgis.core.QgsCoordinateTransform.ReverseTransform)
-                    for point in coordinatesAsPoints
-                ]
-            xcoordsfinal = [point.x() for point in transformedCoordinatesAsPoints]
-            ycoordsfinal = [point.y() for point in transformedCoordinatesAsPoints]
-
-        if False:
-            lencoords = len(xcoords)
-            if False:
-                xcoordsfinal = np.array(xcoords)
-                ycoordsfinal = np.array(ycoords)
-                zcoordsfinal = np.zeros(lencoords)
-            if True:
-                xcoordsfinal = list(xcoords)
-                ycoordsfinal = list(ycoords)
-                zcoordsfinal = list(np.zeros(lencoords))
-                # print(xcoordsfinal[0:20])
-            if False:
-                import array
-
-                xcoordsfinal = array.array("d", xcoords)
-                ycoordsfinal = array.array("d", ycoords)
-                zcoordsfinal = array.array("d", np.zeros(lencoords))
-
-            if True:
-                if direction:
-                    x, y, z = self.meshlayer.xform.transformCoords(lencoords, xcoordsfinal, ycoordsfinal, zcoordsfinal)
-                else:
-                    x, y, z = self.meshlayer.xform.transformCoords(
-                        lencoords,
-                        xcoordsfinal,
-                        ycoordsfinal,
-                        zcoordsfinal,
-                        qgis.core.QgsCoordinateTransform.ReverseTransform,
-                    )
-            if False:
-                if direction:
-                    self.meshlayer.xform.transformInPlace(xcoordsfinal, ycoordsfinal, zcoordsfinal)
-                else:
-                    self.meshlayer.xform.transformInPlace(
-                        xcoordsfinal, ycoordsfinal, zcoordsfinal, qgis.core.QgsCoordinateTransform.ReverseTransform
-                    )
-            if False:
-                if direction:
-                    self.meshlayer.xform.transformCoords(lencoords)
-                else:
-                    self.meshlayer.xform.transformCoords(lencoords, qgis.core.QgsCoordinateTransform.ReverseTransform)
-
+        coordinatesAsPoints = [qgis.core.QgsPointXY(xcoords[i], ycoords[i]) for i in range(len(xcoords))]
+        if direction:
+            transformedCoordinatesAsPoints = [
+                self.meshlayer.xform.transform(point) for point in coordinatesAsPoints
+            ]
+        else:
+            transformedCoordinatesAsPoints = [
+                self.meshlayer.xform.transform(point, qgis.core.QgsCoordinateTransform.ReverseTransform)
+                for point in coordinatesAsPoints
+            ]
+        xcoordsfinal = [point.x() for point in transformedCoordinatesAsPoints]
+        ycoordsfinal = [point.y() for point in transformedCoordinatesAsPoints]
         return xcoordsfinal, ycoordsfinal
 
     def color_palette_changed_contour(self, colorramp, inverse):
@@ -210,12 +165,7 @@ class AbstractMeshRenderer(QtCore.QObject):
         self.lvl_contour = tab
         self.change_cm_contour(self.cmap_contour_raw)
         if not qgis.utils.iface is None:
-            try:
-                qgis.utils.iface.legendInterface().refreshLayerSymbology(self.meshlayer)
-            except Exception as e:
-                # print('openglgetimage -change_cm_contour ' +   str(e))
-                # self.meshlayer.propertiesdialog.errorMessage( 'abstractgetimage -change_lvl_contour ' + str(e) )
-                qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+            qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
 
         self.meshlayer.propertiesdialog.lineEdit_levelschoosen.setText(str(self.lvl_contour))
         self.meshlayer.triggerRepaint()
@@ -227,12 +177,7 @@ class AbstractMeshRenderer(QtCore.QObject):
         self.lvl_vel = tab
         self.change_cm_vel(self.cmap_vel_raw)
         if not qgis.utils.iface is None:
-            try:
-                qgis.utils.iface.legendInterface().refreshLayerSymbology(self.meshlayer)
-            except Exception as e:
-                # print('openglgetimage -change_cm_contour ' +   str(e))
-                # self.meshlayer.propertiesdialog.errorMessage( 'abstractgetimage -change_lvl_contour ' + str(e) )
-                qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+             qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
 
         # self.propertiesdialog.lineEdit_levelschoosen_2.setText(str(self.lvl_vel))
         self.meshlayer.propertiesdialog.lineEdit_levelschoosen.setText(str(self.lvl_vel))
@@ -338,15 +283,11 @@ class AbstractMeshRenderer(QtCore.QObject):
             float(self.ext.yMaximum()),
         ]
 
-        if False:
-            self.sizepx = painter.viewport().size()  # size in pixel - notworking when printing
-        else:
-            ratio = 1.0
-            mupp = float(rendererContext.mapToPixel().mapUnitsPerPixel())
-            # self.sizepx = [ round(((rect[1] - rect[0] )/mupp/ratio),2) , round(((rect[3]  - rect[2] )/mupp/ratio),2) ]
-            self.sizepx = QtCore.QSize(
-                int(((self.rect[1] - self.rect[0]) / mupp / ratio)), int(((self.rect[3] - self.rect[2]) / mupp / ratio))
-            )
+        ratio = 1.0
+        mupp = float(rendererContext.mapToPixel().mapUnitsPerPixel())
+        self.sizepx = QtCore.QSize(
+            int(((self.rect[1] - self.rect[0]) / mupp / ratio)), int(((self.rect[3] - self.rect[2]) / mupp / ratio))
+        )
 
         self.dpi = rendererContext.painter().device().logicalDpiX()
         self.width = float((self.sizepx.width())) / float(self.dpi)  # widht of canvas in inches

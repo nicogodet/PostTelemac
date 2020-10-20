@@ -24,38 +24,29 @@ from __future__ import unicode_literals
 
 from ..meshlayertools import utils
 
-
-"""
-version = utils.getQgisVersion()
-if version < 2.20:
-    import matplotlib
-    from matplotlib import tri
-    import networkx as nx
-    from scipy.spatial import cKDTree
-"""
-
-try:
-    from scipy.spatial import cKDTree
-
-    SCIPYOK = True
-except Exception as e:
-    SCIPYOK = False
-
-# force desactivate scipy
-SCIPYOK = False
+from qgis.PyQt import (
+    QtGui, 
+    QtCore,
+    )
 
 from numpy import sin, cos, abs, int
 import numpy as np
-
 import time
 import numbers
-from qgis.PyQt import QtGui, QtCore
-import os, sys
+import os
+import sys
 import qgis
 
 try:
-    import matplotlib.tri
+    from scipy.spatial import cKDTree
+    SCIPYOK = True
+except:
+    SCIPYOK = False
+# force desactivate scipy
+SCIPYOK = False
 
+try:
+    import matplotlib.tri
     MATPLOTLIBTRIOK = True
 except:
     MATPLOTLIBTRIOK = False
@@ -66,7 +57,6 @@ if MATPLOTLIBTRIOK:
 
 try:
     import networkx as nx
-
     NETWORKXOK = True
 except:
     NETWORKXOK = False
@@ -122,13 +112,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
 
         if SCIPYOK:
             self.initCkdTree()
-
-        """
-        version = utils.getQgisVersion()
-        if version < 2.20:
-            self.initCkdTree()
-            self.initMplTriangulation()
-        """
 
     def initPathDependantVariablesWhenLoading(self):
         """
@@ -308,12 +291,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
         if SCIPYOK:
             self.initCkdTree()
 
-        """
-        version = utils.getQgisVersion()
-        if version < 2.20:
-            self.initCkdTree()
-            self.initMplTriangulation()
-        """
         self.initSelafinParameters()
 
         if MATPLOTLIBTRIOK:
@@ -326,7 +303,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
         self.skdtreefacenode = None
         """
 
-        # meshx, meshy = self.getMesh()
         if len(self.getElemNodes()[0]) > 0:
             x, y = self.getElemNodes()
             arraymesh = np.array([[x[i], y[i]] for i in range(self.elemcount)])
@@ -399,7 +375,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
     def updateInterpolator(self, time1):
 
         if self.triangulationisvalid[0]:
-            # self.triinterp = [matplotlib.tri.LinearTriInterpolator(self.hydrauparser.triangulation, self.values[i]) for i in range(len(self.hydrauparser.parametres))]
             values = self.getValues(time1)
             self.interpolator = [
                 LinearTriInterpolator(self.triangulation, values[i]) for i in range(len(self.parametres))
@@ -431,13 +406,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
                 self.parametres.append([i, name[0].strip(), int(name[1]), faceparcount, None, None])
                 faceparcount += 1
 
-        """
-        if self.pluginlayer != None and len(self.pluginlayer.parametrestoload['virtual_parameters'])>0:    #case of virtual parameters when loadin a selafin layer
-            for param in self.pluginlayer.parametrestoload['virtual_parameters']:
-                self.parametres.append([len(self.parametres),param[1],param[2],len(self.parametres)])
-        if self.pluginlayer != None and (self.pluginlayer.parametrestoload['xtranslation'] != 0 or self.pluginlayer.parametrestoload['ytranslation'] != 0):
-            self.setXYTranslation(self.pluginlayer.parametrestoload['xtranslation'],self.pluginlayer.parametrestoload['ytranslation'])
-        """
         if self.virtualparamtoloadoninit != None:
             if (
                 len(self.virtualparamtoloadoninit["virtual_parameters"]) > 0
@@ -463,13 +431,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
         for i, name in enumerate(self.getVarnames()):
             self.parametres.append([i, name.strip(), None, i])
 
-        """
-        if self.pluginlayer != None and len(self.pluginlayer.parametrestoload['virtual_parameters'])>0:    #case of virtual parameters when loadin a selafin layer
-            for param in self.pluginlayer.parametrestoload['virtual_parameters']:
-                self.parametres.append([len(self.parametres),param[1],param[2],len(self.parametres)])
-        if self.pluginlayer != None and (self.pluginlayer.parametrestoload['xtranslation'] != 0 or self.pluginlayer.parametrestoload['ytranslation'] != 0):
-            self.setXYTranslation(self.pluginlayer.parametrestoload['xtranslation'],self.pluginlayer.parametrestoload['ytranslation'])
-        """
         if self.virtualparamtoloadoninit != None:
             if (
                 len(self.virtualparamtoloadoninit["virtual_parameters"]) > 0
@@ -485,37 +446,16 @@ class PostTelemacAbstractParser(QtCore.QObject):
 
     def identifyKeysParameters(self):
         # load velocity parameters pluginlayer
-
         if self.paramfreesurface == None and self.parambottom == None:
             if self.getParameterName("SURFACELIBRE") != None:
                 self.paramfreesurface = self.getParameterName("SURFACELIBRE")[0]
             if self.getParameterName("BATHYMETRIE") != None:
                 self.parambottom = self.getParameterName("BATHYMETRIE")[0]
-            """
-            if (self.paramfreesurface == None or self.parambottom == None):
-
-                self.pluginlayer.propertiesdialog.groupBox_volume1.setEnabled(False)
-                self.pluginlayer.propertiesdialog.groupBox_volume2.setEnabled(False)
-            """
 
         if self.parametrevx == None and self.parametrevy == None:
-
             if not (self.getParameterName("VITESSEU") == None and self.getParameterName("VITESSEV") == None):
-                """
-                self.pluginlayer.propertiesdialog.tab_velocity.setEnabled(False)
-                else:
-                """
                 self.parametrevx = self.getParameterName("VITESSEU")[0]
                 self.parametrevy = self.getParameterName("VITESSEV")[0]
-                """
-                self.pluginlayer.propertiesdialog.tab_velocity.setEnabled(True)
-                for widget in self.pluginlayer.propertiesdialog.tab_velocity.children():
-                    widget.setEnabled(True)
-                for widget in self.pluginlayer.propertiesdialog.groupBox_schowvel.children():
-                    widget.setEnabled(True)
-                self.pluginlayer.propertiesdialog.groupBox_schowvel.setChecked(True)
-                self.pluginlayer.propertiesdialog.groupBox_schowvel.setChecked(False)
-                """
 
         # load water depth parameters
         if self.parametreh == None:
@@ -602,7 +542,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
                         values.append(facevalue[param[3]])
         except Exception as e:
             self.emitMessage.emit("Abstractparser - getValues : " + str(e))
-        # return facenodevalues, elemvalue
         return values
 
     def getValues2(self, time):
@@ -625,8 +564,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
         """
         DEBUG = False
         result = []
-        # print arraynumpoint
-        # arraynumpointtemp = list(arraynumpoint)
         try:
             for param in arrayparam:
                 if layerparametres != None and layerparametres[param][4]:
@@ -708,7 +645,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
                 i += 1
         except Exception as e:
             self.emitMessage.emit("Abstractparser - getDico : " + str(e))
-            # print 'getdico ' + str(e)
         return dico
 
     def getDico2(self, expr, parametres, enumpointorvalues, type):
@@ -771,13 +707,11 @@ class PostTelemacAbstractParser(QtCore.QObject):
 
     def getFaceNodeXYFromNumPoint(self, arraynumpoint):
         meshx, meshy = self.getFacesNodes()
-        # return [(self.hydraufile.MESHX[i], self.hydraufile.MESHY[i]) for i in arraynumpoint]
         return [[meshx[i], meshy[i]] for i in arraynumpoint]
 
     def getElemXYFromNumElem(self, arraynumelem):
         meshx, meshy = self.getFacesNodes()
         arrayelem = self.getElemFaces()
-        # return [(self.hydraufile.MESHX[i], self.hydraufile.MESHY[i]) for i in arraynumpoint]
         result = []
         for numelem in arraynumelem:
             result.append([(meshx[i], meshy[i]) for i in arrayelem[numelem]])
@@ -787,7 +721,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
     def getFaceXYFromNumFace(self, arraynumelem):
         meshx, meshy = self.getFacesNodes()
         arrayelem = self.getFaces()
-        # return [(self.hydraufile.MESHX[i], self.hydraufile.MESHY[i]) for i in arraynumpoint]
         result = []
         for numelem in arraynumelem:
             result.append([(meshx[i], meshy[i]) for i in arrayelem[numelem]])

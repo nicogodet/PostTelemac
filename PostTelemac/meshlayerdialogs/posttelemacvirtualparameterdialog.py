@@ -23,13 +23,15 @@
 # unicode behaviour
 from __future__ import unicode_literals
 
-# from PyQt4 import uic, QtGui
-from qgis.PyQt import uic, QtCore, QtGui
-
-try:
-    from qgis.PyQt.QtGui import QDialog, QTreeWidgetItem
-except:
-    from qgis.PyQt.QtWidgets import QDialog, QTreeWidgetItem
+from qgis.PyQt import (
+    uic,
+    QtCore,
+    QtGui,
+    )
+from qgis.PyQt.QtWidgets import (
+    QDialog,
+    QTreeWidgetItem,
+    )
 
 
 import os.path
@@ -86,7 +88,6 @@ class DefVariablesDialog(QDialog, FORM_CLASS):
         self.fill_tab(self.tab_variables, lst_var, 0)
         self.fill_tab(self.tab_variables_2, lst_var, 1)
         self.fill_list(self.lst_fonctions, lst_fn)
-        # self.init_cb_classe("")
 
         self.txt_nom_variable.setText(lst_param[0])
         self.txt_formule.setText(lst_param[1])

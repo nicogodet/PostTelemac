@@ -26,11 +26,7 @@ Versions :
 
 # import Qt
 from qgis.PyQt import uic, QtCore, QtGui
-
-try:
-    from qgis.PyQt.QtGui import QMessageBox
-except:
-    from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.PyQt.QtWidgets import QMessageBox
 
 import qgis
 import numpy as np
@@ -119,14 +115,11 @@ class PointSamplingTool(AbstractMeshLayerTool, FORM_CLASS):
             # writer for shapefile
             writer = qgis.core.QgsVectorFileWriter(
                 pathresult, "UTF8", fields, qgis.core.QgsWkbTypes.Point, self.meshlayer.realCRS, "ESRI Shapefile"
-            )
+            ) #TODO : Qgis3 deprec warning
             # for projection
-            if sys.version_info.major == 2:
-                xformutil = qgis.core.QgsCoordinateTransform(parentlayer.crs(), self.meshlayer.realCRS)
-            elif sys.version_info.major == 3:
-                xformutil = qgis.core.QgsCoordinateTransform(
-                    parentlayer.crs(), self.meshlayer.realCRS, qgis.core.QgsProject.instance()
-                )
+            xformutil = qgis.core.QgsCoordinateTransform(
+                parentlayer.crs(), self.meshlayer.realCRS, qgis.core.QgsProject.instance()
+            )
 
             # check interpolator
             if self.meshlayer.hydrauparser.interpolator is None:
@@ -141,19 +134,13 @@ class PointSamplingTool(AbstractMeshLayerTool, FORM_CLASS):
                 attrs = feat.attributes()
                 for paramidx in paramindex:
                     value = self.meshlayer.hydrauparser.interpolator[paramidx](pointinmeshcrs.x(), pointinmeshcrs.y())
-                    # print('value',value,type(value))
                     attrs.append(float(value.data))
-                # print('pointinmeshcrs',pointinmeshcrs.x(),pointinmeshcrs.y() )
-                # print('attrs',attrs,[field.name() for field in fields])
                 fet.setAttributes(attrs)
                 writer.addFeature(fet)
 
             del writer
             vlayer = qgis.core.QgsVectorLayer(pathresult, os.path.basename(pathresult).split(".")[0], "ogr")
-            if sys.version_info.major == 2:
-                qgis.core.QgsMapLayerRegistry.instance().addMapLayer(vlayer)
-            elif sys.version_info.major == 3:
-                qgis.core.QgsProject.instance().addMapLayer(vlayer)
+            qgis.core.QgsProject.instance().addMapLayer(vlayer)
             self.meshlayer.propertiesdialog.normalMessage(
                 str(os.path.basename(pathresult).split(".")[0]) + self.tr(" created")
             )

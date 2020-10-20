@@ -23,23 +23,17 @@ Versions :
 # unicode behaviour
 from __future__ import unicode_literals
 
-try:
-    import matplotlib.colors
-
-    MATPLOTLIBOK = True
-except:
-    MATPLOTLIBOK = False
 import os
-
-# from PyQt4 import  QtGui,  QtCore
-from qgis.PyQt import QtGui, QtCore
 import numpy as np
 
 try:
-    from qgis.PyQt.QtGui import QApplication
+    import matplotlib.colors
+    MATPLOTLIBOK = True
 except:
-    from qgis.PyQt.QtWidgets import QApplication
+    MATPLOTLIBOK = False
 
+from qgis.PyQt import QtGui, QtCore
+from qgis.PyQt.QtWidgets import QApplication
 
 class PostTelemacColorManager:
     def __init__(self, meshlayer, meshrenderer):
@@ -206,50 +200,7 @@ class PostTelemacColorManager:
 
     # *********************** layer symbology generator ******************************************************
 
-    def generateSymbologyItemsCaduc(self, iconSize):
-        try:
-            if (
-                self.meshlayer.hydrauparser != None
-                and self.meshlayer.hydrauparser.hydraufile != None
-                and self.meshlayer.meshrenderer.cmap_contour_leveled != None
-            ):
-                lst = [
-                    ((str(self.meshlayer.hydrauparser.parametres[self.meshlayer.param_displayed][1]), QtGui.QPixmap()))
-                ]
-                for i in range(len(self.meshrenderer.lvl_contour) - 1):
-                    pix = QtGui.QPixmap(iconSize)
-                    r, g, b, a = (
-                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][0] * 255,
-                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][1] * 255,
-                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][2] * 255,
-                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][3] * 255,
-                    )
-                    pix.fill(QtGui.QColor(r, g, b, a))
-                    lst.append(
-                        (str(self.meshrenderer.lvl_contour[i]) + "/" + str(self.meshrenderer.lvl_contour[i + 1]), pix)
-                    )
-
-                if self.meshlayer.propertiesdialog.groupBox_schowvel.isChecked():
-                    lst.append((self.tr("VELOCITY"), QtGui.QPixmap()))
-                    for i in range(len(self.meshrenderer.lvl_vel) - 1):
-                        pix = QtGui.QPixmap(iconSize)
-                        r, g, b, a = (
-                            self.meshlayer.meshrenderer.color_mpl_vel[i][0] * 255,
-                            self.meshlayer.meshrenderer.color_mpl_vel[i][1] * 255,
-                            self.meshlayer.meshrenderer.color_mpl_vel[i][2] * 255,
-                            self.meshlayer.meshrenderer.color_mpl_vel[i][3] * 255,
-                        )
-                        pix.fill(QtGui.QColor(r, g, b, a))
-                        lst.append(
-                            (str(self.meshrenderer.lvl_vel[i]) + "/" + str(self.meshrenderer.lvl_vel[i + 1]), pix)
-                        )
-                return lst
-            else:
-                return []
-        except Exception as e:
-            return []
-
-    def generateSymbologyItems(self, iconSize):
+    def generateSymbologyItems(self, iconSize): #NEED FIX API BREAK
         try:
             if (
                 self.meshlayer.hydrauparser != None

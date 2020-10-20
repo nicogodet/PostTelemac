@@ -6,11 +6,7 @@ from qgis.gui import *
 from qgis.utils import *
 import sys, qgis
 
-if sys.version_info.major == 2:
-    from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
-    from processing.tools.vector import VectorWriter
-elif sys.version_info.major == 3:
-    from qgis.core import QgsVectorFileWriter
+from qgis.core import QgsVectorFileWriter
 # import numpy
 import numpy as np
 
@@ -23,13 +19,6 @@ import matplotlib.pyplot as plt
 from matplotlib import tri
 
 # import PyQT
-"""
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtCore import SIGNAL, Qt
-from PyQt4 import QtCore, QtGui
-"""
-
 from qgis.PyQt import QtCore, QtGui
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
@@ -49,24 +38,6 @@ except Exception as e:
     print(e)
 import sys
 import os.path
-
-"""
-try:
-    #sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),'..','libs_telemac'))
-    sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),'..','libs_telemac'))
-    #import telemac python
-    #from utils.files import getFileContent
-    #from parsers.parserSortie import getValueHistorySortie
-    #from parsers.parserSELAFIN import getValueHistorySLF,   getValuePolylineSLF,subsetVariablesSLF
-    #from parsers.parserStrings import parseArrayPaires
-    from parsers.parserSELAFIN import SELAFIN
-    #print 'import '  + os.path.join(os.path.dirname(os.path.realpath(__file__)),'libs_telemac')
-
-
-except Exception, e :
-    print str(e)
-    print 'import '  + os.path.join(os.path.dirname(os.path.realpath(__file__)),'libs_telemac')
-"""
 
 from ...meshlayerparsers.posttelemac_selafin_parser import *
 
@@ -144,19 +115,10 @@ class SelafinContour2Shp(QtCore.QObject):
         # donnees process
         self.processtype = processtype
         self.quickprocessing = quickprocessing
-        # self.quickprocessing = True
         # donnes delafin
         self.parserhydrau = PostTelemacSelafinParser()
         self.parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
-
-        # slf = SELAFIN(os.path.normpath(selafinfilepath))
         slf = self.parserhydrau.hydraufile
-        """
-        self.slf_x = slf.MESHX
-        self.slf_y = slf.MESHY
-        self.slf_mesh = np.array(slf.IKLE3)
-        """
-        # self.slf_x, self.slf_y  = self.parserhydrau.getMesh()
         self.slf_x, self.slf_y = self.parserhydrau.getFacesNodes()
         self.slf_x = self.slf_x + translatex
         self.slf_y = self.slf_y + translatey
@@ -165,18 +127,13 @@ class SelafinContour2Shp(QtCore.QObject):
         self.slf_mesh = np.array(self.parserhydrau.getElemFaces())
 
         if self.processtype == 0:
-            # self.slf_param = [0,parameter]
-            # self.slf_param = [parameter,self.parserhydrau.getVarnames()[parameter].strip()]
             self.slf_param = [parameter, parameter]
         else:
-            # self.slf_param = [parameter,slf.VARNAMES[parameter].strip()]
             self.slf_param = [parameter, self.parserhydrau.getVarNames()[parameter].strip()]
 
-        # slf_time = [time,slf.tags["times"][time]]
         slf_time = [time, self.parserhydrau.getTimes()[time]]
 
         if forcedvalue is None:
-            # self.slf_value = slf.getVALUES(slf_time[0])[self.slf_param[0]]
             self.slf_value = self.parserhydrau.getValues(slf_time[0])[self.slf_param[0]]
         else:
             self.slf_value = forcedvalue
@@ -227,39 +184,28 @@ class SelafinContour2Shp(QtCore.QObject):
             self.xform = None
 
         if self.processtype in [0, 1, 3, 4]:
-
-            if sys.version_info.major == 2:
-                self.writerw_shp = QgsVectorFileWriter(
-                    self.outputshpfile,
-                    None,
-                    champs,
-                    QGis.WKBMultiPolygon,
-                    QgsCoordinateReferenceSystem(self.slf_shpcrs),
-                    "ESRI Shapefile",
-                )
-            elif sys.version_info.major == 3:
-                self.writerw_shp = QgsVectorFileWriter(
-                    self.outputshpfile,
-                    "utf-8",
-                    champs,
-                    qgis.core.QgsWkbTypes.MultiPolygon,
-                    QgsCoordinateReferenceSystem(self.slf_shpcrs),
-                    driverName="ESRI Shapefile",
-                )
+            self.writerw_shp = QgsVectorFileWriter(
+                self.outputshpfile,
+                "utf-8",
+                champs,
+                qgis.core.QgsWkbTypes.MultiPolygon,
+                QgsCoordinateReferenceSystem(self.slf_shpcrs),
+                driverName="ESRI Shapefile",
+            )
 
         # donnees shp - processing result
-        try:
-            if self.processtype in [2, 3]:
-                self.writerw_process = VectorWriter(
-                    outputprocessing,
-                    None,
-                    champs,
-                    QGis.WKBMultiPolygon,
-                    QgsCoordinateReferenceSystem(str(self.slf_shpcrs)),
-                    "ESRI Shapefile",
-                )
-        except Exception as e:
-            pass
+        # try:
+            # if self.processtype in [2, 3]:
+                # self.writerw_process = VectorWriter(
+                    # outputprocessing,
+                    # None,
+                    # champs,
+                    # QGis.WKBMultiPolygon,
+                    # QgsCoordinateReferenceSystem(str(self.slf_shpcrs)),
+                    # "ESRI Shapefile",
+                # )
+        # except Exception as e:
+            # pass
 
         # donnees matplotlib
         self.levels = levels
@@ -392,52 +338,30 @@ class SelafinContour2Shp(QtCore.QObject):
             geompolygon = geom1.asPolygon()
             for i in range(len(geompolygon)):
                 geomtemp2 = []
-                if sys.version_info.major == 2:
-                    for j in range(len(geompolygon[i])):
-                        geomtemp2.append(QgsPoint(geompolygon[i][j][0], geompolygon[i][j][1]))
-                    geomcheck = QgsGeometry.fromPolygon([geomtemp2])
-                elif sys.version_info.major == 3:
-                    for j in range(len(geompolygon[i])):
-                        geomtemp2.append(QgsPointXY(geompolygon[i][j][0], geompolygon[i][j][1]))
-                    geomcheck = QgsGeometry.fromPolygonXY([geomtemp2])
+                for j in range(len(geompolygon[i])):
+                    geomtemp2.append(QgsPointXY(geompolygon[i][j][0], geompolygon[i][j][1]))
+                geomcheck = QgsGeometry.fromPolygonXY([geomtemp2])
 
                 if len(geomcheck.validateGeometry()) != 0:
                     geomcheck = geomcheck.buffer(0.01, 5)
                 geomtemp1.append(geomcheck)
         else:
             geomtemp2 = []
-            if sys.version_info.major == 2:
-                for i in range(len(geom1)):
-                    geomtemp2.append(QgsPoint(geom1[i][0], geom1[i][1]))
-                geomtemp1.append(QgsGeometry.fromPolygon([geomtemp2]))
-            elif sys.version_info.major == 3:
-                for i in range(len(geom1)):
-                    geomtemp2.append(QgsPointXY(geom1[i][0], geom1[i][1]))
-                geomtemp1.append(QgsGeometry.fromPolygonXY([geomtemp2]))
+            for i in range(len(geom1)):
+                geomtemp2.append(QgsPointXY(geom1[i][0], geom1[i][1]))
+            geomtemp1.append(QgsGeometry.fromPolygonXY([geomtemp2]))
         return geomtemp1
 
     def InsertRinginFeature(self, f1, allfeatures2, vlOuterTempIndex, lvltemp1, counttotal):
         try:
             # Correction des erreurs de geometrie des outers
             if len(f1.geometry().validateGeometry()) != 0:
-                if True:
-                    f1geom = f1.geometry().buffer(0.01, 5)
-                    if f1geom.area() < f1.geometry().area():
-                        f1geom = f1.geometry()
-                        self.writeOutput(
-                            ctime() + " - Warning : geometry " + str(f1.id()) + " not valid before inserting rings"
-                        )
-                else:
-                    geomshpapely = loads(f1.geometry().asWkb())
-                    resulttemp = self.repairPolygon(geomshpapely)
-                    if resulttemp != None:
-                        geom3 = [QgsPointXY(point[0], point[1]) for point in list(resulttemp.exterior.coords)]
-                        geom2 = QgsGeometry.fromPolygon([geom3])
-                        f1geom = geom2
-                        self.writeOutput(ctime() + " - geometry correction")
-                    else:
-                        f1geom = f1.geometry()
-
+                f1geom = f1.geometry().buffer(0.01, 5)
+                if f1geom.area() < f1.geometry().area():
+                    f1geom = f1.geometry()
+                    self.writeOutput(
+                        ctime() + " - Warning : geometry " + str(f1.id()) + " not valid before inserting rings"
+                    )
             else:
                 f1geom = f1.geometry()
 
@@ -512,14 +436,9 @@ class SelafinContour2Shp(QtCore.QObject):
     def do_ring(self, geom3):
         ring = []
         polygon = geom3.asPolygon()[0]
-        if sys.version_info.major == 2:
-            for i in range(len(polygon)):
-                ring.append(QgsPoint(polygon[i][0], polygon[i][1]))
-            ring.append(QgsPoint(polygon[0][0], polygon[0][1]))
-        if sys.version_info.major == 3:
-            for i in range(len(polygon)):
-                ring.append(QgsPointXY(polygon[i][0], polygon[i][1]))
-            ring.append(QgsPointXY(polygon[0][0], polygon[0][1]))
+        for i in range(len(polygon)):
+            ring.append(QgsPointXY(polygon[i][0], polygon[i][1]))
+        ring.append(QgsPointXY(polygon[0][0], polygon[0][1]))
         return ring
 
     def repairPolygon(self, geometry):
@@ -613,14 +532,12 @@ class InitSelafinContour2Shp(QtCore.QObject):
         # Check validity
         self.processtype = processtype
         try:
-            # slf = SELAFIN(os.path.normpath(selafinfilepath))
             parserhydrau = PostTelemacSelafinParser()
             parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
             slf = parserhydrau.hydraufile
         except Exception as e:
             self.raiseError("fichier selafin n existe pas " + str(e))
 
-        # times = slf.tags["times"]
         times = parserhydrau.getTimes()
         if isinstance(time, int):  # cas des plugins et scripts
             if not time in range(len(times)):
@@ -631,11 +548,9 @@ class InitSelafinContour2Shp(QtCore.QObject):
             else:
                 self.raiseError(str(ctime()) + " Time non trouve dans  " + str(times))
 
-        # parameters=[str(slf.VARNAMES[i]).strip() for i in range(len(slf.VARNAMES))]
         parameters = [str(parserhydrau.getVarNames()[i]).strip() for i in range(len(parserhydrau.getVarNames()))]
         if not parameter.isdigit():
             if parameter in parameters:
-                # self.slf_param = [parameters.index(parameter), parameter ]
                 parameter = parameters.index(parameter)
             else:
                 if not self.processtype == 0:
@@ -680,10 +595,7 @@ class InitSelafinContour2Shp(QtCore.QObject):
         if self.processtype == 0:
             self.error.emit(str)
         elif self.processtype in [1, 2, 3]:
-            if sys.version_info.major == 2:
-                raise GeoAlgorithmExecutionException(str)
-            elif sys.version_info.major == 3:
-                pass
+            pass
         elif self.processtype == 4:
             print(str)
             sys.exit(0)

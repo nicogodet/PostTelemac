@@ -9,6 +9,7 @@
  OX10 8BA, United Kingdom  /  \   /       Chatou, France      __/ \ \ `.        76152  Karlsruhe, Germany    _/     }
  www.hrwallingford.com    /    `-'|       innovation.edf.com |    )  )  )       www.baw.de               _.=^       )
                          !________!                           `--'   `--                             ______________/
+
 """
 """@brief
          Tools for handling SELAFIN files and TELEMAC binary related in python
@@ -135,17 +136,6 @@ def subsetVariablesSLF(vars, ALLVARS):
 
 # def getValueHistorySLF( hook,tags,time,support,NVAR,NPOIN3,NPLAN,(varsIndexes,varsName) ):
 def getValueHistorySLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsIndexes, varsName):
-    """
-      Extraction of time series at points.
-      A point could be:
-      (a) A point could be a node 2D associated with one or more plan number
-      (b) A pair (x,y) associated with one or more plan number
-/!\   Vertical interpolation has not been implemented yet.
-      Arguments:
-      - time: the discrete list of time frame to extract from the time history
-      - support: the list of points
-      - varsIndexes: the index in the NVAR-list to the variable to extract
-   """
     f = hook["hook"]
     endian = hook["endian"]
     ftype, fsize = hook["float"]
@@ -188,83 +178,7 @@ def getValueHistorySLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsIndex
 
     return z
 
-    """
-def getEdgesSLF(IKLE,MESHX,MESHY,showbar=True):
-
-   try:
-      from matplotlib.tri import Triangulation
-      edges = Triangulation(MESHX,MESHY,IKLE).get_cpp_triangulation().get_edges()
-   except:
-      #print '... you are in bad luck !'
-      #print '       ~>  without matplotlib based on python 2.7, this operation takes ages'
-      edges = []
-      ibar = 0
-      if showbar: pbar = ProgressBar(maxval=len(IKLE)).start()
-      for e in IKLE:
-         ibar += 1
-         if showbar: pbar.update(ibar)
-         if [e[0],e[1]] not in edges: edges.append([e[1],e[0]])
-         if [e[1],e[2]] not in edges: edges.append([e[2],e[1]])
-         if [e[2],e[0]] not in edges: edges.append([e[0],e[2]])
-      if showbar: pbar.finish()
-
-   return edges
-
-def getNeighboursSLF(IKLE,MESHX,MESHY,showbar=True):
-
-   try:
-      from matplotlib.tri import Triangulation
-      neighbours = Triangulation(MESHX,MESHY,IKLE).get_cpp_triangulation().get_neighbors()
-   except:
-      #print '... you are in bad luck !'
-      #print '       ~>  without matplotlib based on python 2.7, this operation takes a little longer'
-      insiders = {}; bounders = {}
-      #print '    +> start listing neighbours of edges'
-      ibar = 0
-      if showbar: pbar = ProgressBar(maxval=(3*len(IKLE))).start()
-      for e,i in zip(IKLE,range(len(IKLE))):
-         nk = bounders.keys()
-         for k in [0,1,2]:
-            ibar += 1
-            if showbar: pbar.update(ibar)
-            if (e[k],e[(k+1)%3]) not in nk: bounders.update({ (e[(k+1)%3],e[k]):i })
-            else:
-               j = bounders[(e[k],e[(k+1)%3])]
-               insiders.update({(e[k],e[(k+1)%3]):[i,j]})
-               del bounders[(e[k],e[(k+1)%3])]
-      ibar = 0
-      neighbours = - np.ones((len(IKLE),3),dtype=np.int)
-      for e,i in zip(IKLE,range(len(IKLE))):
-         for k in [0,1,2]:
-            ibar += 1
-            if showbar: pbar.update(ibar)
-            if (e[k],e[(k+1)%3]) in insiders:
-               a,b = insiders[(e[k],e[(k+1)%3])]
-               if a == i: neighbours[i][k] = b
-               if b == i: neighbours[i][k] = a
-            if (e[(k+1)%3],e[k]) in insiders:
-               a,b = insiders[(e[(k+1)%3],e[k])]
-               if a == i: neighbours[i][k] = b
-               if b == i: neighbours[i][k] = a
-      #pbar.write('    +> listing neighbours of edges completed',ibar)
-      if showbar: pbar.finish()
-
-   return neighbours
-"""
-
-
-# def getValuePolylineSLF(hook,tags,time,support,NVAR,NPOIN3,NPLAN,(varsIndexes,varsName)):
 def getValuePolylineSLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsIndexes, varsName):
-    """
-      Extraction of longitudinal profiles along lines.
-      A line is made of points extracted from sliceMesh:
-      A point is a pair (x,y) associated with one or more plan number
-/!\   Vertical interpolation has not been implemented yet.
-      Arguments:
-      - time: the discrete list of time frame to extract from the time history
-      - support: the list of points intersecting th mesh
-      - varsIndexes: the index in the NVAR-list to the variable to extract
-   """
     f = hook["hook"]
     endian = hook["endian"]
     ftype, fsize = hook["float"]
@@ -305,15 +219,6 @@ def getValuePolylineSLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsInde
 
 # def getValuePolyplanSLF(hook,tags,time,support,NVAR,NPOIN3,NPLAN,(varsIndexes,varsName)):
 def getValuePolyplanSLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsIndexes, varsName):
-    """
-      Extraction of variables at a list of times on a list of planes.
-      A plane is an integer
-/!\   Vertical interpolation has not been implemented yet.
-      Arguments:
-      - time: the discrete list of time frame to extract from the time history
-      - support: the list of planes
-      - varsIndexes: the index in the NVAR-list to the variable to extract
-   """
     f = hook["hook"]
     endian = hook["endian"]
     ftype, fsize = hook["float"]

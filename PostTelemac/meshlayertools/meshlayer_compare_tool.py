@@ -75,36 +75,12 @@ class CompareTool(AbstractMeshLayerTool, FORM_CLASS):
         str3 = self.tr("All files")
 
         if isinstance(fname, bool):  # click on openfile connexion
-            if False:
-                try:
-                    fname, extension = self.propertiesdialog.qfiledlg.getOpenFileName(
-                        None,
-                        str1,
-                        self.propertiesdialog.loaddirectory,
-                        str2 + " (*.res *.geo *.init *.slf);;" + str3 + " (*)",
-                    )
-                except:
-                    fname, extension = self.propertiesdialog.qfiledlg.getOpenFileNameAndFilter(
-                        None,
-                        str1,
-                        self.propertiesdialog.loaddirectory,
-                        str2 + " (*.res *.geo *.init *.slf);;" + str3 + " (*)",
-                    )
-            if True:
-                if int(qgis.PyQt.QtCore.QT_VERSION_STR[0]) == 4:
-                    fname = self.propertiesdialog.qfiledlg.getOpenFileName(
-                        None,
-                        str1,
-                        self.propertiesdialog.loaddirectory,
-                        str2 + " (*.res *.geo *.init *.slf);;" + str3 + " (*)",
-                    )
-                elif int(qgis.PyQt.QtCore.QT_VERSION_STR[0]) == 5:
-                    fname, extension = self.propertiesdialog.qfiledlg.getOpenFileName(
-                        None,
-                        str1,
-                        self.propertiesdialog.loaddirectory,
-                        str2 + " (*.res *.geo *.init *.slf);;" + str3 + " (*)",
-                    )
+            fname, extension = self.propertiesdialog.qfiledlg.getOpenFileName(
+                None,
+                str1,
+                self.propertiesdialog.loaddirectory,
+                str2 + " (*.res *.geo *.init *.slf);;" + str3 + " (*)",
+            )
 
         # Things
         if fname:
@@ -153,28 +129,14 @@ class CompareTool(AbstractMeshLayerTool, FORM_CLASS):
         self.checkBox_6.setEnabled(True)
 
     def getCorrespondingParameters(self):
-        if False:
-            for var in self.selafinlayer.hydrauparser.parametres:
-                for param in self.compareprocess.hydrauparsercompared.getVarnames():
-                    if var[1] in param.strip():
-                        self.selafinlayer.hydrauparser.parametres[var[0]][
-                            3
-                        ] = self.compareprocess.hydrauparsercompared.getVarnames().index(param)
-                        break
-                    else:
-                        self.selafinlayer.hydrauparser.parametres[var[0]][3] = None
-            self.selafinlayer.propertiesdialog.lineEdit.setText(
-                str([[param[0], param[3]] for param in self.selafinlayer.hydrauparser.parametres])
-            )
-        else:
-            for var in self.meshlayer.hydrauparser.parametres:
-                for param in self.compareprocess.hydrauparsercompared.parametres:
-                    if var[1] == param[1]:
-                        self.meshlayer.hydrauparser.parametres[var[0]][3] = param[0]
-                        break
-                    else:
-                        self.meshlayer.hydrauparser.parametres[var[0]][3] = None
-            self.lineEdit.setText(str([[param[0], param[3]] for param in self.meshlayer.hydrauparser.parametres]))
+        for var in self.meshlayer.hydrauparser.parametres:
+            for param in self.compareprocess.hydrauparsercompared.parametres:
+                if var[1] == param[1]:
+                    self.meshlayer.hydrauparser.parametres[var[0]][3] = param[0]
+                    break
+                else:
+                    self.meshlayer.hydrauparser.parametres[var[0]][3] = None
+        self.lineEdit.setText(str([[param[0], param[3]] for param in self.meshlayer.hydrauparser.parametres]))
 
     def reinitCorrespondingParameters(self):
         for i, var in enumerate(self.meshlayer.hydrauparser.parametres):

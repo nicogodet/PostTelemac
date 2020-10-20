@@ -28,10 +28,6 @@ from __future__ import unicode_literals
 
 import sys
 
-"""
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-"""
 from qgis.PyQt.QtCore import *
 from qgis.PyQt.QtGui import *
 from qgis.PyQt import QtCore, QtGui
@@ -43,29 +39,11 @@ import numpy as np
 from matplotlib.path import Path
 import sys
 
-if sys.version_info.major == 2:
-    from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
-    from processing.tools.vector import VectorWriter
-elif sys.version_info.major == 3:
-    from qgis.core import QgsVectorFileWriter
+from qgis.core import QgsVectorFileWriter
 import matplotlib.pyplot as plt
 from matplotlib import tri
 
 from qgis.utils import *
-
-"""
-from PyQt4.QtCore import SIGNAL, Qt
-from PyQt4 import QtCore, QtGui
-"""
-
-"""
-from ..libs_telemac.utils.files import getFileContent
-from ..libs_telemac.parsers.parserSortie import getValueHistorySortie
-from ..libs_telemac.parsers.parserSELAFIN import getValueHistorySLF,   getValuePolylineSLF,subsetVariablesSLF
-from ..libs_telemac.parsers.parserSELAFIN import SELAFIN
-from ..libs_telemac.parsers.parserStrings import parseArrayPaires
-"""
-
 
 import threading
 from time import ctime
@@ -106,16 +84,7 @@ def isFileLocked(file, readLockCheck=False):
 
     return False
 
-
 # *************************************************************************
-"""
-def workerFinished(str1):
-    progress.setText(str(ctime()) +" - Fin du thread - Chargement du fichier resultat")
-    vlayer = QgsVectorLayer( str1, os.path.basename(str1).split('.')[0],"ogr")
-    QgsMapLayerRegistry.instance().addMapLayer(vlayer)
-
-"""
-
 
 class SelafinContour2Pts(QtCore.QObject):
 
@@ -142,23 +111,12 @@ class SelafinContour2Pts(QtCore.QObject):
         QtCore.QObject.__init__(self)
 
         self.traitementarriereplan = processtype
-        """
-        slf = SELAFIN(os.path.normpath(selafinfilepath))
-        self.x = slf.MESHX
-        self.y = slf.MESHY
-        self.mesh = np.array(slf.IKLE3)
-        """
         # donnes delafin
         self.parserhydrau = PostTelemacSelafinParser()
         self.parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
 
         # slf = SELAFIN(os.path.normpath(selafinfilepath))
         slf = self.parserhydrau.hydraufile
-        """
-        self.slf_x = slf.MESHX
-        self.slf_y = slf.MESHY
-        self.mesh = np.array(slf.IKLE3)
-        """
         # self.x, self.y  = self.parserhydrau.getMesh()
         self.x, self.y = self.parserhydrau.getFacesNodes()
         self.x = self.x + translatex
@@ -172,11 +130,9 @@ class SelafinContour2Pts(QtCore.QObject):
         self.paramvalueX = paramvx
         self.paramvalueY = paramvy
         self.ztri = ztri
-        # self.traitementarriereplan = donnees_d_entree['traitementarriereplan']
 
         self.crs = selafincrs
 
-        # self.pathshp = donnees_d_entree['pathshp']
         # donnees shp - outside qgis
         if not outputshpname:
             outputshpname = os.path.basename(os.path.normpath(selafinfilepath)).split(".")[0] + "_point" + str(".shp")
@@ -194,55 +150,16 @@ class SelafinContour2Pts(QtCore.QObject):
         # Fields creation
         test = [False, False]
         tabparam = []
-        # donnees_d_entree['champs'] = QgsFields()
         fields = QgsFields()
-        # for i,name in enumerate(slf.VARNAMES):
         paramsname = [param[0] for param in self.parserhydrau.getVarNames()]
-        # for i,name in enumerate(self.parserhydrau.getVarNames()):
         for i, name in enumerate(paramsname):
             self.writeOutput(str(ctime()) + " - Initialisation - Variable dans le fichier res : " + name.strip())
             tabparam.append([i, name.strip()])
-            # donnees_d_entree['champs'].append(QgsField(str(name.strip()).translate(None, "?,!.;"),   QVariant.Double))
-            # fields.append(QgsField(str(name.strip()).translate(None, "?,!.;"),   QVariant.Double))
             fields.append(QgsField(str(name.strip()), QVariant.Double))
-            # if self.donnees_d_entree['Parametre_vitesse_X']   !=  None:
-            """
-                if self.paramvalueX   !=  None:
-                    #if str(name).strip() == self.donnees_d_entree['Parametre_vitesse_X'].strip():
-                    if str(name).strip() == self.paramvalueX.strip():
-                        test[0]=True
-                        #self.donnees_d_entree['paramvalueX']  = i
-                        self.paramvalueX  = i
-                    #if str(name).strip() == self.donnees_d_entree['Parametre_vitesse_Y'].strip():
-                    if str(name).strip() == self.paramvalueY.strip():
-                        test[1]=True
-                        #self.donnees_d_entree['paramvalueY'] = i
-                        self.paramvalueY = i
-                else:
-                    
-                    #self.donnees_d_entree['paramvalueX']  = None
-                    #self.donnees_d_entree['paramvalueY']  = None
-                    
-                    self.paramvalueX = None
-                    self.paramvalueY = None
-                """
-
-        # if self.donnees_d_entree['Parametre_vitesse_X']  != None:
-        """
-        if self.paramvalueX  != None:
-            if test == [True,True]:
-                self.writeOutput( str(ctime()) + " - Initialisation - Parametre trouvee : " 
-                                         +str(tabparam[self.paramvalueX ][1]).strip()+" "
-                                         +str(tabparam[self.paramvalueY ][1]).strip())
-            else:
-                raise GeoAlgorithmExecutionException(str(ctime()) + " - Initialisation - Erreur : \
-                                     Parametre vitesse non trouve")
-        """
         self.vlayer = ""
 
         self.vitesse = "0"
 
-        # fields = donnees_d_entree['champs']
         if self.computevelocity:
             fields.append(QgsField("UV", QVariant.Double))
             fields.append(QgsField("VV", QVariant.Double))
@@ -256,17 +173,10 @@ class SelafinContour2Pts(QtCore.QObject):
                 None,
                 fields,
                 QgsWkbTypes.Point,
-                QgsCoordinateReferenceSystem(str(self.crs)),  # QGis.WKBPoint
+                QgsCoordinateReferenceSystem(str(self.crs)), 
                 "ESRI Shapefile",
             )
-        """                                                         
-        if self.traitementarriereplan == 1 or self.traitementarriereplan == 2 :
-            self.writerw2 = VectorWriter(donnees_d_entree['fichierdesortie_point'],
-                                                      None , fields, 
-                                                      QgsWkbTypes.WKBMultiPoint, 
-                                                      QgsCoordinateReferenceSystem(str(self.crs) ))
-                                                      
-        """
+
 
     def run(self):
         strtxt = (
@@ -276,173 +186,84 @@ class SelafinContour2Pts(QtCore.QObject):
             + " - fichier : "
             + os.path.basename(self.pathshp)
         )
-        """
-            if self.traitementarriereplan == 0 : self.status.emit(strtxt) 
-            else : progress.setText(strtxt)
-            """
+
         self.writeOutput(strtxt)
 
         fet = QgsFeature()
         try:
-            if True:
-                if self.paramvalueX == None:
-                    boolvitesse = False
-                else:
-                    boolvitesse = True
-                # ------------------------------------- TRaitement de tous les points
-                if self.pasespace == 0:
-                    noeudcount = len(self.x)
-                    strtxt = str(ctime()) + " - Thread - Traitement des vitesses - " + str(noeudcount) + " noeuds"
+            if self.paramvalueX == None:
+                boolvitesse = False
+            else:
+                boolvitesse = True
+            # ------------------------------------- TRaitement de tous les points
+            if self.pasespace == 0:
+                noeudcount = len(self.x)
+                strtxt = str(ctime()) + " - Thread - Traitement des vitesses - " + str(noeudcount) + " noeuds"
+                """
+                    if self.traitementarriereplan  == 0 : self.status.emit(strtxt) 
+                    else : progress.setText(strtxt)
                     """
-                        if self.traitementarriereplan  == 0 : self.status.emit(strtxt) 
-                        else : progress.setText(strtxt)
+                self.writeOutput(strtxt)
+
+                for k in range(len(self.x)):
+                    if k % 5000 == 0:
+                        strtxt = str(ctime()) + " - Thread - noeud n " + str(k) + "/" + str(noeudcount)
                         """
-                    self.writeOutput(strtxt)
-
-                    for k in range(len(self.x)):
-                        if k % 5000 == 0:
-                            strtxt = str(ctime()) + " - Thread - noeud n " + str(k) + "/" + str(noeudcount)
+                            if self.traitementarriereplan  == 0 : self.status.emit(strtxt) 
+                            else : progress.setText(strtxt)
                             """
-                                if self.traitementarriereplan  == 0 : self.status.emit(strtxt) 
-                                else : progress.setText(strtxt)
-                                """
-                            self.writeOutput(strtxt)
+                        self.writeOutput(strtxt)
+                        """
+                            
+                            if self.traitementarriereplan  == 0 : self.progress.emit(int(100.0*k/noeudcount))
+                            else : progress.setPercentage(int(100.0*k/noeudcount))
                             """
-                                
-                                if self.traitementarriereplan  == 0 : self.progress.emit(int(100.0*k/noeudcount))
-                                else : progress.setPercentage(int(100.0*k/noeudcount))
-                                """
 
-                        fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(self.x[k]), float(self.y[k]))))
-                        # self.writeOutput('temp1')
-                        tabattr = []
-                        if len(self.ztri) > 0:
-                            for l in range(len(self.ztri)):
-                                tabattr.append(float(self.ztri[l][k]))
-                        # self.writeOutput('temp2')
-                        if boolvitesse:
-                            norme = (
-                                (float(self.ztri[self.paramvalueX][k])) ** 2.0
-                                + (float(self.ztri[self.paramvalueY][k])) ** 2.0
-                            ) ** (0.5)
-                            atanUVVV = math.atan2(
-                                float(self.ztri[self.paramvalueY][k]), float(self.ztri[self.paramvalueX][k])
-                            )
-
-                            angle = atanUVVV / math.pi * 180.0
-                            if angle < 0:
-                                angle = angle + 360
-
-                            # angle YML
-                            # angle = atanUVVV*180.0/math.pi+min(atanUVVV,0)/atanUVVV*360.0
-                            tabattr.append(float(self.ztri[self.paramvalueX][k]))
-                            tabattr.append(float(self.ztri[self.paramvalueY][k]))
-                            tabattr.append(norme)
-                            tabattr.append(angle)
-                        # self.writeOutput('temp3')
-                        fet.setAttributes(tabattr)
-                        if self.traitementarriereplan == 0 or self.traitementarriereplan == 2:
-                            self.writerw1.addFeature(fet)
-                        if self.traitementarriereplan == 1 or self.traitementarriereplan == 2:
-                            self.writerw2.addFeature(fet)
-                # ------------------------------------- Traitement  du pas d'espace des points
-                else:
-                    triangul = tri.Triangulation(self.x, self.y, self.mesh)
-                    lineartri = []
+                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(self.x[k]), float(self.y[k]))))
+                    # self.writeOutput('temp1')
+                    tabattr = []
                     if len(self.ztri) > 0:
-                        for i in range(len(self.ztri)):
-                            lineartri.append(tri.LinearTriInterpolator(triangul, self.ztri[i]))
+                        for l in range(len(self.ztri)):
+                            tabattr.append(float(self.ztri[l][k]))
+                    # self.writeOutput('temp2')
+                    if boolvitesse:
+                        norme = (
+                            (float(self.ztri[self.paramvalueX][k])) ** 2.0
+                            + (float(self.ztri[self.paramvalueY][k])) ** 2.0
+                        ) ** (0.5)
+                        atanUVVV = math.atan2(
+                            float(self.ztri[self.paramvalueY][k]), float(self.ztri[self.paramvalueX][k])
+                        )
 
-                    xmin = np.min(self.x)
-                    xmax = np.max(self.x)
-                    ymin = np.min(self.y)
-                    ymax = np.max(self.y)
-                    pasx = int((xmax - xmin) / self.pasespace)
-                    pasy = int((ymax - ymin) / self.pasespace)
+                        angle = atanUVVV / math.pi * 180.0
+                        if angle < 0:
+                            angle = angle + 360
 
-                    strtxt = (
-                        str(ctime())
-                        + " - Thread - Traitement des vitesses - pas d espace : "
-                        + str(self.pasespace)
-                        + "m - nombre de points : "
-                        + str(pasx)
-                        + "*"
-                        + str(pasy)
-                        + "="
-                        + str(pasx * pasy)
-                    )
-                    """             
-                        if self.traitementarriereplan  == 0 : self.status.emit(strtxt) 
-                        else : progress.setText(strtxt)
-                        """
-                    self.writeOutput(strtxt)
-
-                    compt = 0
-                    for x2 in range(pasx):
-                        xtemp = float(xmin + x2 * self.pasespace)
-
-                        for y2 in range(pasy):
-                            compt = compt + 1
-                            if (compt) % 5000 == 0:
-                                strtxt = str(ctime()) + " - Thread -  noeud n " + str(compt) + "/" + str(pasx * pasy)
-                                """
-                                    if self.traitementarriereplan  == 0 : self.status.emit(strtxt) 
-                                    else : progress.setText(strtxt)
-                                    
-                                    if self.traitementarriereplan  == 0 : self.progress.emit(int(100.0*compt/(pasy*pasx)))
-                                    else : progress.setPercentage(int(100.0*compt/(pasy*pasx)))
-                                    """
-                                self.writeOutput(strtxt)
-
-                            ytemp = float(ymin + y2 * self.pasespace)
-                            fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(xtemp, ytemp)))
-                            tabattr1 = []
-                            if str(float(lineartri[0].__call__(xtemp, ytemp))) == "nan":
-                                continue
-
-                            for j in range(len(lineartri)):
-                                tabattr1.append(float(lineartri[j].__call__(xtemp, ytemp)))
-                            if boolvitesse:
-                                VX = float(lineartri[self.paramvalueX].__call__(xtemp, ytemp))
-                                VY = float(lineartri[self.paramvalueY].__call__(xtemp, ytemp))
-                                norme = ((VX) ** 2.0 + (VY) ** 2.0) ** (0.5)
-                                angle = math.atan2(VY, VX) / math.pi * 180.0
-                                if angle < 0:
-                                    angle = angle + 360
-                                tabattr1.append(VX)
-                                tabattr1.append(VY)
-                                tabattr1.append(norme)
-                                tabattr1.append(angle)
-                            fet.setAttributes(tabattr1)
-                            if self.traitementarriereplan == 0 or self.traitementarriereplan == 2:
-                                self.writerw1.addFeature(fet)
-                            if self.traitementarriereplan == 1 or self.traitementarriereplan == 2:
-                                self.writerw2.addFeature(fet)
-
-                # del self.writerw
+                        # angle YML
+                        # angle = atanUVVV*180.0/math.pi+min(atanUVVV,0)/atanUVVV*360.0
+                        tabattr.append(float(self.ztri[self.paramvalueX][k]))
+                        tabattr.append(float(self.ztri[self.paramvalueY][k]))
+                        tabattr.append(norme)
+                        tabattr.append(angle)
+                    # self.writeOutput('temp3')
+                    fet.setAttributes(tabattr)
+                    if self.traitementarriereplan == 0 or self.traitementarriereplan == 2:
+                        self.writerw1.addFeature(fet)
+                    if self.traitementarriereplan == 1 or self.traitementarriereplan == 2:
+                        self.writerw2.addFeature(fet)
+            # ------------------------------------- Traitement  du pas d'espace des points
         except Exception as e:
             strtxt = str(ctime()) + " ************ PROBLEME CALCUL DES VITESSES : " + str(e)
-            """
-                if self.traitementarriereplan  == 0 : self.status.emit(strtxt) 
-                else : progress.setText(strtxt)
-                """
             self.writeOutput(strtxt)
 
-        """
-            if self.traitementarriereplan == 0: self.progress.emit(int(100.0))
-            else : progress.setPercentage(int(100.0))
-            """
         if self.traitementarriereplan == 0 or self.traitementarriereplan == 2:
             del self.writerw1
         if self.traitementarriereplan == 1 or self.traitementarriereplan == 2:
             del self.writerw2
         strtxt = str(ctime()) + " - Thread - fichier " + self.pathshp + " cree"
-        """
-            if self.traitementarriereplan   == 0 : self.status.emit(strtxt) 
-            else : progress.setText(strtxt)
-            """
+
         self.writeOutput(strtxt)
-        # self.status.emit("Fichier " + self.nomrept+ '\ '.strip()+ self.nomfilet + " cree")
+
         if self.traitementarriereplan == 0:
             self.finished.emit(self.pathshp)
         if self.traitementarriereplan == 2:
@@ -498,7 +319,6 @@ class InitSelafinMesh2Pts(QtCore.QObject):
         self.processtype = processtype
 
         try:
-            # slf = SELAFIN(os.path.normpath(selafinfilepath))
             parserhydrau = PostTelemacSelafinParser()
             parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
             slf = parserhydrau.hydraufile
@@ -518,19 +338,6 @@ class InitSelafinMesh2Pts(QtCore.QObject):
                 self.raiseError(str(ctime()) + " Time non trouve dans  " + str(times))
 
         # check velocity creation
-
-        """
-        if parameter is not None:
-            parameters=[str(slf.VARNAMES[i]).strip() for i in range(len(slf.VARNAMES))]
-            if not parameter.isdigit():
-                if parameter in parameters:
-                    #self.slf_param = [parameters.index(parameter), parameter ]
-                    parameter = parameters.index(parameter)
-                else:
-                    self.raiseError( str(parameter) + " parameter pas trouve dans "+str(parameters))
-            else : 
-                parameter = int(parameter)
-        """
         self.worker = SelafinContour2Pts(
             processtype,  # 0 : thread inside qgis (plugin) - 1 : thread processing - 2 : modeler (no thread) - 3 : modeler + shpouput - 4: outsideqgis
             selafinfilepath,  # path to selafin file
@@ -576,10 +383,7 @@ class InitSelafinMesh2Pts(QtCore.QObject):
         if self.processtype == 0:
             self.error.emit(str)
         elif self.processtype in [1, 2, 3]:
-            if sys.version_info.major == 2:
-                raise GeoAlgorithmExecutionException(str)
-            elif sys.version_info.major == 3:
-                pass
+            pass
         elif self.processtype == 4:
             print(str)
             sys.exit(0)
@@ -739,8 +543,3 @@ class InitSelafinMesh2Pts2:
             self.thread.start()
         else:
             self.worker.run()
-
-
-# *************************************************************************
-# ************** Initialisation des variables ****************************************
-# *************************************************************************

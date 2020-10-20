@@ -25,7 +25,6 @@ Versions :
 
 import qgis
 
-
 def getQgisVersion():
     try:
         version = qgis.core.QGis.QGIS_VERSION

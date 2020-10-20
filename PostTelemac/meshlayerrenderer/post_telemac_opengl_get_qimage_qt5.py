@@ -26,48 +26,25 @@ Versions :
 # import qgis
 import qgis.core
 
-# import PyQT
-
-# import matplotlib
-# import matplotlib
-# matplotlib.use('Agg')
-# import matplotlib.pyplot as plt
-# from matplotlib import tri
-# from matplotlib.backends.backend_agg import FigureCanvasAgg
-# import numpy
 import numpy as np
 
 # other imports
 from time import ctime
 
-# import cStringIO
 import gc
 import time
 
 from OpenGL.GL import *
 from OpenGL.GL import shaders
 
-# from PyQt4 import QtGui, QtCore
 from qgis.PyQt import QtGui, QtCore
-
-try:
-    from qgis.PyQt.QtGui import QApplication
-except:
-    from qgis.PyQt.QtWidgets import QApplication
-
-try:
-    from PyQt4.QtCore import *
-    from PyQt4.QtGui import *
-    from PyQt4.QtOpenGL import QGLPixelBuffer, QGLFormat, QGLContext
-except:
-    from PyQt5.QtCore import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtOpenGL import QGLFormat, QGLContext
+from qgis.PyQt.QtWidgets import QApplication
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtOpenGL import QGLFormat, QGLContext
 
 import numpy
 from math import log, ceil, exp
-
-# from utilities import complete_filename, format_
 
 from .post_telemac_pluginlayer_colormanager import *
 from .post_telemac_abstract_get_qimage import *
@@ -86,18 +63,11 @@ def roundUpSize(size):
 
 class MeshRenderer(AbstractMeshRenderer):
 
-    # __imageChangeRequested = QtCore.pyqtSignal(qgis.core.QgsRenderContext)
     __imageChangeRequested = QtCore.pyqtSignal()
     RENDERER_TYPE = "OpenGL"
 
     def __init__(self, meshlayer, integertemp, vtx=[[0.0, 0.0, 0.0]], idx=[0]):
         AbstractMeshRenderer.__init__(self, meshlayer, integertemp, vtx=[[0.0, 0.0, 0.0]], idx=[0])
-        # self.fig =  plt.figure(int)
-        # self.canvas = FigureCanvasAgg(self.fig)
-        # self.meshlayer = meshlayer
-        # self.ax = self.fig.add_subplot(111)
-        # Reprojected things
-        # self.meshxreprojected, self.meshyreprojected = None, None
         self.goodpointindex = None
         self.arraypoints = None
 

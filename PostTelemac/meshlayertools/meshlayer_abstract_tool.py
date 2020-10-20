@@ -25,19 +25,10 @@ Versions :
 
 from __future__ import unicode_literals
 
-# from PyQt4 import uic, QtCore, QtGui
 from qgis.PyQt import uic, QtCore, QtGui
-
-try:
-    from qgis.PyQt.QtGui import QWidget, QTreeWidgetItem
-except:
-    from qgis.PyQt.QtWidgets import QWidget, QTreeWidgetItem
+from qgis.PyQt.QtWidgets import QWidget, QTreeWidgetItem
 import os
 
-# FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'ValueTool.ui'))
-
-
-# class AbstractMeshLayerTool(QtGui.QWidget, FORM_CLASS):
 class AbstractMeshLayerTool(QWidget):
 
     SOFTWARE = []
@@ -76,28 +67,19 @@ class AbstractMeshLayerTool(QWidget):
             self.qtreewidgetitem.setIcon(0, QtGui.QIcon(self.iconpath))
 
         if arb[0] == "Main":
-            if False:
+            root = self.propertiesdialog.treeWidget_utils.invisibleRootItem()
+            child_count = root.childCount()
+
+            if child_count == 0:
                 self.propertiesdialog.treeWidget_utils.addTopLevelItems([self.qtreewidgetitem])
             else:
-
-                root = self.propertiesdialog.treeWidget_utils.invisibleRootItem()
-                child_count = root.childCount()
-                # print(arb[-1],child_count)
-
-                if child_count == 0:
-                    # print('first',item.text(0),item.childCount())
-                    # print('first')
-                    self.propertiesdialog.treeWidget_utils.addTopLevelItems([self.qtreewidgetitem])
-                else:
-                    for i in range(child_count):
-                        item = root.child(i)
-                        # print(item.text(0),item.childCount())
-                        if item.childCount() > 0:
-                            # self.propertiesdialog.treeWidget_utils.addTopLevelItems([self.qtreewidgetitem])
-                            self.propertiesdialog.treeWidget_utils.insertTopLevelItems(i, [self.qtreewidgetitem])
-                            break
-                        if i == child_count - 1:
-                            self.propertiesdialog.treeWidget_utils.insertTopLevelItems(i, [self.qtreewidgetitem])
+                for i in range(child_count):
+                    item = root.child(i)
+                    if item.childCount() > 0:
+                        self.propertiesdialog.treeWidget_utils.insertTopLevelItems(i, [self.qtreewidgetitem])
+                        break
+                    if i == child_count - 1:
+                        self.propertiesdialog.treeWidget_utils.insertTopLevelItems(i, [self.qtreewidgetitem])
 
         else:
             wdgitem = None
