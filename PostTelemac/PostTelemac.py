@@ -13,8 +13,7 @@
 """
 
 # import QT
-# from PyQt4 import QtCore ,QtGui
-from qgis.PyQt import QtCore, QtGui
+from qgis.PyQt import QtCore, QtGui, QtWidgets
 
 # import qgis
 import qgis
@@ -25,9 +24,7 @@ import time
 import sys
 import subprocess
 
-# sys.path.append(os.path.join(os.path.dirname(__file__),'libs_telemac'))
 # Posttelemac library import
-# import .resources_rc
 from . import resources_rc
 
 from .meshlayer.post_telemac_pluginlayer import SelafinPluginLayer
@@ -78,18 +75,10 @@ class PostTelemac:
         locale_path = os.path.join(self.plugin_dir, "i18n", "posttelemac_{}.qm".format(locale))
 
         if os.path.exists(locale_path):
-            # app=QApplication([''])
             self.translator = QtCore.QTranslator()
-            # self.translator = QTranslator(app)
             self.translator.load(locale_path)
             QtCore.QCoreApplication.installTranslator(self.translator)
-            """
 
-            if qVersion() > '4.3.3':
-                print 'ok'
-                QCoreApplication.installTranslator(self.translator)
-                #app.installTranslator(self.translator)
-            """
         # ***********************************************************************
 
         self.pluginLayerType = None
@@ -101,21 +90,15 @@ class PostTelemac:
         self.menu = self.tr(u"&PostTelemac")
         # TODO: We are going to let the user set this up in a future iteration
         # toolbar
-        try:
-            from qgis.PyQt.QtGui import QToolBar
-        except:
-            from qgis.PyQt.QtWidgets import QToolBar
-        toolbars = self.iface.mainWindow().findChildren(QToolBar)
+        toolbars = self.iface.mainWindow().findChildren(QtWidgets.QToolBar)
 
-        test = True
         for toolbar1 in toolbars:
             if toolbar1.windowTitle() == u"Telemac":
                 self.toolbar = toolbar1
                 test = False
                 break
-        if test:
-            self.toolbar = self.iface.addToolBar(u"Telemac")
-            self.toolbar.setObjectName(u"Telemac")
+        self.toolbar = self.iface.addToolBar(u"Telemac")
+        self.toolbar.setObjectName(u"Telemac")
 
         self.dlg_about = None
 
@@ -188,12 +171,7 @@ class PostTelemac:
 
         icon = QtGui.QIcon(icon_path)
 
-        try:
-            from qgis.PyQt.QtGui import QAction
-        except:
-            from qgis.PyQt.QtWidgets import QAction
-
-        action = QAction(icon, text, parent)
+        action = QtWidgets.QAction(icon, text, parent)
         action.triggered.connect(callback)
         action.setEnabled(enabled_flag)
 
@@ -257,10 +235,6 @@ class PostTelemac:
             self.iface.mapCanvas().mapSettings().destinationCrs()
         )  # to prevent weird bug with weird crs
         qgis.core.QgsProject.instance().addMapLayer(self.slf[len(self.slf) - 1])
-        # try:
-        # qgis.core.QgsMapLayerRegistry.instance().addMapLayer(self.slf[len(self.slf)-1])
-        # except:
-        # qgis.core.QgsProject.instance().addMapLayer(self.slf[len(self.slf)-1])
         self.iface.showLayerProperties(self.slf[len(self.slf) - 1])
 
     def showHelp(self):
@@ -278,18 +252,8 @@ class PostTelemac:
     # Specific functions
     def addToRegistry(self):
         # Add telemac_viewer in QgsPluginLayerRegistry
-        if utils.getQgisVersion() < 2.20:
-            reg = qgis.core.QgsPluginLayerRegistry.instance()
-        else:
-            reg = qgis.core.QgsApplication.pluginLayerRegistry()
-        if False:
-            if u"selafin_viewer" in qgis.core.QgsPluginLayerRegistry.instance().pluginLayerTypes():
-                qgis.core.QgsPluginLayerRegistry.instance().removePluginLayerType("selafin_viewer")
-            self.pluginLayerType = SelafinPluginLayerType()
-            qgis.core.QgsPluginLayerRegistry.instance().addPluginLayerType(self.pluginLayerType)
-
-        if True:
-            if u"selafin_viewer" in reg.pluginLayerTypes():
-                reg.removePluginLayerType("selafin_viewer")
-            self.pluginLayerType = SelafinPluginLayerType()
-            reg.addPluginLayerType(self.pluginLayerType)
+        reg = qgis.core.QgsApplication.pluginLayerRegistry()
+        if u"selafin_viewer" in reg.pluginLayerTypes():
+            reg.removePluginLayerType("selafin_viewer")
+        self.pluginLayerType = SelafinPluginLayerType()
+        reg.addPluginLayerType(self.pluginLayerType)
