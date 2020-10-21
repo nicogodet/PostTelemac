@@ -168,7 +168,6 @@ class SelafinPluginLayer(qgis.core.QgsPluginLayer):
         import glob, inspect, importlib
         import PostTelemac.meshlayerparsers
 
-        # import PostTelemac.meshlayerparsers, sys
         self.parsers = []
         path = os.path.join(os.path.dirname(__file__), "..", "meshlayerparsers")
         modules = glob.glob(path + "/*.py")
@@ -329,8 +328,12 @@ class SelafinPluginLayer(qgis.core.QgsPluginLayer):
 
         # final update
         self.triggerRepaint()
+        
+        # legend 
+        # legend = SelafinPluginLegend()
+        # self.setLegend(legend)
 
-        if qgis.utils.iface is not None:
+        if qgis.utils.iface is not None: #toujours utile ?
             qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.id())
 
         self.canvas.setExtent(self.extent())
@@ -742,3 +745,12 @@ class SelafinPluginLayer(qgis.core.QgsPluginLayer):
 
     def setTransformContext(self, transformContext):
         pass
+        
+# class SelafinPluginLegend(qgis.core.QgsMapLayerLegend): #C'est la façon de faire
+    # def __init__(self, text, icon, parent=None):
+        # QgsMapLayerLegend.__init__(self, parent)
+        # self.text = text
+        # self.icon = icon
+        
+    # def createLayerTreeModelLegendNodes(self, layer_tree_layer):
+        # return [QgsSimpleLegendNode(layer_tree_layer, self.text, self.icon, self)]
