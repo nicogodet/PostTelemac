@@ -330,8 +330,12 @@ class SelafinPluginLayer(qgis.core.QgsPluginLayer):
         self.triggerRepaint()
         
         # legend 
+        ## documentation : https://github.com/BRGM/gml_application_schema_toolbox/blob/474df9894000132c757e1f15a2daabbac902e699/gml_application_schema_toolbox/core/load_gmlas_in_qgis.py#L62
+        ## documentation : https://gis.stackexchange.com/questions/331020/pyqgis-script-crashes-qgis-3-when-remove-a-custom-pluginlayer-which-has-custom-l
         # legend = SelafinPluginLegend()
         # self.setLegend(legend)
+        
+        
 
         if qgis.utils.iface is not None: #toujours utile ?
             qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.id())
