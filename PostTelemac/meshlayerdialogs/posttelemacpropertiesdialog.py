@@ -68,12 +68,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
                 methods for utilities are set in PostTelemacUtils class
         """
         super(PostTelemacPropertiesDialog, self).__init__(parent)
-        # QtGui.QDockWidget.__init__(self, parent)
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
         self.unloadtools = False
@@ -101,7 +95,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         homedir = os.path.expanduser("~")
         self.posttelemacdir = os.path.join(homedir, ".PostTelemac")
         if not os.path.isdir(self.posttelemacdir):
-            # os.makedirs(self.posttelemacdir)
             shutil.copytree(os.path.join(os.path.dirname(__file__), "..", "config"), self.posttelemacdir)
 
         self.combodialog = postTelemacComboboxDialog()  # usefull for asking something
@@ -112,15 +105,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         self.pushButton_loadslf.clicked.connect(self.loadSelafin)
         self.pushButton_crs.clicked.connect(self.set_layercrs)
         self.pushbutton_crstranslation.clicked.connect(self.translateCrs)
-
-        # ********* ********** ******************************************
-        # tab  ************************************************
-        # ********* ********** ******************************************
-        # self.tabWidget.currentChanged.connect(self.mapToolChooser)
-
-        # ********* ********** ******************************************
-        # Display tab  ************************************************
-        # ********* ********** ******************************************
 
         # Time
         self.horizontalSlider_time.sliderPressed.connect(self.sliderPressed)
@@ -136,9 +120,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             self.treeWidget_parameters.setColumnWidth(0, 40)
             self.treeWidget_parameters.header().setResizeMode(0, QtGui.QHeaderView.Fixed)
         except:
-            # self.treeWidget_parameters.header().setResizeMode(QtGui.QHeaderView.ResizeToContents)
             self.treeWidget_parameters.setColumnWidth(0, 40)
-            # self.treeWidget_parameters.header().setResizeMode(0,QtGui.QHeaderView.Fixed)
         # virtual parameter
         self.pushButton_param_add.clicked.connect(self.open_def_variables)
         self.pushButton_param_edit.clicked.connect(self.open_def_variables)
@@ -168,7 +150,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         # Mesh box
         self.checkBox_showmesh.stateChanged.connect(self.meshlayer.showMesh)
         # transparency box
-        # self.horizontalSlider_transp.valueChanged.connect(self.meshlayer.meshrenderer.changeAlpha)
         self.horizontalSlider_transp.valueChanged.connect(self.changeAlpha)
         self.horizontalSlider_transp.sliderPressed.connect(self.sliderPressed)
         self.horizontalSlider_transp.sliderReleased.connect(self.sliderReleased)
@@ -237,7 +218,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
                 self.comboBox_genericlevels.setCurrentIndex(self.meshlayer.parametrestoload["renderer"][1][1])
                 self.comboBox_clrgame.setCurrentIndex(self.meshlayer.parametrestoload["renderer"][1][0])
                 # range
-                # print('step1',self.meshlayer.parametrestoload['renderer'][2][1])
                 self.lineEdit_levelmin.setText(self.meshlayer.parametrestoload["renderer"][2][1][0])
                 self.lineEdit_levelmax.setText(self.meshlayer.parametrestoload["renderer"][2][1][1])
                 self.lineEdit_levelstep.setText(self.meshlayer.parametrestoload["renderer"][2][1][2])
@@ -274,7 +254,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             if self.unloadtools:
                 # compare
                 self.writeSelafinCaracteristics(self.textEdit_2, self.meshlayer.hydrauparser)
-
                 if self.postutils.compareprocess is not None:
                     self.reset_dialog()
                     self.postutils.compareprocess = None
@@ -284,13 +263,10 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
                 self.reinitcomposeurimages(0)
 
             self.meshlayerschangedsignal.emit()
-            # self.populateMinMaxSpinBox()
 
     def loadTools(self, filetype=None):
 
         import glob, inspect, importlib
-
-        # import PostTelemac.meshlayertools, sys
 
         self.unloadTools()
 
@@ -312,7 +288,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
                                     self.errorMessage(istool + " : " + str(e))
                             else:  # specific software tool
                                 try:  # case obj has SOFTWARE
-
                                     if len(obj.SOFTWARE) > 0 and filetype in obj.SOFTWARE:
                                         try:
                                             self.tools.append(obj(self.meshlayer, self))
@@ -530,7 +505,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
     def readHydrauFile2(self):
         self.playstep = int(self.spinBox_readtimestep.value())
         if self.meshlayer.time_displayed < len(self.meshlayer.hydrauparser.getTimes()) - self.playstep:
-            # print str(self.meshlayer.time_displayed + self.playstep) + ' ' + str(len(self.meshlayer.hydrauparser.getTimes() ))
             self.horizontalSlider_time.setValue(self.meshlayer.time_displayed + self.playstep)
             self.meshlayer.canvas.refresh()
         else:  # end of time reached
@@ -680,7 +654,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             self.groupBox_colorramp.setTitle("Color ramp - velocity")
 
         # update lastscolorparams
-        # self.lastscolorparams = [classes, text,  #1 : color gradient, generic levels, #2 : color gradient, min, max, step, #3 : preset color ramp]
         self.lastscolorparams = lastscolorparamstemp
 
     def connectColorRampSignals(self):
@@ -872,7 +845,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """
         name = self.dlg_color.lineEdit_name.text()
         if self.comboBox_clrramp_preset.findText(name) > -1:
-            # path = os.path.join(os.path.dirname(__file__),'..', 'config',name+'.clr')
             path = os.path.join(self.posttelemacdir, name + ".clr")
             os.remove(path)
             self.dlg_color.close()
@@ -891,19 +863,15 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             if fullpath:
                 path = name
             else:
-                # path = os.path.join(os.path.dirname(__file__),'..', 'config',str(name)+'.clr')
                 path = os.path.join(self.posttelemacdir, str(name) + ".clr")
             if name:
                 cmap, levels = self.meshlayer.meshrenderer.colormanager.readClrColorRamp(path)
 
                 if cmap and levels:
-                    # self.meshlayer.cmap = cmap
                     if self.tabWidget_lvl_vel.currentIndex() == 0:  # contour
-                        # self.meshlayer.meshrenderer.cmap_mpl_contour_raw = cmap
                         self.meshlayer.meshrenderer.cmap_contour_raw = cmap
                         self.meshlayer.meshrenderer.change_lvl_contour(levels)
                     elif self.tabWidget_lvl_vel.currentIndex() == 1:  # veolicty
-                        # self.meshlayer.meshrenderer.cmap_mpl_vel_raw = cmap
                         self.meshlayer.meshrenderer.cmap_vel_raw = cmap
                         self.meshlayer.meshrenderer.change_lvl_vel(levels)
 
@@ -912,7 +880,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         Load user defined color ramp in user defined color ramp combobox
         """
         self.comboBox_clrramp_preset.clear()
-        # for file in os.listdir(os.path.join(os.path.dirname(__file__),'..', 'config')):
         for file in os.listdir(self.posttelemacdir):
             if file.endswith(".clr") and file.split(".")[0]:
                 self.comboBox_clrramp_preset.addItem(file.split(".")[0])
@@ -974,7 +941,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """
         Populate classes combobox on dialog creation
         """
-        # f = open(os.path.join(os.path.dirname(__file__),'..', 'config','classes.txt'), 'r')
         f = open(os.path.join(self.posttelemacdir, "classes.txt"), "r")
         for line in f:
             tabtemp = []
@@ -983,7 +949,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             self.predeflevels.append([line.split("=")[0], tabtemp])
         for i in range(len(self.predeflevels)):
             self.comboBox_genericlevels.addItem(self.predeflevels[i][0])
-            # self.comboBox_genericlevels_2.addItem(self.predeflevels[i][0])
         f.close()
 
     def populatecombobox_time(self):
@@ -1034,7 +999,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             ramp = style.colorRamp(rampName)
             icon = qgis.core.QgsSymbolLayerUtils.colorRampPreviewIcon(ramp, rampIconSize)
             self.comboBox_clrgame.addItem(icon, rampName)
-            # self.comboBox_clrgame_2.addItem(icon, rampName)
             self.comboBox_clrgame2.addItem(icon, rampName)
 
     def changeMeshLayerRenderer(self, typerenderer):
