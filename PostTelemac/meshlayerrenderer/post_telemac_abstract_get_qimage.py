@@ -177,7 +177,7 @@ class AbstractMeshRenderer(QtCore.QObject):
         self.lvl_vel = tab
         self.change_cm_vel(self.cmap_vel_raw)
         if not qgis.utils.iface is None:
-             qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+            qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
 
         # self.propertiesdialog.lineEdit_levelschoosen_2.setText(str(self.lvl_vel))
         self.meshlayer.propertiesdialog.lineEdit_levelschoosen.setText(str(self.lvl_vel))
