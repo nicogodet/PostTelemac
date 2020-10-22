@@ -115,13 +115,10 @@ class SelafinContour2Pts(QtCore.QObject):
         self.parserhydrau = PostTelemacSelafinParser()
         self.parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
 
-        # slf = SELAFIN(os.path.normpath(selafinfilepath))
         slf = self.parserhydrau.hydraufile
-        # self.x, self.y  = self.parserhydrau.getMesh()
         self.x, self.y = self.parserhydrau.getFacesNodes()
         self.x = self.x + translatex
         self.y = self.y + translatey
-        # self.mesh  = np.array( self.parserhydrau.getIkle() )
         self.mesh = np.array(self.parserhydrau.getElemFaces())
 
         self.time = time
@@ -168,7 +165,7 @@ class SelafinContour2Pts(QtCore.QObject):
             self.vitesse = "1"
 
         if self.traitementarriereplan == 0 or self.traitementarriereplan == 2:
-            self.writerw1 = QgsVectorFileWriter(
+            self.writerw1 = QgsVectorFileWriter( ##FIX deprecation warning C:\Users\GODET\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\pointsamplingtool\doPointSamplingTool.py 
                 self.pathshp,
                 None,
                 fields,
