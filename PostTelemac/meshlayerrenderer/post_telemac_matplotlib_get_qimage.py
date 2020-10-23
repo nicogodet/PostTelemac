@@ -391,7 +391,7 @@ class MeshRenderer(AbstractMeshRenderer):
         Return a qimage of the matplotlib figure
         """
         try:
-            buf = StringIO()
+            buf = cStringIO()
             self.fig.canvas.print_figure(buf, dpi=dpi2)
             buf.seek(0)
             image = QtGui.QImage.fromData(buf.getvalue())
