@@ -796,5 +796,5 @@ class SelafinPluginLegend(qgis.core.QgsMapLayerLegend): #C'est la façon de fair
             else:
                 return []
         except Exception as e:
-            self.meshlayer.propertiesdialog.errorMessage("colormanager - generateSymbologyItems : " + str(e))
+            self.meshlayer.propertiesdialog.errorMessage("SelafinPluginLegend : " + str(e))
             return []
