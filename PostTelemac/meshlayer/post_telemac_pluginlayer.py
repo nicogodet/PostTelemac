@@ -334,6 +334,7 @@ class SelafinPluginLayer(qgis.core.QgsPluginLayer):
         ## documentation : https://gis.stackexchange.com/questions/331020/pyqgis-script-crashes-qgis-3-when-remove-a-custom-pluginlayer-which-has-custom-l
         legend = SelafinPluginLegend(self)
         self.setLegend(legend)
+
         
         
 
