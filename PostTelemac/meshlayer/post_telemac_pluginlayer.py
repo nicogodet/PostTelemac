@@ -332,6 +332,7 @@ class SelafinPluginLayer(qgis.core.QgsPluginLayer):
         # legend 
         ## documentation : https://github.com/BRGM/gml_application_schema_toolbox/blob/474df9894000132c757e1f15a2daabbac902e699/gml_application_schema_toolbox/core/load_gmlas_in_qgis.py#L62
         ## documentation : https://gis.stackexchange.com/questions/331020/pyqgis-script-crashes-qgis-3-when-remove-a-custom-pluginlayer-which-has-custom-l
+        ## documentation : https://github.com/Oslandia/meshlayer/blob/master/meshlayer.py
         # legend = SelafinPluginLegend()
         # self.setLegend(legend)
         
