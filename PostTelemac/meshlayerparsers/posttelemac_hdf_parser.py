@@ -24,7 +24,6 @@ import time
 import numpy as np
 from osgeo import gdal
 
-# import gdal_array
 import subprocess
 
 from .posttelemac_abstract_parser import PostTelemacAbstractParser

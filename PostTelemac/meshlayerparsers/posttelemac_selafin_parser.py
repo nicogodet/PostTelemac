@@ -20,24 +20,21 @@ Versions :
 
  ***************************************************************************/
 """
-import numpy as np
 from .posttelemac_abstract_parser import PostTelemacAbstractParser
-
-# from .libs_telemac.parsers.parserSELAFIN import SELAFIN
 from .libtelemac.parserSELAFIN import SELAFIN
+
 import string
+import numpy as np
 
 try:
     import pyfive
 except:
-    print("no pyfive")
-
+    pass
 
 class PostTelemacSelafinParser(PostTelemacAbstractParser):
 
     SOFTWARE = "TELEMAC"
     EXTENSION = ["res", "slf", "geo", "init"]
-    # TOOLS = ['VALUETOOL', 'TEMPORALGRAPHTOOL', 'FLOWTOOL', 'VOLUMETOOL', 'ANIMATIONTOOL', 'COMPARETOOL',  'EXTRACTMACTOOL', 'OPENGLTOOL', 'PROFILETOOL', 'RASTERTOOL', 'TOSHAPETOOL']
 
     def __init__(self, layer1=None):
         super(PostTelemacSelafinParser, self).__init__(layer1)

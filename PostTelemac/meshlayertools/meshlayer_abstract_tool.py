@@ -25,8 +25,10 @@ Versions :
 
 from __future__ import unicode_literals
 
-from qgis.PyQt import uic, QtCore, QtGui
+from qgis.PyQt import uic
+from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QWidget, QTreeWidgetItem
+
 import os
 
 class AbstractMeshLayerTool(QWidget):
@@ -35,7 +37,6 @@ class AbstractMeshLayerTool(QWidget):
 
     def __init__(self, meshlayer, dialog, parent=None):
         super(AbstractMeshLayerTool, self).__init__(parent)
-        # self.setupUi(self)
         self.meshlayer = meshlayer
         self.propertiesdialog = dialog
         self.widgetindex = None
@@ -64,7 +65,7 @@ class AbstractMeshLayerTool(QWidget):
         self.qtreewidgetitem = QTreeWidgetItem()
         self.qtreewidgetitem.setText(0, arb[-1])
         if self.iconpath != None:
-            self.qtreewidgetitem.setIcon(0, QtGui.QIcon(self.iconpath))
+            self.qtreewidgetitem.setIcon(0, QIcon(self.iconpath))
 
         if arb[0] == "Main":
             root = self.propertiesdialog.treeWidget_utils.invisibleRootItem()

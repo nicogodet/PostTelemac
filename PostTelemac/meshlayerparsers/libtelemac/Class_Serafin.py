@@ -7,7 +7,6 @@ from struct import unpack, pack
 import numpy as np
 import copy
 
-# import matplotlib.tri as tri
 import mmap
 
 

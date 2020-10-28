@@ -22,23 +22,23 @@ Versions :
 
  ***************************************************************************/
 """
+from qgis.PyQt.QtCore import (QObject, QMutex, QSize, pyqtSignal)
+from qgis.PyQt.QtGui import QImage
 
-from qgis.PyQt import (
-    QtGui,
-    QtCore,
-    )
+from qgis.core import (QgsPointXY, QgsCoordinateTransform, QgsRenderContext)
+from qgis.utils import iface
+
+from .post_telemac_pluginlayer_colormanager import * 
+
 import numpy as np
-from .post_telemac_pluginlayer_colormanager import *
-import qgis
 import time
 
+class AbstractMeshRenderer(QObject):
 
-class AbstractMeshRenderer(QtCore.QObject):
-
-    __CRSChangeRequested = QtCore.pyqtSignal()
+    __CRSChangeRequested = pyqtSignal()
 
     def __init__(self, meshlayer, integertemp=0, vtx=[[0.0, 0.0, 0.0]], idx=[0]):
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         self.meshlayer = meshlayer
         self.colormanager = PostTelemacColorManager(self.meshlayer, self)
         self.alpha_displayed = 100.0
@@ -60,7 +60,7 @@ class AbstractMeshRenderer(QtCore.QObject):
         self.lvl_contour = []
         self.lvl_vel = []
 
-        self.__imageChangedMutex = QtCore.QMutex()
+        self.__imageChangedMutex = QMutex()
 
         self.sizepx = None
         self.rendererContext = None
@@ -92,13 +92,13 @@ class AbstractMeshRenderer(QtCore.QObject):
         pass
 
     def canvasPaned(self):
-        return (QtGui.QImage(), QtGui.QImage())
+        return (QImage(), QImage())
 
     def canvasChangedWithSameBBox(self):
-        return (QtGui.QImage(), QtGui.QImage())
+        return (QImage(), QImage())
 
     def canvasCreation(self):
-        return (QtGui.QImage(), QtGui.QImage())
+        return (QImage(), QImage())
 
     # *****************************************************************
     # abstractclass functions
@@ -123,14 +123,14 @@ class AbstractMeshRenderer(QtCore.QObject):
             self.meshlayer.propertiesdialog.errorMessage("Abstract get image - changeTriangulationCRS : " + str(e))
 
     def getTransformedCoords(self, xcoords, ycoords, direction=True):
-        coordinatesAsPoints = [qgis.core.QgsPointXY(xcoords[i], ycoords[i]) for i in range(len(xcoords))]
+        coordinatesAsPoints = [QgsPointXY(xcoords[i], ycoords[i]) for i in range(len(xcoords))]
         if direction:
             transformedCoordinatesAsPoints = [
                 self.meshlayer.xform.transform(point) for point in coordinatesAsPoints
             ]
         else:
             transformedCoordinatesAsPoints = [
-                self.meshlayer.xform.transform(point, qgis.core.QgsCoordinateTransform.ReverseTransform)
+                self.meshlayer.xform.transform(point, QgsCoordinateTransform.ReverseTransform)
                 for point in coordinatesAsPoints
             ]
         xcoordsfinal = [point.x() for point in transformedCoordinatesAsPoints]
@@ -138,19 +138,11 @@ class AbstractMeshRenderer(QtCore.QObject):
         return xcoordsfinal, ycoordsfinal
 
     def color_palette_changed_contour(self, colorramp, inverse):
-        # temp = self.colormanager.qgsvectorgradientcolorrampv2ToColumncolor(colorramp)
-        # self.cmap_mpl_contour_raw = self.colormanager.columncolorToCmap(temp)
         self.cmap_contour_raw = self.colormanager.qgsvectorgradientcolorrampv2ToColumncolor(colorramp, inverse)
-
-        # print('colorramp : ' + str(colorramp) + ' \n cmapcontourraw :' +str(self.cmap_contour_raw) )
-
         self.change_cm_contour(self.cmap_contour_raw)
 
     def color_palette_changed_vel(self, colorramp, inverse):
-
-        # temp = self.colormanager.qgsvectorgradientcolorrampv2ToColumncolor(colorramp)
         self.cmap_vel_raw = self.colormanager.qgsvectorgradientcolorrampv2ToColumncolor(colorramp, inverse)
-        # cmap_vel = self.layer.colormanager.qgsvectorgradientcolorrampv2ToCmap(temp1)
         self.change_cm_vel(self.cmap_vel_raw)
 
     def changeAlpha(self, nb):
@@ -164,8 +156,8 @@ class AbstractMeshRenderer(QtCore.QObject):
         """
         self.lvl_contour = tab
         self.change_cm_contour(self.cmap_contour_raw)
-        if not qgis.utils.iface is None:
-            qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        if not iface is None:
+            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
 
         self.meshlayer.propertiesdialog.lineEdit_levelschoosen.setText(str(self.lvl_contour))
         self.meshlayer.triggerRepaint()
@@ -176,20 +168,17 @@ class AbstractMeshRenderer(QtCore.QObject):
         """
         self.lvl_vel = tab
         self.change_cm_vel(self.cmap_vel_raw)
-        if not qgis.utils.iface is None:
-            qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        if not iface is None:
+            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
 
-        # self.propertiesdialog.lineEdit_levelschoosen_2.setText(str(self.lvl_vel))
         self.meshlayer.propertiesdialog.lineEdit_levelschoosen.setText(str(self.lvl_vel))
         self.meshlayer.triggerRepaint()
 
-    # def getMaskMesh4(self,selafin,rendererContext):
     def getCoordsIndexInCanvas(self, meshlayer, rendererContext):
         """
         return a new triangulation based on triangles visbles in the canvas. 
         return index of selafin points correspondind to the new triangulation
         """
-        # mesh = np.array(meshlayer.hydrauparser.getIkle())
         mesh = np.array(meshlayer.hydrauparser.getElemFaces())
 
         recttemp = rendererContext.extent()
@@ -228,8 +217,6 @@ class AbstractMeshRenderer(QtCore.QObject):
         mask = np.in1d(goodikle, oldpoint)
         idx = np.searchsorted(oldpoint, goodikle.ravel()[mask])
         goodikle.ravel()[mask] = newpoints[idx]
-
-        # triangle = matplotlib.tri.Triangulation(xMesh[goodpointindex],yMesh[goodpointindex],np.array(goodikle))
 
         return xMesh[goodpointindex], yMesh[goodpointindex], np.array(goodikle), goodpointindex
 
@@ -272,7 +259,7 @@ class AbstractMeshRenderer(QtCore.QObject):
 
         painter = rendererContext.painter()
         self.__imageChangedMutex.lock()
-        self.rendererContext = qgis.core.QgsRenderContext(rendererContext)
+        self.rendererContext = QgsRenderContext(rendererContext)
         self.rendererContext.setPainter(None)
 
         self.ext = self.rendererContext.extent()
@@ -285,15 +272,13 @@ class AbstractMeshRenderer(QtCore.QObject):
 
         ratio = 1.0
         mupp = float(rendererContext.mapToPixel().mapUnitsPerPixel())
-        self.sizepx = QtCore.QSize(
+        self.sizepx = QSize(
             int(((self.rect[1] - self.rect[0]) / mupp / ratio)), int(((self.rect[3] - self.rect[2]) / mupp / ratio))
         )
 
         self.dpi = rendererContext.painter().device().logicalDpiX()
         self.width = float((self.sizepx.width())) / float(self.dpi)  # widht of canvas in inches
         self.lenght = float((self.sizepx.height())) / float(self.dpi)  # height of canvas in inches
-
-        # self.__img = None
 
         self.__imageChangedMutex.unlock()
 
@@ -362,4 +347,4 @@ class AbstractMeshRenderer(QtCore.QObject):
 
         except Exception as e:
             meshlayer.propertiesdialog.textBrowser_2.append("Get rendered image : " + str(e))
-            return (False, QtGui.QImage(), QtGui.QImage())
+            return (False, QImage(), QImage())

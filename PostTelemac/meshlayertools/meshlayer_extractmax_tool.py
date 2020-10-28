@@ -60,7 +60,6 @@ class ExtractMaxTool(AbstractMeshLayerTool, FORM_CLASS):
     def calculMaxRes(self):
 
         self.initclass = initRunGetMax()
-        # self.initclass.status.connect(self.propertiesdialog.textBrowser_2.append)
         self.initclass.status.connect(self.propertiesdialog.logMessage)
 
         self.initclass.finished1.connect(self.chargerSelafin)
@@ -95,7 +94,6 @@ class runGetMax(QtCore.QObject):
         self.selafinlayer = selafinlayer
         self.tool = tool
         self.name_res = self.selafinlayer.hydraufilepath
-        # self.name_res_out = self.selafinlayer.hydraufilepath.split('.')[0] + '_Max.res'
         self.name_res_out = self.selafinlayer.hydraufilepath.rsplit(".", maxsplit=1)[0] + "_Max.res"
         self.intensite = intensite
         self.direction = direction

@@ -23,79 +23,77 @@ Versions :
  ***************************************************************************/
 """
 
-from qgis.PyQt import QtGui, QtCore
+from qgis.PyQt.QtCore import (QObject, Qt)
+from qgis.PyQt.QtGui import QColor
+
+from qgis.core import (QgsGeometry, QgsWkbTypes, QgsPointXY)
+from qgis.gui import QgsRubberBand
+
 import numpy as np
-import qgis
 
-
-class MeshLayerRubberband(QtCore.QObject):
+class MeshLayerRubberband(QObject):
     def __init__(self, meshlayer):
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         self.meshlayer = meshlayer
 
         self.rubberbandelem = None
         self.rubberbandfacenode = None
         self.rubberbandface = None
 
-        self.pointcolor = QtGui.QColor(QtCore.Qt.red)
-        self.elemcolor = QtGui.QColor(QtCore.Qt.blue)
-        self.facecolor = QtGui.QColor(QtCore.Qt.darkGreen)
+        self.pointcolor = QColor(Qt.red)
+        self.elemcolor = QColor(Qt.blue)
+        self.facecolor = QColor(Qt.darkGreen)
 
     def drawFromNum(self, num, type):
         if type == 0:
             geomtemp = self.meshlayer.hydrauparser.getElemXYFromNumElem(num)[0]
-            elemqgisgeom = qgis.core.QgsGeometry.fromPolygon(
-                [[self.meshlayer.xform.transform(qgis.core.QgsPointXY(coord[0], coord[1])) for coord in geomtemp]]
+            elemqgisgeom = QgsGeometry.fromPolygon(
+                [[self.meshlayer.xform.transform(QgsPointXY(coord[0], coord[1])) for coord in geomtemp]]
             )
             if not self.rubberbandelem:
                 self.createRubberbandElem()
-            self.rubberbandelem.reset(qgis.core.QgsWkbTypes.PolygonGeometry)
+            self.rubberbandelem.reset(QgsWkbTypes.PolygonGeometry)
             self.rubberbandelem.addGeometry(elemqgisgeom, None)
 
         if type == 1:
             x, y = self.meshlayer.hydrauparser.getFaceNodeXYFromNumPoint(num)[0]
-            qgspointfromcanvas = self.meshlayer.xform.transform(qgis.core.QgsPointXY(x, y))
+            qgspointfromcanvas = self.meshlayer.xform.transform(QgsPointXY(x, y))
             if not self.rubberbandfacenode:
                 self.createRubberbandFaceNode()
-            try:
-                self.rubberbandfacenode.reset(qgis.core.QGis.Point)
-            except:
-                self.rubberbandfacenode.reset(qgis.core.QgsWkbTypes.PointGeometry)
-
+            self.rubberbandfacenode.reset(QgsWkbTypes.PointGeometry)
             self.rubberbandfacenode.addPoint(qgspointfromcanvas)
 
         if type == 2:
             geomtemp = self.meshlayer.hydrauparser.getFaceXYFromNumFace(num)[0]
-            faceqgisgeom = qgis.core.QgsGeometry.fromPolyline(
-                [self.meshlayer.xform.transform(qgis.core.QgsPointXY(coord[0], coord[1])) for coord in geomtemp]
+            faceqgisgeom = QgsGeometry.fromPolyline(
+                [self.meshlayer.xform.transform(QgsPointXY(coord[0], coord[1])) for coord in geomtemp]
             )
-
             if not self.rubberbandface:
                 self.createRubberbandFace()
-            self.rubberbandface.reset(qgis.core.QgsWkbTypes.LineGeometry)
+            self.rubberbandface.reset(QgsWkbTypes.LineGeometry)
             self.rubberbandface.addGeometry(faceqgisgeom, None)
 
     def reset(self):
         if self.rubberbandelem != None:
-            self.rubberbandelem.reset(qgis.core.QgsWkbTypes.PolygonGeometry)
+            self.rubberbandelem.reset(QgsWkbTypes.PolygonGeometry)
         if self.rubberbandfacenode != None:
-            self.rubberbandfacenode.reset(qgis.core.QgsWkbTypes.PointGeometry)
+            self.rubberbandfacenode.reset(QgsWkbTypes.PointGeometry)
         if self.rubberbandface != None:
-            self.rubberbandface.reset(qgis.core.QgsWkbTypes.LineGeometry)
+            self.rubberbandface.reset(QgsWkbTypes.LineGeometry)
 
     def createRubberbandFaceNode(self):
-        self.rubberbandfacenode = qgis.gui.QgsRubberBand(self.meshlayer.canvas, qgis.core.QgsWkbTypes.PointGeometry)
+        self.rubberbandfacenode = QgsRubberBand(self.meshlayer.canvas, QgsWkbTypes.PointGeometry)
         self.rubberbandfacenode.setWidth(2)
         self.rubberbandfacenode.setColor(self.pointcolor)
 
     def createRubberbandElem(self):
-        self.rubberbandelem = qgis.gui.QgsRubberBand(self.meshlayer.canvas, qgis.core.QgsWkbTypes.PolygonGeometry)
+        self.rubberbandelem = QgsRubberBand(self.meshlayer.canvas, QgsWkbTypes.PolygonGeometry)
         self.rubberbandelem.setWidth(2)
-        color = QtGui.QColor(self.elemcolor)
+        color = QColor(self.elemcolor)
         color.setAlpha(100)
         self.rubberbandelem.setColor(color)
 
     def createRubberbandFace(self):
-        self.rubberbandface = qgis.gui.QgsRubberBand(self.meshlayer.canvas, qgis.core.QgsWkbTypes.LineGeometry)
+        self.rubberbandface = QgsRubberBand(self.meshlayer.canvas, QgsWkbTypes.LineGeometry)
         self.rubberbandface.setWidth(5)
         self.rubberbandface.setColor(self.facecolor)

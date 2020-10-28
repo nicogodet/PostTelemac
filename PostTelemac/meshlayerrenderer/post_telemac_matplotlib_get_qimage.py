@@ -23,23 +23,24 @@ Versions :
  ***************************************************************************/
 """
 
-import qgis.core
-from qgis.PyQt import QtGui
+from qgis.PyQt.QtGui import QImage
+
+from qgis.utils import iface
+
+from .post_telemac_pluginlayer_colormanager import *
+from .post_telemac_abstract_get_qimage import *
 
 import matplotlib
 import numpy as np
 import gc
 import time
 from time import ctime
-from io import BytesIO as cStringIO
+from io import BytesIO
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import tri
 from matplotlib.backends.backend_agg import FigureCanvasAgg
-
-from .post_telemac_pluginlayer_colormanager import *
-from .post_telemac_abstract_get_qimage import *
 
 DEBUG = False
 PRECISION = 0.01
@@ -51,12 +52,9 @@ class MeshRenderer(AbstractMeshRenderer):
     def __init__(self, meshlayer, int=1):
         AbstractMeshRenderer.__init__(self, meshlayer, int)
         self.fig = plt.figure(int)
-        # self.canvas = FigureCanvasAgg(self.fig)
-        # self.meshlayer = meshlayer
         self.ax = self.fig.add_subplot(111)
         # Reprojected things
         self.triangulation = None  # the reprojected triangulation
-        # self.meshxreprojected, self.meshyreprojected = None, None
         # mpl figures
         self.tricontourf1 = None  # the contour plot
         self.meshplot = None  # the meshplot
@@ -84,8 +82,8 @@ class MeshRenderer(AbstractMeshRenderer):
         self.cmap_mpl_contour, self.norm_mpl_contour, self.cmap_contour_leveled = self.colormanager.changeColorMap(
             cm, self.lvl_contour
         )
-        if qgis.utils.iface is not None:
-            qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        if iface is not None:
+            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
         if isinstance(self.cmap_contour_leveled, np.ndarray):
             colortemp = np.array(self.cmap_contour_leveled)
             for i in range(len(colortemp)):
@@ -104,8 +102,8 @@ class MeshRenderer(AbstractMeshRenderer):
         """
         cm = self.colormanager.arrayStepRGBAToCmap(cm_raw)
         self.cmap_mpl_vel, self.norm_mpl_vel, self.cmap_vel_leveled = self.colormanager.changeColorMap(cm, self.lvl_vel)
-        if qgis.utils.iface is not None:
-            qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        if iface is not None:
+            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
         if isinstance(self.cmap_vel_leveled, np.ndarray):
             colortemp = np.array(self.cmap_vel_leveled.tolist())
             for i in range(len(colortemp)):
@@ -129,7 +127,6 @@ class MeshRenderer(AbstractMeshRenderer):
 
         if DEBUG:
             self.debugtext.append("deplacement")
-
 
         self.ax.set_ylim([self.rect[2], self.rect[3]])
         self.ax.set_xlim([self.rect[0], self.rect[1]])
@@ -169,7 +166,6 @@ class MeshRenderer(AbstractMeshRenderer):
             self.ax.axes.axis("off")
 
         if not self.tritemp:  # create temp triangulation
-            # self.tritemp, self.goodpointindex = self.getMaskMesh4(meshlayer,rendererContext)
             xMeshcanvas, yMeshcanvas, goodiklecanvas, self.goodpointindex = self.getCoordsIndexInCanvas(
                 self.meshlayer, self.rendererContext
             )
@@ -186,9 +182,6 @@ class MeshRenderer(AbstractMeshRenderer):
             norm=self.norm_mpl_contour,
             # alpha = meshlayer.alpha_displayed/100.0,
             nchunk=10
-            # extent = tuple(rect),
-            # mask = self.mask ,
-            # rasterized=True
         )
 
         if DEBUG:
@@ -268,10 +261,7 @@ class MeshRenderer(AbstractMeshRenderer):
             self.lvl_contour,
             cmap=self.cmap_mpl_contour,
             norm=self.norm_mpl_contour,
-            # alpha = meshlayer.alpha_displayed/100.0,
-            # extent = tuple(rect),
             extend="neither"
-            # rasterized=True
         )
 
         if self.meshlayer.showmesh:
@@ -365,10 +355,6 @@ class MeshRenderer(AbstractMeshRenderer):
             taby = np.ravel(mesh[1].tolist())
             if not selafin.triinterp:
                 selafin.initTriinterpolator()
-            """
-            tabvx =  selafin.triinterp[selafin.parametrevx].__call__(tabx,taby)
-            tabvy =  selafin.triinterp[selafin.parametrevy].__call__(tabx,taby)
-            """
             tempx1, tempy1 = self.getTransformedCoords(tabx, taby, False)
             tabvx = selafin.triinterp[selafin.hydrauparser.parametrevx].__call__(tempx1, tempy1)
             tabvy = selafin.triinterp[selafin.hydrauparser.parametrevy].__call__(tempx1, tempy1)
@@ -391,10 +377,10 @@ class MeshRenderer(AbstractMeshRenderer):
         Return a qimage of the matplotlib figure
         """
         try:
-            buf = cStringIO()
+            buf = BytesIO()
             self.fig.canvas.print_figure(buf, dpi=dpi2)
             buf.seek(0)
-            image = QtGui.QImage.fromData(buf.getvalue())
+            image = QImage.fromData(buf.getvalue())
             if ratio > 1.0:
                 image = image.scaled(image.width() * ratio, image.height() * ratio)
             return image
@@ -413,10 +399,7 @@ class MeshRenderer(AbstractMeshRenderer):
             float(recttemp.yMinimum()),
             float(recttemp.yMaximum()),
         ]
-        """
-        tabx, taby = selafin.hydrauparser.getMesh()
-        tabx, taby = self.getTransformedCoords(tabx,taby)
-        """
+
         tabx = self.meshxreprojected
         taby = self.meshyreprojected
 

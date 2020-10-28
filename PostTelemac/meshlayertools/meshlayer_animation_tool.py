@@ -24,8 +24,13 @@ Versions :
 """
 
 
-from qgis.PyQt import uic, QtCore, QtGui
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import (QEvent, QObject, pyqtSignal)
+
+from qgis.core import (QgsProject, QgsLayoutExporter, QgsLayoutItemPicture
+
 from .meshlayer_abstract_tool import *
+
 import qgis
 import time
 import tempfile
@@ -45,15 +50,14 @@ class AnimationTool(AbstractMeshLayerTool, FORM_CLASS):
 
     def __init__(self, meshlayer, dialog):
         AbstractMeshLayerTool.__init__(self, meshlayer, dialog)
-        # self.setupUi(self)
 
     def initTool(self):
         self.setupUi(self)
         self.iconpath = os.path.join(os.path.dirname(__file__), "..", "icons", "tools", "Video_48x48.png")
 
         self.pushButton_film.clicked.connect(self.makeAnimation)
-        qgis.core.QgsProject.instance().layoutManager().layoutAdded.connect(self.reinitcomposeurlist)
-        qgis.core.QgsProject.instance().layoutManager().layoutRemoved.connect(self.reinitcomposeurlist)
+        QgsProject.instance().layoutManager().layoutAdded.connect(self.reinitcomposeurlist)
+        QgsProject.instance().layoutManager().layoutRemoved.connect(self.reinitcomposeurlist)
 
         self.comboBox_compositions.currentIndexChanged.connect(self.reinitcomposeurimages)
         self.comboBox_8.installEventFilter(self)
@@ -102,7 +106,7 @@ class AnimationTool(AbstractMeshLayerTool, FORM_CLASS):
         """
         try:
             self.comboBox_compositions.clear()
-            for composeurview in qgis.core.QgsProject.instance().layoutManager().layouts():
+            for composeurview in QgsProject.instance().layoutManager().layouts():
                 name = composeurview.name()
                 self.comboBox_compositions.addItems([str(name)])
         except Exception as e:
@@ -114,23 +118,17 @@ class AnimationTool(AbstractMeshLayerTool, FORM_CLASS):
         """
         self.comboBox_8.clear()
         name = self.comboBox_compositions.currentText()
-        # print name
         try:
             composition = None
-            for composeurview in qgis.core.QgsProject.instance().layoutManager().layouts():
-                composition = (
-                    qgis.core.QgsProject.instance()
-                    .layoutManager()
-                    .layoutByName(name)
-                )
-
+            for composeurview in QgsProject.instance().layoutManager().layouts():
+                composition = (QgsProject.instance().layoutManager().layoutByName(name))
             self.comboBox_8.addItems([self.tr("no picture")])
 
             if composition != None:
                 images = [
                     item.id()
                     for item in composition.items()
-                    if isinstance(item, qgis._core.QgsLayoutItemPicture) and item.scene()
+                    if isinstance(item, QgsLayoutItemPicture) and item.scene()
                 ]
                 images = [str(image) for image in images]
                 self.comboBox_8.addItems(images)
@@ -144,16 +142,16 @@ class AnimationTool(AbstractMeshLayerTool, FORM_CLASS):
         """
         # Action to update images in composer with movie tool
         try:
-            if target == self.comboBox_8 and event.type() == QtCore.QEvent.MouseButtonPress:
+            if target == self.comboBox_8 and event.type() == QEvent.MouseButtonPress:
                 self.reinitcomposeurimages()
             return False
         except Exception as e:
             return False
 
 
-class PostTelemacAnimation(QtCore.QObject):
+class PostTelemacAnimation(QObject):
     def __init__(self, slf, tool):
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         self.pluginlayer = slf
         self.tempdir = None
         self.fig = None
@@ -173,11 +171,9 @@ class PostTelemacAnimation(QtCore.QObject):
             self.status.emit(txt)
 
         # Cherche le composeur voulu
-        for composeurview in qgis.core.QgsProject.instance().layoutManager().layouts():
+        for composeurview in QgsProject.instance().layoutManager().layouts():
             composition = (
-                qgis.core.QgsProject.instance()
-                .layoutManager()
-                .layoutByName(self.tool.comboBox_compositions.currentText())
+                QgsProject.instance().layoutManager().layoutByName(self.tool.comboBox_compositions.currentText())
             )
 
         # Cree les paths souhaités
@@ -186,7 +182,7 @@ class PostTelemacAnimation(QtCore.QObject):
         nameslf = os.path.basename(self.pluginlayer.hydraufilepath).split(".")[0]
         nameavi = os.path.normpath(os.path.join(dir, nameslf + ".avi"))
 
-        txt = time.ctime() + " - Film - creation du fichier " + str(nameavi)
+        txt = time.ctime() + " - Film - création du fichier " + str(nameavi)
         if self.outputtype:
             self.pluginlayer.propertiesdialog.textBrowser_2.append(txt)
         else:
@@ -207,12 +203,12 @@ class PostTelemacAnimation(QtCore.QObject):
         images = [
             item
             for item in composition.items()
-            if isinstance(item, qgis._core.QgsLayoutItemPicture) and item.scene()
+            if isinstance(item, QgsLayoutItemPicture) and item.scene()
         ]
         legends = [
             item
             for item in composition.items()
-            if isinstance(item, qgis._core.QgsLayoutItemLegend) and item.scene()
+            if isinstance(item, QgsLayoutItemLegend) and item.scene()
         ]
 
         if self.tool.comboBox_8.currentIndex() != 0:
@@ -222,7 +218,7 @@ class PostTelemacAnimation(QtCore.QObject):
                     composeurimage = image
                     rectimage = np.array(
                         [composeurimage.rectWithFrame().width(), composeurimage.rectWithFrame().height()]
-                    )  # size img in mm in composer width
+                    )
             if self.tool.comboBox_9.currentIndex() == 0:
                 for tool in self.pluginlayer.propertiesdialog.tools:
                     if tool.__class__.__name__ == "TemporalGraphTool":
@@ -275,7 +271,7 @@ class PostTelemacAnimation(QtCore.QObject):
                 finlename = "img" + "%04d" % compt + "." + formatcomposer
                 filename1 = os.path.join(self.tempdir, finlename)
 
-                qgsexporter = qgis.core.QgsLayoutExporter(composition)
+                qgsexporter = QgsLayoutExporter(composition)
                 image = qgsexporter.renderPageToImage(0)
                 image.save(filename1)
 
@@ -300,7 +296,6 @@ class PostTelemacAnimation(QtCore.QObject):
             output_file = nameavi
             ffmpeg_res, logfile = self.images_to_video(tmp_img_dir, output_file, fps)
             if ffmpeg_res:
-                # shutil.rmtree(self.tempdir)
                 txt = time.ctime() + " - Film - fichier cree " + str(nameavi)
                 if self.outputtype:
                     self.pluginlayer.propertiesdialog.textBrowser_2.append(txt)
@@ -332,7 +327,12 @@ class PostTelemacAnimation(QtCore.QObject):
         self.finished.emit()
 
     def images_to_video(
-        self, tmp_img_dir="/tmp/vid/%03d.png", output_file="/tmp/vid/test.avi", fps=10, qual=1, ffmpeg_bin="ffmpeg"
+        self, 
+        tmp_img_dir="/tmp/vid/%03d.png", 
+        output_file="/tmp/vid/test.avi", 
+        fps=10, 
+        qual=1, 
+        ffmpeg_bin="ffmpeg"
     ):
 
         if qual == 0:  # lossless
@@ -341,7 +341,6 @@ class PostTelemacAnimation(QtCore.QObject):
             bitrate = 10000 if qual == 1 else 2000
             opts = ["-vcodec", "mpeg4", "-b", str(bitrate) + "K"]
 
-        # if images do not start with 1: -start_number 14
         cmd = [ffmpeg_bin, "-f", "image2", "-framerate", str(fps), "-i", tmp_img_dir]
         cmd += opts
         cmd += ["-r", str(fps), "-f", "avi", "-y", output_file]
@@ -352,11 +351,10 @@ class PostTelemacAnimation(QtCore.QObject):
         res = subprocess.call(cmd, shell=False, stdin=subprocess.PIPE, stdout=f, stderr=f)
 
         if res != 0:
-            # f.delete = False  # keep the file on error
             f.close()
 
         return res == 0, f.name
 
-    status = QtCore.pyqtSignal(str)
-    finished = QtCore.pyqtSignal()
-    printimage = QtCore.pyqtSignal(str, str, int, str)
+    status = pyqtSignal(str)
+    finished = pyqtSignal()
+    printimage = pyqtSignal(str, str, int, str)

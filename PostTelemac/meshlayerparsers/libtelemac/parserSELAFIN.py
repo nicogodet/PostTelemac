@@ -113,7 +113,6 @@ def putFileContent(file, lines):
     SrcF.close()
     return
 
-
 def subsetVariablesSLF(vars, ALLVARS):
     ids = []
     names = []
@@ -133,8 +132,6 @@ def subsetVariablesSLF(vars, ALLVARS):
 
     return ids, names
 
-
-# def getValueHistorySLF( hook,tags,time,support,NVAR,NPOIN3,NPLAN,(varsIndexes,varsName) ):
 def getValueHistorySLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsIndexes, varsName):
     f = hook["hook"]
     endian = hook["endian"]
@@ -216,8 +213,6 @@ def getValuePolylineSLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsInde
 
     return z
 
-
-# def getValuePolyplanSLF(hook,tags,time,support,NVAR,NPOIN3,NPLAN,(varsIndexes,varsName)):
 def getValuePolyplanSLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsIndexes, varsName):
     f = hook["hook"]
     endian = hook["endian"]
@@ -245,7 +240,6 @@ def getValuePolyplanSLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsInde
             f.read(4)
 
     return z
-
 
 def getEndianFromChar(f, nchar):
     pointer = f.tell()
@@ -308,13 +302,11 @@ class CONLIM:
 
         if fileName != "":
             # ~~> Number of boundary points ( tuple() necessary for dtype parsing )
-            # core = [ tuple((' '.join(c.strip().split()[0:13])+' 0 0.0 0.0 0').split()) for c in getFileContent(fileName) ]
             core = [tuple(c.strip().split()[0:13]) for c in getFileContent(fileName)]
             self.NPTFR = len(core)
             self.BOR = np.array(core, DTYPE)
             # ~~> Dictionary of KFRGL
             self.KFRGL = dict(zip(self.BOR["n"] - 1, range(self.NPTFR)))
-
             # ~~> Filtering indices
             self.INDEX = np.array(range(self.NPTFR), dtype=np.int)
 
