@@ -117,7 +117,7 @@ class runGetMax(QtCore.QObject):
         """
 
         ## Creation de la variable au format Serafin
-        if True:
+        try:
             resin = Serafin(name=self.name_res, mode="rb")
             resout = Serafin(name=self.name_res_out, mode="wb")
 
@@ -153,21 +153,17 @@ class runGetMax(QtCore.QObject):
                 resout.nbvar += 1
                 resout.nomvar.append("duree")
 
-            print("resout.nomvar", resout.nomvar)
-
             ## Ecriture de l'entete dans le fichier de sortie
             resout.write_header()
 
             ## Boucle sur tous les temps et récuperation des variables
             itermin = self.tool.spinBox_max_start.value()
             iterfin = self.tool.spinBox_max_end.value()
-            # for num_time, time in enumerate(self.selafinlayer.hydrauparser.getTimes()[itermin:iterfin]):
             for timeslf in self.selafinlayer.hydrauparser.getTimes()[itermin:iterfin]:
                 num_time = np.where(self.selafinlayer.hydrauparser.getTimes() == timeslf)[0][0]
                 if (num_time - itermin) % 10 == 0:
                     self.status.emit(time.ctime() + " - Maximum creation - time " + str(timeslf))
                 if num_time != itermin:
-                    # var = resin.read(time)
                     var = self.selafinlayer.hydrauparser.getValues(num_time)
                     for num_var, val_var in enumerate(var):
                         if (
@@ -178,7 +174,6 @@ class runGetMax(QtCore.QObject):
                                 or num_var == self.selafinlayer.hydrauparser.parametrevy
                             )
                         ):
-                            # if num_var == self.selafinlayer.parametrevx or num_var == self.selafinlayer.parametrevy:
                             pos_max = np.where(np.abs(var[num_var]) > np.abs(var_max[num_var]))[
                                 0
                             ]  ## On recherche tous les indicides du tableau ou les nouvelles valeurs sont supérieurs aux anciennes
@@ -194,9 +189,7 @@ class runGetMax(QtCore.QObject):
                                     var_dur[pos_sub] += timeslf - previoustime
                                     previoustime = timeslf
                                 if self.submersion > -1:
-                                    # possubpreced = np.isnan(var_sub[num_var])
                                     possubpreced = np.where(np.isnan(var_sub))[0]  # on cherche les valeurs encore a nan
-                                    # self.status.emit('test \n' + str(possubpreced) +'\n' + str(pos_sub))
                                     goodnum = np.intersect1d(pos_sub, possubpreced)  # on intersecte les deux
                                     var_sub[goodnum] = timeslf
                             pos_max = np.where(var[num_var] > var_max[num_var])[
@@ -227,7 +220,6 @@ class runGetMax(QtCore.QObject):
                         ][pos_vmax]
 
                 else:  ## Ce else permet de d'initialiser notre variable max avec le premier pas de temps
-                    # var_max = resin.read(time)
                     var_max = self.selafinlayer.hydrauparser.getValues(num_time)
                     if self.submersion > -1 and self.selafinlayer.hydrauparser.parametreh != None:
                         # var_sub = np.array([np.nan]*self.selafinlayer.hydrauparser.pointcount)
@@ -237,7 +229,6 @@ class runGetMax(QtCore.QObject):
                         ]  # la ou h est sup a 0.05 m
                         var_sub[pos_sub] = timeslf
                     if self.duree > -1 and self.selafinlayer.hydrauparser.parametreh != None:
-                        # var_dur = np.array([0.0]*self.selafinlayer.hydrauparser.pointcount)
                         var_dur = np.array([0.0] * self.selafinlayer.hydrauparser.facesnodescount)
                         previoustime = timeslf
                         """
@@ -290,10 +281,9 @@ class runGetMax(QtCore.QObject):
 
             self.finished.emit(self.name_res_out)
 
-            """
-            except Exception, e:
-                self.status.emit('getmax error : ' + str(e))
-            """
+        except Exception as e:
+            self.status.emit('getmax error : ' + str(e))
+
 
     status = QtCore.pyqtSignal(str)
     finished = QtCore.pyqtSignal(str)

@@ -38,11 +38,17 @@ from OpenGL.GL import *
 from OpenGL.GL import shaders
 
 from qgis.PyQt.QtCore import pyqtSignal, QMutex, QThread, Qt, QSize
-from qgis.PyQt.QtGui import QColor, QImage
+from qgis.PyQt.QtGui import (
+    QColor,
+    QImage,
+    QSurfaceFormat,
+    QOpenGLContext,
+    QOffscreenSurface,
+    QOpenGLFramebufferObject,
+    QOpenGLFramebufferObjectFormat,
+)
 from qgis.PyQt.QtWidgets import QApplication
 
-#from PyQt5.QtCore import *
-#from PyQt5.QtGui import *
 from PyQt5.QtOpenGL import QGLFormat, QGLContext
 
 import numpy
@@ -135,7 +141,7 @@ class MeshRenderer(AbstractMeshRenderer):
             self.__idxfacetotalcountidx = np.array(self.__idxfacetotalcountidx)
             self.__idxfacetotalcountlen = np.array([len(elem) for elem in self.__idxfacetotal])
         except Exception as e:
-            print("resetFaceNodeCoord " + str(e))
+            self.meshlayer.propertiesdialog.errorMessage("resetFaceNodeCoord " + str(e))
 
         self.__vtxfacetodraw = self.__vtxfacetotal
         self.__idxfacetodraw = self.__idxfacetotal
@@ -211,7 +217,7 @@ class MeshRenderer(AbstractMeshRenderer):
         except Exception as e:
             iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
         # transparency - alpha changed
-        if self.color_mpl_vel != None:
+        if self.color_mpl_vel.any() != None:
             colortemp = np.array(self.color_mpl_vel.tolist())
             for i in range(len(colortemp)):
                 colortemp[i][3] = min(colortemp[i][3], self.alpha_displayed / 100.0)
@@ -330,7 +336,7 @@ class MeshRenderer(AbstractMeshRenderer):
                 if not self.rendererContext.renderingStopped():
                     return (self.__img, None)
             except Exception as e:
-                print(str(e))
+                self.meshlayer.propertiesdialog.errorMessage("canves creation " + str(e))
 
         else:
             self.__drawInMainThread()
@@ -382,7 +388,7 @@ class MeshRenderer(AbstractMeshRenderer):
             self.__imageChangedMutex.unlock()
 
         except Exception as e:
-            print("draw " + str(e))
+            self.meshlayer.propertiesdialog.errorMessage("draw " + str(e))
 
     # ************************************************************************************
     # *************************************** Secondary func  ******************************
@@ -924,7 +930,7 @@ class MeshRenderer(AbstractMeshRenderer):
                     glDisableClientState(GL_COLOR_ARRAY)
 
                 except Exception as e:
-                    print("face elem rendering " + str(e))
+                    self.meshlayer.propertiesdialog.errorMessage("face elem rendering " + str(e))
 
             elif self.meshlayer.hydrauparser.parametres[self.meshlayer.param_displayed][2] == 1:
                 glEnable(GL_TEXTURE_2D)
@@ -1004,13 +1010,10 @@ class MeshRenderer(AbstractMeshRenderer):
                     glDisableClientState(GL_COLOR_ARRAY)
 
                 except Exception as e:
-                    print("face elem rendering " + str(e))
+                    self.meshlayer.propertiesdialog.errorMessage("face elem rendering " + str(e))
 
             if DEBUGTIME:
                 self.debugtext += ["param done : " + str(round(time.clock() - self.timestart, 3))]
-
-            else:
-                self.doRenderWork(val, imageSize, center, mapUnitsPerPixel, rotation)
 
             img = self.__pixBuf.toImage()
 
@@ -1024,5 +1027,5 @@ class MeshRenderer(AbstractMeshRenderer):
             return img
 
         except Exception as e:
-            print(str(e))
+            self.meshlayer.propertiesdialog.errorMessage(str(e))
             return QImage()
