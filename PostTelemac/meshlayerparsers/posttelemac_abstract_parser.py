@@ -22,12 +22,7 @@ Versions :
 """
 from __future__ import unicode_literals
 
-from ..meshlayertools import utils
-
-from qgis.PyQt import (
-    QtGui, 
-    QtCore,
-    )
+from qgis.PyQt.QtCore import (QObject, pyqtSignal)
 
 from numpy import sin, cos, abs, int
 import numpy as np
@@ -43,7 +38,7 @@ try:
 except:
     SCIPYOK = False
 # force desactivate scipy
-SCIPYOK = False
+# SCIPYOK = False
 
 try:
     import matplotlib.tri
@@ -62,28 +57,24 @@ except:
     NETWORKXOK = False
 
 
-class PostTelemacAbstractParser(QtCore.QObject):
+class PostTelemacAbstractParser(QObject):
 
-    emitMessage = QtCore.pyqtSignal(str)
-    updateinterplator = QtCore.pyqtSignal(int)
+    emitMessage = pyqtSignal(str)
+    updateinterplator = pyqtSignal(int)
 
     def __init__(self, virtualparamtoloadoninit=None):
-        super(QtCore.QObject, self).__init__()
+        super(QObject, self).__init__()
         self.virtualparamtoloadoninit = virtualparamtoloadoninit
         self.path = None
         self.hydraufile = None
-
         self.elemcount = None
         self.facesnodescount = None
         self.facescount = None
         self.itertimecount = None
-
         self.skdtreeelemnode = None
         self.skdtreefacenode = None
-
         self.facesindex = None
         self.elemfacesindex = None
-
         self.triangulation = None
         self.triangulationisvalid = [False, None]
         self.interpolator = None
@@ -233,16 +224,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
         """
         return np.array([])
 
-    # ****************************************************************************************
-    # ****************************************************************************************
-    # ****************************************************************************************
-
-    # ****************************************************************************************
-    # ****************** Inherited functions             *************************************
-    # ****************************************************************************************
-
-    # ****************************************************************************************
-    # ******************  Load functions                *************************************
 
     def extent(self):
         x1, y1 = self.getElemNodes()
@@ -314,19 +295,16 @@ class PostTelemacAbstractParser(QtCore.QObject):
             self.skdtreefacenode = cKDTree(arraymesh, leafsize=100)
 
     def createInterpolator(self):
-
         elemfaces = self.getElemFaces()
 
         # interpolator for triangle mesh
         if len(elemfaces) > 0 and len(elemfaces.shape) > 1 and elemfaces.shape[1] == 3:
-
             meshx, meshy = self.getFacesNodes()
             ikle = self.getElemFaces()
             self.triangulation = Triangulation(meshx, meshy, np.array(ikle))
             bool1, error = self.checkTriangul()
 
             if bool1:
-                # self.trifind = self.triangulation.get_trifinder()
                 self.triangulationisvalid = [True, None]
 
             else:
@@ -342,7 +320,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
 
         d = collections.OrderedDict()
         indexfinal = []
-        # x,y = self.getMesh()
         x, y = self.getFacesNodes()
 
         p = [[x[i], y[i]] for i in range(len(x))]
@@ -373,7 +350,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
         self.updateinterplator.emit(time1)
 
     def updateInterpolator(self, time1):
-
         if self.triangulationisvalid[0]:
             values = self.getValues(time1)
             self.interpolator = [
@@ -388,10 +364,8 @@ class PostTelemacAbstractParser(QtCore.QObject):
         Called load_selafin by when changing selafin file
         Set selafin variables
         """
-        # self.initTriangul()
         self.parametres = []
-        # load  parametres in self.parametres
-        # for i,name in enumerate(self.getVarnames()):
+        
         elemparcount = 0
         facenodeparcount = 0
         faceparcount = 0
@@ -407,9 +381,8 @@ class PostTelemacAbstractParser(QtCore.QObject):
                 faceparcount += 1
 
         if self.virtualparamtoloadoninit != None:
-            if (
-                len(self.virtualparamtoloadoninit["virtual_parameters"]) > 0
-            ):  # case of virtual parameters when loadin a selafin layer
+            # case of virtual parameters when loadin a selafin layer
+            if (len(self.virtualparamtoloadoninit["virtual_parameters"]) > 0):
                 for param in self.virtualparamtoloadoninit["virtual_parameters"]:
                     self.parametres.append([len(self.parametres), param[1], param[2], None, param[3], None])
 
@@ -425,16 +398,13 @@ class PostTelemacAbstractParser(QtCore.QObject):
         Called load_selafin by when changing selafin file
         Set selafin variables
         """
-        # self.initTriangul()
         self.parametres = []
-        # load  parametres in self.parametres
         for i, name in enumerate(self.getVarnames()):
             self.parametres.append([i, name.strip(), None, i])
 
         if self.virtualparamtoloadoninit != None:
-            if (
-                len(self.virtualparamtoloadoninit["virtual_parameters"]) > 0
-            ):  # case of virtual parameters when loadin a selafin layer
+            # case of virtual parameters when loadin a selafin layer
+            if (len(self.virtualparamtoloadoninit["virtual_parameters"]) > 0):
                 for param in self.virtualparamtoloadoninit["virtual_parameters"]:
                     self.parametres.append([len(self.parametres), param[1], param[2], len(self.parametres)])
             if self.virtualparamtoloadoninit["xtranslation"] != 0 or self.virtualparamtoloadoninit["ytranslation"] != 0:
@@ -550,7 +520,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
         """
         values = self.getRawValues(time)
 
-        # print str(self.parametres)
         for param in self.parametres:
             if param[2]:  # for virtual parameter - compute it
                 self.dico = self.getDico(param[2], self.parametres, values, "values")
@@ -571,11 +540,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
                     tempordonees = eval(layerparametres[param][4], {}, dico)
                     result.append(tempordonees[0])
                 else:
-                    if False:
-                        # tempordonees = self.hydraufile.getSERIES(arraynumpoint,[param],False)
-                        tempordonees = self.getRawTimeSerie(arraynumpoint, [param], False)
-                        result.append(tempordonees[0])
-
                     if self.parametres[param][2] == 0:  # elem value
                         if DEBUG:
                             print("getTimeSerie getElemRawTimeSerie  " + str(arraynumpoint))
@@ -596,7 +560,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
 
         except Exception as e:
             self.emitMessage.emit("Abstractparser - getTimeSerie : " + str(e))
-            # print 'getserie ' + str(e)
         return np.array(result)
 
     def getDico(self, expr, parametres, enumpointorvalues, type):
@@ -608,9 +571,7 @@ class PostTelemacAbstractParser(QtCore.QObject):
             dico["int"] = int
             dico["if_then_else"] = self.if_then_else
             a = "V{}"
-            # nb_var = len(values)
             nb_var = len(self.getElemRawValue(0)) + len(self.getFacesNodesRawValues(0))
-            # nb_var  = len(enumpointorvalues)
             i = 0
             num_var = 0
             while num_var < nb_var:
@@ -619,27 +580,14 @@ class PostTelemacAbstractParser(QtCore.QObject):
                     if type == "values":
                         dico[a.format(i)] = enumpointorvalues[i]
                     elif type == "timeseries":
-                        if False:
-                            dico[a.format(i)] = self.getRawTimeSerie(enumpointorvalues, [i])
-                        if True:
-                            if parametres[i][2] == 0:  # elem value
-                                # if DEBUG : print 'getTimeSerie getElemRawTimeSerie'
-                                # tempordonees = self.getElemRawTimeSerie(arraynumpoint,[self.parametres[param][3]],False)
-                                # tempordonees = self.getElemRawTimeSerie(arraynumpoint,[parametres[i][3]],False)
-                                # result.append(tempordonees[0])
-                                dico[a.format(i)] = self.getElemRawTimeSerie(enumpointorvalues, [parametres[i][3]])
-                            elif parametres[i][2] == 1:  # face node value
-                                # if DEBUG : print 'getTimeSerie getFacesNodesRawTimeSeries'
-                                # tempordonees = self.getFacesNodesRawTimeSeries(arraynumpoint,[parametres[i][3]],False)
-                                # result.append(tempordonees[0])
-                                dico[a.format(i)] = self.getFacesNodesRawTimeSeries(
-                                    enumpointorvalues, [parametres[i][3]]
-                                )
-                            elif parametres[i][2] == 2:  # face  value
-                                # if DEBUG : print 'getTimeSerie getFacesRawTimeSeries'
-                                # tempordonees = self.getFacesRawTimeSeries(arraynumpoint,[parametres[i][3],False)
-                                # result.append(tempordonees[0])
-                                dico[a.format(i)] = self.getFacesRawTimeSeries(enumpointorvalues, [parametres[i][3]])
+                        if parametres[i][2] == 0:  # elem value
+                            dico[a.format(i)] = self.getElemRawTimeSerie(enumpointorvalues, [parametres[i][3]])
+                        elif parametres[i][2] == 1:  # face node value
+                            dico[a.format(i)] = self.getFacesNodesRawTimeSeries(
+                                enumpointorvalues, [parametres[i][3]]
+                            )
+                        elif parametres[i][2] == 2:  # face  value
+                            dico[a.format(i)] = self.getFacesRawTimeSeries(enumpointorvalues, [parametres[i][3]])
 
                 num_var += 1
                 i += 1
@@ -656,7 +604,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
             dico["int"] = int
             dico["if_then_else"] = self.if_then_else
             a = "V{}"
-            # nb_var = len(values)
             nb_var = len(self.getRawValues(0))
             i = 0
             num_var = 0
@@ -724,7 +671,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
         result = []
         for numelem in arraynumelem:
             result.append([(meshx[i], meshy[i]) for i in arrayelem[numelem]])
-
         return result
 
     def getNearestFaceNode(self, x, y):
@@ -760,7 +706,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
         meshx, meshy = self.getFacesNodes()
         # nearestfacenodenum = self.skdtreefacenode.query(point1,k=1)[1][0]
         nearestfacenodenum = self.getNearestFaceNode(x, y)
-        # print self.getElemFaces().shape
         if len(self.getElemFaces().shape) == 1:
             faces = []
             elemfaces = self.getElemFaces()
@@ -770,29 +715,15 @@ class PostTelemacAbstractParser(QtCore.QObject):
                     faces.append(i)
         else:
             faces = np.where(np.array(self.getElemFaces()) == nearestfacenodenum)[0]
-
-        if sys.version_info.major == 2:
-            qgspoint = qgis.core.QgsGeometry.fromPoint(qgis.core.QgsPoint(x, y))
-        elif sys.version_info.major == 3:
-            qgspoint = qgis.core.QgsGeometry.fromPointXY(qgis.core.QgsPointXY(x, y))
+        qgspoint = qgis.core.QgsGeometry.fromPointXY(qgis.core.QgsPointXY(x, y))
 
         for face in faces:
-            if sys.version_info.major == 2:
-                geom = qgis.core.QgsGeometry.fromPolygon(
-                    [[qgis.core.QgsPoint(meshx[facenode], meshy[facenode]) for facenode in self.getElemFaces()[face]]]
-                )
-            elif sys.version_info.major == 3:
-                geom = qgis.core.QgsGeometry.fromPolygonXY(
-                    [[qgis.core.QgsPointXY(meshx[facenode], meshy[facenode]) for facenode in self.getElemFaces()[face]]]
-                )
-            # print qgspoint.asPoint()
-            # print geom.asPolygon()
-
+            geom = qgis.core.QgsGeometry.fromPolygonXY(
+                [[qgis.core.QgsPointXY(meshx[facenode], meshy[facenode]) for facenode in self.getElemFaces()[face]]]
+            )
             if qgspoint.intersects(geom):
                 numfinal = face
-                # print 'numfinal ' + str(numfinal)
                 return numfinal
-        # print '0'
         return 0
 
     def getNearestFace(self, x, y):
@@ -812,23 +743,13 @@ class PostTelemacAbstractParser(QtCore.QObject):
         # print self.getElemFaces().shape
         faces = np.where(np.array(self.getFaces()) == nearestfacenodenum)[0]
 
-        if sys.version_info.major == 2:
-            qgspoint = qgis.core.QgsGeometry.fromPoint(qgis.core.QgsPoint(x, y))
-        elif sys.version_info.major == 3:
-            qgspoint = qgis.core.QgsGeometry.fromPointXY(qgis.core.QgsPointXY(x, y))
+        qgspoint = qgis.core.QgsGeometry.fromPointXY(qgis.core.QgsPointXY(x, y))
 
         mindist = None
         for face in faces:
-            if sys.version_info.major == 2:
-                geom = qgis.core.QgsGeometry.fromPolyline(
-                    [qgis.core.QgsPoint(meshx[facenode], meshy[facenode]) for facenode in self.getFaces()[face]]
-                )
-            elif sys.version_info.major == 3:
-                geom = qgis.core.QgsGeometry.fromPolylineXY(
-                    [qgis.core.QgsPointXY(meshx[facenode], meshy[facenode]) for facenode in self.getFaces()[face]]
-                )
-            # print qgspoint.asPoint()
-            # print geom.asPolygon()
+            geom = qgis.core.QgsGeometry.fromPolylineXY(
+                [qgis.core.QgsPointXY(meshx[facenode], meshy[facenode]) for facenode in self.getFaces()[face]]
+            )
             # distance
             if mindist == None:
                 mindist = geom.distance(qgspoint)
@@ -880,7 +801,6 @@ class PostTelemacAbstractParser(QtCore.QObject):
     def createNetworkxGraph(self):
         if NETWORKXOK:
             G = nx.Graph()
-            # G.add_edges_from([(edge[0],edge[1]) for edge in self.triangulation.edges])
             G.add_edges_from([(edge[0], edge[1]) for edge in self.getFaces()])
             self.networkxgraph = G
             return True
@@ -896,43 +816,24 @@ class PostTelemacAbstractParser(QtCore.QObject):
     def getBoundary(self):
         elems = self.getElemFaces()
         meshx, meshy = self.getFacesNodes()
-        # compt = 0
         geoms = []
         for elem in elems:
             if len(elem) > 2:
                 geoms.append([qgis.core.QgsPoint(meshx[facenode], meshy[facenode]) for facenode in elem])
 
         finalgeom = qgis.core.QgsGeometry.fromPolygon(geoms)
-        # finalgeom.convertToSingleType()
-
-        if False:
-            if len(elem) > 2:
-                if compt == 0:
-                    finalgeom = qgis.core.QgsGeometry.fromPolygon(
-                        [[qgis.core.QgsPoint(meshx[facenode], meshy[facenode]) for facenode in elem]]
-                    )
-                else:
-                    elemgeom = qgis.core.QgsGeometry.fromPolygon(
-                        [[qgis.core.QgsPoint(meshx[facenode], meshy[facenode]) for facenode in elem]]
-                    )
-                    finalgeom = finalgeom.combine(elemgeom)
-                compt += 1
-
         return finalgeom
 
     def getParameterName(self, param):
         trouve = False
         f = open(os.path.join(os.path.dirname(__file__), "..", "config", "parametres.txt"), "r")
-        # f = open(os.path.join(self.selafinlayer.propertiesdialog.posttelemacdir,'parametres.txt'), 'r')
         for line in f:
-            # print str(param) + ' ' + str(line.split("=")[0])
             if param == line.split("=")[0]:
                 tabtemp = []
                 for txt in line.split("=")[1].split("\n")[0].split(";"):
                     tabtemp.append(str(txt))
 
                 for paramtemp in self.parametres:
-                    # print str(paramtemp[1]) + ' ' +str(tabtemp)
                     if paramtemp[1] in tabtemp:
                         trouve = True
                         f.close()
