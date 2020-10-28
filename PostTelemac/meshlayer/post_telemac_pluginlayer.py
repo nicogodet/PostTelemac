@@ -21,12 +21,15 @@
 from __future__ import unicode_literals
 
 # Standard import
-import qgis.core
+import qgis.core #QgsPluginLayer, QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject, QgsRectangle, QgsMapLayerLegend, QgsLayerTreeModelLegendNode
 import qgis.gui
-import qgis.utils
+import qgis.utils #iface
 
 # Qt
-from qgis.PyQt import QtCore, QtGui
+from qgis.PyQt import (
+    QtCore, #pyqtSignal, QSettings, QtCore
+    QtGui #QPixmap
+    )
 from qgis.PyQt.QtWidgets import QApplication
 
 # other import
@@ -332,11 +335,9 @@ class SelafinPluginLayer(qgis.core.QgsPluginLayer):
         # legend 
         ## documentation : https://github.com/BRGM/gml_application_schema_toolbox/blob/474df9894000132c757e1f15a2daabbac902e699/gml_application_schema_toolbox/core/load_gmlas_in_qgis.py#L62
         ## documentation : https://gis.stackexchange.com/questions/331020/pyqgis-script-crashes-qgis-3-when-remove-a-custom-pluginlayer-which-has-custom-l
-        legend = SelafinPluginLegend(self)
-        self.setLegend(legend)
-
-        
-        
+        ## documentation : https://gist.github.com/wonder-sk/c5d925833bcd54b9e401
+        # legend = SelafinPluginLegend(self)
+        # self.setLegend(legend)
 
         if qgis.utils.iface is not None: #toujours utile ?
             qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.id())
@@ -748,53 +749,53 @@ class SelafinPluginLayer(qgis.core.QgsPluginLayer):
         pass
         
 
-class SelafinPluginLegend(qgis.core.QgsMapLayerLegend): #C'est la façon de faire
-    def __init__(self, meshlayer, parent=None):
-        qgis.core.QgsMapLayerLegend.__init__(self, parent)
-        self.nodes = []
-        self.meshlayer = meshlayer
+# class SelafinPluginLegend(qgis.core.QgsMapLayerLegend): #C'est la façon de faire
+    # def __init__(self, meshlayer, parent=None):
+        # qgis.core.QgsMapLayerLegend.__init__(self, parent)
+        # self.nodes = []
+        # self.meshlayer = meshlayer
         
-    def createLayerTreeModelLegendNodes(self, nodeLayer):
-        # return [QgsSimpleLegendNode(nodeLayer, self.text, self.icon, self)]
-#    def generateSymbologyItems(self, iconSize): #NEED FIX API BREAK
-        try:
-            if (
-                self.meshlayer.hydrauparser != None
-                and self.meshlayer.hydrauparser.hydraufile != None
-                and self.meshlayer.meshrenderer.cmap_contour_leveled != None
-            ):
-                self.nodes.append(qgis.core.QgsLayerTreeModelLegendNode(nodeLayer))
-                for i in range(len(self.meshlayer.meshrenderer.lvl_contour) - 1):
-                    pix = QtGui.QPixmap()
-                    text = str(self.meshlayer.meshrenderer.lvl_contour[i]) + "/" + str(self.meshlayer.meshrenderer.lvl_contour[i + 1])
-                    r, g, b, a = (
-                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][0] * 255,
-                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][1] * 255,
-                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][2] * 255,
-                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][3] * 255,
-                    )
-                    pix.fill(QtGui.QColor(r, g, b, a))
-                    #node = qgis.core.QgsRasterSymbolLegendNode(nodeLayer, QtGui.QColor(r, g, b, a), text)
-                    node = qgis.core.QgsSimpleLegendNode(nodeLayer, text, QtGui.QIcon(pix))
-                    self.nodes.append(node)
+    # def createLayerTreeModelLegendNodes(self, nodeLayer):
+        # # return [QgsSimpleLegendNode(nodeLayer, self.text, self.icon, self)]
+# #    def generateSymbologyItems(self, iconSize): #NEED FIX API BREAK
+        # try:
+            # if (
+                # self.meshlayer.hydrauparser != None
+                # and self.meshlayer.hydrauparser.hydraufile != None
+                # and self.meshlayer.meshrenderer.cmap_contour_leveled != None
+            # ):
+                # self.nodes.append(qgis.core.QgsLayerTreeModelLegendNode(nodeLayer))
+                # for i in range(len(self.meshlayer.meshrenderer.lvl_contour) - 1):
+                    # pix = QtGui.QPixmap()
+                    # text = str(self.meshlayer.meshrenderer.lvl_contour[i]) + "/" + str(self.meshlayer.meshrenderer.lvl_contour[i + 1])
+                    # r, g, b, a = (
+                        # self.meshlayer.meshrenderer.cmap_contour_leveled[i][0] * 255,
+                        # self.meshlayer.meshrenderer.cmap_contour_leveled[i][1] * 255,
+                        # self.meshlayer.meshrenderer.cmap_contour_leveled[i][2] * 255,
+                        # self.meshlayer.meshrenderer.cmap_contour_leveled[i][3] * 255,
+                    # )
+                    # pix.fill(QtGui.QColor(r, g, b, a))
+                    # #node = qgis.core.QgsRasterSymbolLegendNode(nodeLayer, QtGui.QColor(r, g, b, a), text)
+                    # node = qgis.core.QgsSimpleLegendNode(nodeLayer, text, QtGui.QIcon(pix))
+                    # self.nodes.append(node)
 
-                # if self.meshlayer.propertiesdialog.groupBox_schowvel.isChecked() :
-                    # lst.append((self.tr("VELOCITY"), QtGui.QPixmap()))
-                    # for i in range(len(self.meshrenderer.lvl_vel) - 1):
-                        # pix = QtGui.QPixmap(iconSize)
-                        # r, g, b, a = (
-                            # self.meshlayer.meshrenderer.cmap_vel_leveled[i][0] * 255,
-                            # self.meshlayer.meshrenderer.cmap_vel_leveled[i][1] * 255,
-                            # self.meshlayer.meshrenderer.cmap_vel_leveled[i][2] * 255,
-                            # self.meshlayer.meshrenderer.cmap_vel_leveled[i][3] * 255,
-                        # )
-                        # pix.fill(QtGui.QColor(r, g, b, a))
-                        # lst.append(
-                            # (str(self.meshrenderer.lvl_vel[i]) + "/" + str(self.meshrenderer.lvl_vel[i + 1]), pix)
-                        # )
-                return self.nodes
-            else:
-                return []
-        except Exception as e:
-            self.meshlayer.propertiesdialog.errorMessage("SelafinPluginLegend : " + str(e))
-            return []
+                # # if self.meshlayer.propertiesdialog.groupBox_schowvel.isChecked() :
+                    # # lst.append((self.tr("VELOCITY"), QtGui.QPixmap()))
+                    # # for i in range(len(self.meshrenderer.lvl_vel) - 1):
+                        # # pix = QtGui.QPixmap(iconSize)
+                        # # r, g, b, a = (
+                            # # self.meshlayer.meshrenderer.cmap_vel_leveled[i][0] * 255,
+                            # # self.meshlayer.meshrenderer.cmap_vel_leveled[i][1] * 255,
+                            # # self.meshlayer.meshrenderer.cmap_vel_leveled[i][2] * 255,
+                            # # self.meshlayer.meshrenderer.cmap_vel_leveled[i][3] * 255,
+                        # # )
+                        # # pix.fill(QtGui.QColor(r, g, b, a))
+                        # # lst.append(
+                            # # (str(self.meshrenderer.lvl_vel[i]) + "/" + str(self.meshrenderer.lvl_vel[i + 1]), pix)
+                        # # )
+                # return self.nodes
+            # else:
+                # return []
+        # except Exception as e:
+            # self.meshlayer.propertiesdialog.errorMessage("SelafinPluginLegend : " + str(e))
+            # return []
