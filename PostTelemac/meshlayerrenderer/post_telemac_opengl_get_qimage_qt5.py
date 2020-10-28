@@ -37,12 +37,12 @@ import time
 from OpenGL.GL import *
 from OpenGL.GL import shaders
 
-from qgis.PyQt.QtCore import pyqtSignal, QMutex, QThread, Qt
-from qgis.PyQt.QtGui import QSize, QColor, QImage
+from qgis.PyQt.QtCore import pyqtSignal, QMutex, QThread, Qt, QSize
+from qgis.PyQt.QtGui import QColor, QImage
 from qgis.PyQt.QtWidgets import QApplication
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+#from PyQt5.QtCore import *
+#from PyQt5.QtGui import *
 from PyQt5.QtOpenGL import QGLFormat, QGLContext
 
 import numpy
@@ -132,7 +132,6 @@ class MeshRenderer(AbstractMeshRenderer):
 
             for elem in self.__idxfacetotal:
                 self.__idxfacetotalcountidx.append((self.__idxfacetotalcountidx[-1]) + len(elem))
-                # self.__idxfacetotalcountlen.append(len(elem))
             self.__idxfacetotalcountidx = np.array(self.__idxfacetotalcountidx)
             self.__idxfacetotalcountlen = np.array([len(elem) for elem in self.__idxfacetotal])
         except Exception as e:
@@ -208,9 +207,9 @@ class MeshRenderer(AbstractMeshRenderer):
         cm = self.colormanager.arrayStepRGBAToCmap(cm_raw)
         self.cmap_mpl_vel, self.norm_mpl_vel, self.color_mpl_vel = self.colormanager.changeColorMap(cm, self.lvl_vel)
         try:
-            qgis.utils.iface.legendInterface().refreshLayerSymbology(self.meshlayer)
+            iface.legendInterface().refreshLayerSymbology(self.meshlayer)
         except Exception as e:
-            qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
         # transparency - alpha changed
         if self.color_mpl_vel != None:
             colortemp = np.array(self.color_mpl_vel.tolist())
