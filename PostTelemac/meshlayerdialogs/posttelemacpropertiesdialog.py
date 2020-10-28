@@ -26,7 +26,7 @@ from __future__ import unicode_literals
 # import Qt
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import Qt, QCoreApplication, QSettings, QSize, pyqtSignal
-from qgis.PyQt.QtGui import QHeaderView, QColor, QFont, QIcon
+from qgis.PyQt.QtGui import QColor, QFont, QIcon
 from qgis.PyQt.QtWidgets import (
     QDockWidget,
     QFileDialog,
@@ -34,7 +34,15 @@ from qgis.PyQt.QtWidgets import (
     QTableWidgetItem,
     QApplication,
     QMessageBox,
+    QHeaderView,
 )
+
+from qgis.core import (
+    QgsCoordinateReferenceSystem,
+    QgsStyle,
+    QgsSymbolLayerUtils,
+)
+from qgis.gui import QgsProjectionSelectionDialog
 
 # other import
 import os
@@ -46,7 +54,6 @@ from .posttelemac_dialog_combobox import postTelemacComboboxDialog
 from .posttelemacvirtualparameterdialog import *
 from .posttelemacusercolorrampdialog import *
 from .posttelemac_xytranslation import *
-from ..meshlayertools import utils
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "..", "ui", "properties.ui"))
@@ -77,7 +84,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         self.lastscolorparams = None  # used to save the color ramp state
         self.canvas = self.meshlayer.canvas
         self.maptooloriginal = self.canvas.mapTool()  # Initial map tool (ie mouse behaviour)
-        self.crsselector = qgis.gui.QgsProjectionSelectionDialog()
+        self.crsselector = QgsProjectionSelectionDialog()
         self.playstep = None
         self.playactive = False
 
@@ -405,7 +412,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             self.label_selafin_crs.setText(crs)
         else:
             source.setText(crs)
-        self.meshlayer.setRealCrs(qgis.core.QgsCoordinateReferenceSystem(crs))
+        self.meshlayer.setRealCrs(QgsCoordinateReferenceSystem(crs))
 
     def translateCrs(self):
         if self.meshlayer.hydrauparser is not None:
@@ -770,7 +777,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """
         change color map of selafin layer (matplotlib's style) when color palette combobox is changed
         """
-        temp1 = qgis.core.QgsStyle.defaultStyle().colorRamp(self.comboBox_clrgame.currentText())
+        temp1 = QgsStyle.defaultStyle().colorRamp(self.comboBox_clrgame.currentText())
 
         inverse = self.checkBox_inverse_clr.isChecked()
         if self.meshlayer.meshrenderer != None:
@@ -984,11 +991,11 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """
         Populate colorpalette combobox on dialog creation
         """
-        style = qgis.core.QgsStyle.defaultStyle()
+        style = QgsStyle.defaultStyle()
         rampIconSize = QSize(50, 20)
         for rampName in style.colorRampNames():
             ramp = style.colorRamp(rampName)
-            icon = qgis.core.QgsSymbolLayerUtils.colorRampPreviewIcon(ramp, rampIconSize)
+            icon = QgsSymbolLayerUtils.colorRampPreviewIcon(ramp, rampIconSize)
             self.comboBox_clrgame.addItem(icon, rampName)
             self.comboBox_clrgame2.addItem(icon, rampName)
 

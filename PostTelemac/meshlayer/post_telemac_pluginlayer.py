@@ -33,7 +33,7 @@ from qgis.core import (
 from qgis.utils import iface
 
 # Qt
-from qgis.PyQt.QtCore import pyqtSignal, QSettings, QString
+from qgis.PyQt.QtCore import pyqtSignal, QSettings
 
 # from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtWidgets import QApplication
