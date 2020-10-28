@@ -24,11 +24,9 @@ Versions :
 from __future__ import unicode_literals
 
 # import Qt
-from qgis.PyQt import (
-    uic,
-    QtCore,
-    )
-
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import (Qt, QCoreApplication, QSettings, QSize, pyqtSignal)
+from qgis.PyQt.QtGui import (QHeaderView, QColor, QFont, QIcon)
 from qgis.PyQt.QtWidgets import (
     QDockWidget,
     QFileDialog,
@@ -56,8 +54,8 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "..", "ui
 
 class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
 
-    updateparamsignal = QtCore.pyqtSignal()
-    meshlayerschangedsignal = QtCore.pyqtSignal()
+    updateparamsignal = pyqtSignal()
+    meshlayerschangedsignal = pyqtSignal()
 
     def __init__(self, layer1, parent=None):
         """
@@ -84,8 +82,8 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         self.playactive = False
 
         # the directory of "load telemac" button
-        if QtCore.QSettings().value("posttelemac/lastdirectory") != "":
-            self.loaddirectory = QtCore.QSettings().value("posttelemac/lastdirectory")
+        if QSettings().value("posttelemac/lastdirectory") != "":
+            self.loaddirectory = QSettings().value("posttelemac/lastdirectory")
         else:
             self.loaddirectory = None
 
@@ -116,9 +114,9 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         # parameters
         self.treeWidget_parameters.itemSelectionChanged.connect(self.change_param)
         try:
-            self.treeWidget_parameters.header().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+            self.treeWidget_parameters.header().setResizeMode(QHeaderView.ResizeToContents)
             self.treeWidget_parameters.setColumnWidth(0, 40)
-            self.treeWidget_parameters.header().setResizeMode(0, QtGui.QHeaderView.Fixed)
+            self.treeWidget_parameters.header().setResizeMode(0, QHeaderView.Fixed)
         except:
             self.treeWidget_parameters.setColumnWidth(0, 40)
         # virtual parameter
@@ -158,8 +156,8 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
 
         # rednertype
         allitems = [self.comboBox_rendertype.itemText(i) for i in range(self.comboBox_rendertype.count())]
-        if QtCore.QSettings().value("posttelemac/renderlib") is not None:
-            self.comboBox_rendertype.setCurrentIndex(allitems.index(QtCore.QSettings().value("posttelemac/renderlib")))
+        if QSettings().value("posttelemac/renderlib") is not None:
+            self.comboBox_rendertype.setCurrentIndex(allitems.index(QSettings().value("posttelemac/renderlib")))
         self.comboBox_rendertype.currentIndexChanged.connect(self.changeMeshLayerRenderer)
 
         # ********* ********** ******************************************
@@ -184,7 +182,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             self.label_loadslf.setText(os.path.basename(self.meshlayer.hydraufilepath).split(".")[0])
 
             self.loaddirectory = os.path.dirname(self.meshlayer.hydraufilepath)
-            QtCore.QSettings().setValue("posttelemac/lastdirectory", self.loaddirectory)
+            QSettings().setValue("posttelemac/lastdirectory", self.loaddirectory)
             # param
             self.populatecombobox_param()
             if paramtemp:
@@ -223,7 +221,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
                 self.lineEdit_levelstep.setText(self.meshlayer.parametrestoload["renderer"][2][1][2])
                 # user
                 index = self.comboBox_clrramp_preset.findText(
-                    self.meshlayer.parametrestoload["renderer"][3], QtCore.Qt.MatchFixedString
+                    self.meshlayer.parametrestoload["renderer"][3], Qt.MatchFixedString
                 )
                 if index > 0:
                     self.comboBox_clrramp_preset.setCurrentIndex(index)
@@ -325,11 +323,11 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """
         Show message str in main textbrowser
         """
-        self.textBrowser_main.setTextColor(QtGui.QColor("red"))
-        self.textBrowser_main.setFontWeight(QtGui.QFont.Bold)
+        self.textBrowser_main.setTextColor(QColor("red"))
+        self.textBrowser_main.setFontWeight(QFont.Bold)
         self.textBrowser_main.append(time.ctime() + " - " + message)
-        self.textBrowser_main.setTextColor(QtGui.QColor("black"))
-        self.textBrowser_main.setFontWeight(QtGui.QFont.Normal)
+        self.textBrowser_main.setTextColor(QColor("black"))
+        self.textBrowser_main.setFontWeight(QFont.Normal)
         self.textBrowser_main.verticalScrollBar().setValue(self.textBrowser_main.verticalScrollBar().maximum())
 
         if self.debugtoprint:
@@ -340,8 +338,8 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         Show message error str in main textbrowser
         """
         self.textBrowser_main.append(time.ctime() + " - " + message)
-        self.textBrowser_main.setTextColor(QtGui.QColor("black"))
-        self.textBrowser_main.setFontWeight(QtGui.QFont.Normal)
+        self.textBrowser_main.setTextColor(QColor("black"))
+        self.textBrowser_main.setFontWeight(QFont.Normal)
         self.textBrowser_main.verticalScrollBar().setValue(self.textBrowser_main.verticalScrollBar().maximum())
 
         if self.debugtoprint:
@@ -352,13 +350,6 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         Show message error str in main textbrowser
         """
         self.textBrowser_2.append(message)
-        """
-        self.textBrowser_main.append(time.ctime() + ' - '+ message)
-        self.textBrowser_main.setTextColor(QtGui.QColor("black"))
-        self.textBrowser_main.setFontWeight(QtGui.QFont.Normal)
-        self.textBrowser_main.verticalScrollBar().setValue(self.textBrowser_main.verticalScrollBar().maximum())
-        """
-
         if self.debugtoprint:
             print("log message : ", message)
 
@@ -387,7 +378,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
                 software = extension.split(" ")[0]
             timestart = time.perf_counter()
             self.loaddirectory = os.path.dirname(tempname)
-            QtCore.QSettings().setValue("posttelemac/lastdirectory", self.loaddirectory)
+            QSettings().setValue("posttelemac/lastdirectory", self.loaddirectory)
             self.meshlayer.clearParameters()
             success = self.meshlayer.load_selafin(tempname, software)
             if success:
@@ -489,8 +480,8 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
 
     def readHydrauFile(self):
         """Action when play clicked"""
-        iconplay = QtGui.QIcon(":/plugins/PostTelemac/icons/play/play.png")
-        iconstop = QtGui.QIcon(":/plugins/PostTelemac/icons/play/stop.png")
+        iconplay = QIcon(":/plugins/PostTelemac/icons/play/play.png")
+        iconstop = QIcon(":/plugins/PostTelemac/icons/play/stop.png")
         if not self.playactive:  # action on click when not playing
             self.pushButton_Read.setIcon(iconstop)
             self.playactive = True
@@ -508,7 +499,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             self.horizontalSlider_time.setValue(self.meshlayer.time_displayed + self.playstep)
             self.meshlayer.canvas.refresh()
         else:  # end of time reached
-            iconplay = QtGui.QIcon(":/plugins/PostTelemac/icons/play/play.png")
+            iconplay = QIcon(":/plugins/PostTelemac/icons/play/play.png")
             self.pushButton_Read.setIcon(iconplay)
             self.playactive = False
             self.meshlayer.canvas.mapCanvasRefreshed.disconnect(self.readHydrauFile2)
@@ -994,7 +985,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         Populate colorpalette combobox on dialog creation
         """
         style = qgis.core.QgsStyle.defaultStyle()
-        rampIconSize = QtCore.QSize(50, 20)
+        rampIconSize = QSize(50, 20)
         for rampName in style.colorRampNames():
             ramp = style.colorRamp(rampName)
             icon = qgis.core.QgsSymbolLayerUtils.colorRampPreviewIcon(ramp, rampIconSize)
@@ -1003,11 +994,11 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
 
     def changeMeshLayerRenderer(self, typerenderer):
         if typerenderer == 0:  # openGL
-            QtCore.QSettings().setValue("posttelemac/renderlib", "OpenGL")
+            QSettings().setValue("posttelemac/renderlib", "OpenGL")
             if self.meshlayer.hydraufilepath != None:
                 self.meshlayer.load_selafin(self.meshlayer.hydraufilepath, self.meshlayer.hydrauparser.SOFTWARE)
         elif typerenderer == 1:  # matplotlib
-            QtCore.QSettings().setValue("posttelemac/renderlib", "MatPlotLib")
+            QSettings().setValue("posttelemac/renderlib", "MatPlotLib")
             if self.meshlayer.hydraufilepath != None:
                 self.meshlayer.load_selafin(self.meshlayer.hydraufilepath, self.meshlayer.hydrauparser.SOFTWARE)
 
@@ -1019,7 +1010,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """Used for translation"""
         # if False:
             # try:
-                # return QtCore.QCoreApplication.translate(
+                # return QCoreApplication.translate(
                     # "PostTelemacPropertiesDialog", message, None, QApplication.UnicodeUTF8
                 # )
             # except Exception as e:

@@ -25,32 +25,21 @@
 # unicode behaviour
 from __future__ import unicode_literals
 
-from qgis.PyQt import (
-    uic,
-    QtCore,
-    QtGui,
-    )
-from qgis.PyQt.QtWidgets import (
-    QDialog,
-    QTableWidgetItem,
-    )
+from qgis.PyQt import uic
+from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtWidgets import (QDialog, QTableWidgetItem)
 
-import os, sys
-import qgis.gui
+from qgis.gui import QgsColorButton
 
+import os
+import sys
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "..", "ui", "usercolorramp.ui"))
-
 
 class UserColorRampDialog(QDialog, FORM_CLASS):
     def __init__(self, selafinlayer, parent=None):
         """Constructor."""
         super(UserColorRampDialog, self).__init__(parent)
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.finished.connect(self.dialogIsFinished)
         self.meshlayer = selafinlayer
@@ -72,10 +61,10 @@ class UserColorRampDialog(QDialog, FORM_CLASS):
         if self.meshlayer.propertiesdialog.tabWidget_lvl_vel.currentIndex() == 0:  # contour
             self.tableWidget.setRowCount(len(self.meshlayer.meshrenderer.lvl_contour) - 1)
             for i in range(len(self.meshlayer.meshrenderer.lvl_contour) - 1):
-                colorwdg = qgis.gui.QgsColorButton()
+                colorwdg = QgsColorButton()
                 colorwdg.setAllowOpacity(True)
                 colorwdg.setColor(
-                    QtGui.QColor(
+                    QColor(
                         self.meshlayer.meshrenderer.cmap_contour_leveled[i][0] * 255,
                         self.meshlayer.meshrenderer.cmap_contour_leveled[i][1] * 255,
                         self.meshlayer.meshrenderer.cmap_contour_leveled[i][2] * 255,
@@ -88,10 +77,10 @@ class UserColorRampDialog(QDialog, FORM_CLASS):
         elif self.meshlayer.propertiesdialog.tabWidget_lvl_vel.currentIndex() == 1:  # velocity
             self.tableWidget.setRowCount(len(self.meshlayer.meshrenderer.lvl_vel) - 1)
             for i in range(len(self.meshlayer.meshrenderer.lvl_vel) - 1):
-                colorwdg = qgis.gui.QgsColorButton()
+                colorwdg = QgsColorButton()
                 colorwdg.setAllowAlpha(True)
                 colorwdg.setColor(
-                    QtGui.QColor(
+                    QColor(
                         self.meshlayer.meshrenderer.cmap_vel_leveled[i][0] * 255,
                         self.meshlayer.meshrenderer.cmap_vel_leveled[i][1] * 255,
                         self.meshlayer.meshrenderer.cmap_vel_leveled[i][2] * 255,
@@ -105,7 +94,7 @@ class UserColorRampDialog(QDialog, FORM_CLASS):
     def addrow(self):
         introw = self.tableWidget.currentRow()
         self.tableWidget.insertRow(introw + 1)
-        colorwdg = qgis.gui.QgsColorButton()
+        colorwdg = QgsColorButton()
         self.tableWidget.setCellWidget(introw + 1, 0, colorwdg)
         self.tableWidget.setItem(introw + 1, 1, QTableWidgetItem(self.tableWidget.item(introw, 2)))
         self.tableWidget.setItem(introw + 1, 2, QTableWidgetItem(self.tableWidget.item(introw + 2, 1)))
@@ -156,7 +145,6 @@ class UserColorRampDialog(QDialog, FORM_CLASS):
                         wdg.color().alpha(),
                     ]
                 )
-                # colors.append([float(float(i)/(rowcount)),wdg.color().red(),wdg.color().green(),wdg.color().blue(),wdg.color().alpha()])
         else:
             levels.append(float(self.tableWidget.item(0, 1).text()))
             wdg = self.tableWidget.cellWidget(0, 0)
@@ -176,8 +164,6 @@ class UserColorRampDialog(QDialog, FORM_CLASS):
         if self.lineEdit_name.text() == "":
             self.pushButton_3.setEnabled(False)
             self.pushButton_4.setEnabled(False)
-            # self.bb_valide.button(self.bb_valide.Ok).setEnabled(False)
         else:
-            # self.bb_valide.button(self.bb_valide.Ok).setEnabled(True)
             self.pushButton_3.setEnabled(True)
             self.pushButton_4.setEnabled(True)

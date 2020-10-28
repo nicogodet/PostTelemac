@@ -23,19 +23,15 @@ Impl
 # unicode behaviour
 from __future__ import unicode_literals
 
-from qgis.PyQt import (
-    uic,
-    QtCore,
-    QtGui,
-    QtWidgets,
-    )
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import QDialog
 
 import os
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "..", "ui", "XY_translation_dialog.ui"))
 
 
-class xyTranslationDialog(QtWidgets.QDialog, FORM_CLASS):
+class xyTranslationDialog(QDialog, FORM_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
         super(xyTranslationDialog, self).__init__(parent)
