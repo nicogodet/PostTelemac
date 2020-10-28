@@ -1,8 +1,22 @@
-import qgis.core
-import qgis.utils
+# -*- coding: utf-8 -*-
+"""
+/***************************************************************************
+ PostTelemac
+                                 A QGIS plugin
+ Post Traitment or Telemac
+                              -------------------
+        begin                : 2015-07-07
+        git sha              : $Format:%H$
+        copyright            : (C) 2015 by Artelia
+        email                : patrice.Verchere@arteliagroup.com
+ ***************************************************************************/
+"""
+
+from qgis.core import (QgsPluginLayerType, QgsPluginLayerRegistry)
+from qgis.utils import iface
 
 # import PyQT
-from qgis.PyQt import QtCore
+from qgis.PyQt.QtCore import Qt
 
 # import posttelemac
 from .post_telemac_pluginlayer import SelafinPluginLayer
@@ -10,14 +24,14 @@ from .post_telemac_pluginlayer import SelafinPluginLayer
 
 class SelafinPluginLayerType(qgis.core.QgsPluginLayerType):
     def __init__(self):
-        qgis.core.QgsPluginLayerType.__init__(self, SelafinPluginLayer.LAYER_TYPE)
-        self.iface = qgis.utils.iface
+        QgsPluginLayerType.__init__(self, SelafinPluginLayer.LAYER_TYPE)
+        self.iface = iface
 
     def createLayer(self):
         return SelafinPluginLayer()
 
     def showLayerProperties(self, layer):
-        self.iface.addDockWidget(QtCore.Qt.RightDockWidgetArea, layer.propertiesdialog)
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, layer.propertiesdialog)
         self.iface.mapCanvas().setRenderFlag(True)
         return True
 

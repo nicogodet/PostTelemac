@@ -36,7 +36,6 @@ from .meshlayerdialogs.posttelemac_about import aboutDialog
 DOPROCESSING = False  # set to false to make the plugin reloader work
 if DOPROCESSING:
     from .posttelemacprovider.PostTelemacProvider import PostTelemacProvider
-
     cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
     if cmd_folder not in sys.path:
         sys.path.insert(0, cmd_folder)
@@ -99,7 +98,7 @@ class PostTelemac:
         :returns: Translated version of message.
         :rtype: QString
         """
-        return QtCore.QCoreApplication.translate("PostTelemac", message)
+        return QCoreApplication.translate("PostTelemac", message)
 
     def add_action(
         self,
