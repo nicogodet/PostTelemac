@@ -91,11 +91,6 @@ class PostTelemac:
 
         self.dlg_about = None
 
-        # Processing
-        if DOPROCESSING:
-            self.provider = PostTelemacProvider()
-            QgsApplication.processingRegistry().addProvider(self.provider)
-
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
         We implement this ourselves since we do not inherit QObject.
@@ -177,6 +172,11 @@ class PostTelemac:
 
         self.actions.append(action)
         return action
+        
+        def initProcessing(self):
+        """Init Processing provider for QGIS >= 3.8."""
+            self.provider = PostTelemacProvider()
+            QgsApplication.processingRegistry().addProvider(self.provider)
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
