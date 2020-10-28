@@ -22,16 +22,17 @@ Versions :
 
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import (QObject, QMutex, QSize, pyqtSignal)
+from qgis.PyQt.QtCore import QObject, QMutex, QSize, pyqtSignal
 from qgis.PyQt.QtGui import QImage
 
-from qgis.core import (QgsPointXY, QgsCoordinateTransform, QgsRenderContext)
+from qgis.core import QgsPointXY, QgsCoordinateTransform, QgsRenderContext
 from qgis.utils import iface
 
-from .post_telemac_pluginlayer_colormanager import * 
+from .post_telemac_pluginlayer_colormanager import *
 
 import numpy as np
 import time
+
 
 class AbstractMeshRenderer(QObject):
 
@@ -125,9 +126,7 @@ class AbstractMeshRenderer(QObject):
     def getTransformedCoords(self, xcoords, ycoords, direction=True):
         coordinatesAsPoints = [QgsPointXY(xcoords[i], ycoords[i]) for i in range(len(xcoords))]
         if direction:
-            transformedCoordinatesAsPoints = [
-                self.meshlayer.xform.transform(point) for point in coordinatesAsPoints
-            ]
+            transformedCoordinatesAsPoints = [self.meshlayer.xform.transform(point) for point in coordinatesAsPoints]
         else:
             transformedCoordinatesAsPoints = [
                 self.meshlayer.xform.transform(point, QgsCoordinateTransform.ReverseTransform)
@@ -176,7 +175,7 @@ class AbstractMeshRenderer(QObject):
 
     def getCoordsIndexInCanvas(self, meshlayer, rendererContext):
         """
-        return a new triangulation based on triangles visbles in the canvas. 
+        return a new triangulation based on triangles visbles in the canvas.
         return index of selafin points correspondind to the new triangulation
         """
         mesh = np.array(meshlayer.hydrauparser.getElemFaces())

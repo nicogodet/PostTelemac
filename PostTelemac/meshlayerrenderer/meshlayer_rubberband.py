@@ -23,13 +23,14 @@ Versions :
  ***************************************************************************/
 """
 
-from qgis.PyQt.QtCore import (QObject, Qt)
+from qgis.PyQt.QtCore import QObject, Qt
 from qgis.PyQt.QtGui import QColor
 
-from qgis.core import (QgsGeometry, QgsWkbTypes, QgsPointXY)
+from qgis.core import QgsGeometry, QgsWkbTypes, QgsPointXY
 from qgis.gui import QgsRubberBand
 
 import numpy as np
+
 
 class MeshLayerRubberband(QObject):
     def __init__(self, meshlayer):

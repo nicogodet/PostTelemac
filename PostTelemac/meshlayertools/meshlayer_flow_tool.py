@@ -347,7 +347,6 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
                     )
                 self.meshlayer.rubberband.rubberbandface.addPoint(qgis.core.QgsPointXY(mapPos.x(), mapPos.y()))
 
-
     def rightClicked(self, position):  # used to quit the current action
         if self.selectionmethod == 0:
             mapPos = self.meshlayer.canvas.getCoordinateTransform().toMapCoordinates(position["x"], position["y"])
@@ -457,7 +456,7 @@ class computeFlow(QtCore.QObject):
     def computeFlowMain(self):
         """
         Main method
-        
+
         """
 
         DEBUG = True
@@ -479,7 +478,7 @@ class computeFlow(QtCore.QObject):
                 parameteruv = self.selafinlayer.hydrauparser.parametrevx
                 parametervv = self.selafinlayer.hydrauparser.parametrevy
 
-                if METHOD == 0: # Method0 : shortest path and vector computation
+                if METHOD == 0:  # Method0 : shortest path and vector computation
                     if self.selafinlayer.hydrauparser.networkxgraph == None:
                         self.selafinlayer.hydrauparser.createNetworkxGraph()
 
@@ -570,9 +569,7 @@ class computeFlow(QtCore.QObject):
                                     v2vect = uv2 + vv2
                                     xy2 = list(self.selafinlayer.hydrauparser.getFaceNodeXYFromNumPoint([elem])[0])
                                     if "flow" in locals():
-                                        flow = flow + self.computeFlowBetweenPoints(
-                                            xy1, h1, v1vect, xy2, h2, v2vect
-                                        )
+                                        flow = flow + self.computeFlowBetweenPoints(xy1, h1, v1vect, xy2, h2, v2vect)
                                     else:
                                         flow = self.computeFlowBetweenPoints(xy1, h1, v1vect, xy2, h2, v2vect)
 

@@ -84,7 +84,9 @@ def isFileLocked(file, readLockCheck=False):
 
     return False
 
+
 # *************************************************************************
+
 
 class SelafinContour2Pts(QtCore.QObject):
 
@@ -165,15 +167,14 @@ class SelafinContour2Pts(QtCore.QObject):
             self.vitesse = "1"
 
         if self.traitementarriereplan == 0 or self.traitementarriereplan == 2:
-            self.writerw1 = QgsVectorFileWriter( ##FIX deprecation warning C:\Users\GODET\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\pointsamplingtool\doPointSamplingTool.py 
+            self.writerw1 = QgsVectorFileWriter(  ##FIX deprecation warning C:\Users\GODET\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\pointsamplingtool\doPointSamplingTool.py
                 self.pathshp,
                 None,
                 fields,
                 QgsWkbTypes.Point,
-                QgsCoordinateReferenceSystem(str(self.crs)), 
+                QgsCoordinateReferenceSystem(str(self.crs)),
                 "ESRI Shapefile",
             )
-
 
     def run(self):
         strtxt = (

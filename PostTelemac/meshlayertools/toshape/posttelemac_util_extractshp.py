@@ -7,6 +7,7 @@ from qgis.utils import *
 import sys, qgis
 
 from qgis.core import QgsVectorFileWriter
+
 # import numpy
 import numpy as np
 
@@ -195,17 +196,17 @@ class SelafinContour2Shp(QtCore.QObject):
 
         # donnees shp - processing result
         # try:
-            # if self.processtype in [2, 3]:
-                # self.writerw_process = VectorWriter(
-                    # outputprocessing,
-                    # None,
-                    # champs,
-                    # QGis.WKBMultiPolygon,
-                    # QgsCoordinateReferenceSystem(str(self.slf_shpcrs)),
-                    # "ESRI Shapefile",
-                # )
+        # if self.processtype in [2, 3]:
+        # self.writerw_process = VectorWriter(
+        # outputprocessing,
+        # None,
+        # champs,
+        # QGis.WKBMultiPolygon,
+        # QgsCoordinateReferenceSystem(str(self.slf_shpcrs)),
+        # "ESRI Shapefile",
+        # )
         # except Exception as e:
-            # pass
+        # pass
 
         # donnees matplotlib
         self.levels = levels
@@ -326,7 +327,7 @@ class SelafinContour2Shp(QtCore.QObject):
                         else:
                             pr2.addFeatures([fet])
                             vl2temp1.commitChanges()
-        index2 = QgsSpatialIndex(vl2temp1.getFeatures())               
+        index2 = QgsSpatialIndex(vl2temp1.getFeatures())
         return (vl1temp1, vl2temp1, index2)
 
     def get_outerinner(self, geom1):

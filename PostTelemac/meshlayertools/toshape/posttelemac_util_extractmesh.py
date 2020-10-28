@@ -40,6 +40,7 @@ debug = False
 
 # *************************************************************************
 
+
 def isFileLocked(file, readLockCheck=False):
     """
     Checks to see if a file is locked. Performs three checks
@@ -117,7 +118,6 @@ class SelafinContour2Shp(QtCore.QObject):
 
         self.slf_mesh = np.array(self.parserhydrau.getElemFaces())
         slf_time = [time, self.parserhydrau.getTimes()[time]]
-
 
         if parameter is not None:
             self.slf_param = [parameter, self.parserhydrau.getVarNames()[parameter]]

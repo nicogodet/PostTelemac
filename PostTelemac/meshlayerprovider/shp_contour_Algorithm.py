@@ -159,17 +159,17 @@ class ShpContourAlgorithm(GeoAlgorithm):
             level = [float(self.getParameterValue(self.SELAFIN_LVL_SPE).split(";")[i]) for i in range(len(self.getParameterValue(self.SELAFIN_LVL_SPE).split(";")))]
                 
         self.initclass.start(int(self.getParameterValue(self.PROCESS_TYPE))+1,                 #0 : thread inside qgis (plugin) - 1 : thread processing - 2 : modeler (no thread) - 3 : modeler + shpouput - 4: outsideqgis
-                         os.path.normpath(self.getParameterValue(self.SELAFIN_FILE)),                 #path to selafin file
-                         self.getParameterValue(self.SELAFIN_TIME),                            #time to process (selafin time in seconds)
-                         param,                     #parameter to process name (string) or id (int)
-                         level,                       #levels to create
-                         self.getParameterValue(self.SELAFIN_CRS),      #selafin crs
-                         self.getParameterValue(self.SHP_CRS) if self.getParameterValue(self.TRANS_CRS) else None,   #if no none, specify crs of output file
-                         self.getParameterValue(self.QUICK_PROCESS),                #quickprocess option - don't make ring
-                         self.getParameterValue(self.SHP_NAME),           #change generic outputname to specific one
-                          None,         #if not none, create shp in this directory
-                        forcedvalue = None,          #force value for plugin
-                          self.getOutputValue(self.SHP_PROCESS))
+                            os.path.normpath(self.getParameterValue(self.SELAFIN_FILE)),                 #path to selafin file
+                            self.getParameterValue(self.SELAFIN_TIME),                            #time to process (selafin time in seconds)
+                            param,                     #parameter to process name (string) or id (int)
+                            level,                       #levels to create
+                            self.getParameterValue(self.SELAFIN_CRS),      #selafin crs
+                            self.getParameterValue(self.SHP_CRS) if self.getParameterValue(self.TRANS_CRS) else None,   #if no none, specify crs of output file
+                            self.getParameterValue(self.QUICK_PROCESS),                #quickprocess option - don't make ring
+                            self.getParameterValue(self.SHP_NAME),           #change generic outputname to specific one
+                            None,         #if not none, create shp in this directory
+                            forcedvalue = None,          #force value for plugin
+                            self.getOutputValue(self.SHP_PROCESS))
         
 
         # Input layers vales are always a string with its location.

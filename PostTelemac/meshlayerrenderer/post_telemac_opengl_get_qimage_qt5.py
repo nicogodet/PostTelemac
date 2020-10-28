@@ -37,13 +37,13 @@ import time
 from OpenGL.GL import *
 from OpenGL.GL import shaders
 
-from qgis.PyQt.QtCore import (pyqtSignal, QMutex, QThread, Qt)
-from qgis.PyQt.QtGui import (QSize, QColor, QImage)
+from qgis.PyQt.QtCore import pyqtSignal, QMutex, QThread, Qt
+from qgis.PyQt.QtGui import QSize, QColor, QImage
 from qgis.PyQt.QtWidgets import QApplication
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtOpenGL import (QGLFormat, QGLContext)
+from PyQt5.QtOpenGL import QGLFormat, QGLContext
 
 import numpy
 from math import log, ceil, exp
@@ -205,30 +205,22 @@ class MeshRenderer(AbstractMeshRenderer):
             self.meshlayer.triggerRepaint()
 
     def change_cm_vel(self, cm_raw):
-        """
-        change_cm_vel
-        change the color map and layer symbology
-        """
-            cm = self.colormanager.arrayStepRGBAToCmap(cm_raw)
-            self.cmap_mpl_vel, self.norm_mpl_vel, self.color_mpl_vel = self.colormanager.changeColorMap(
-                cm, self.lvl_vel
-            )
-            try:
-                qgis.utils.iface.legendInterface().refreshLayerSymbology(self.meshlayer)
-            except Exception as e:
-                # print('openglgetimage -change_cm_contour ' +   str(e))
-                # self.meshlayer.propertiesdialog.errorMessage( 'openglgetimage -change_cm_contour ' + str(e) )
-                qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
-            # transparency - alpha changed
-            if self.color_mpl_vel != None:
-                colortemp = np.array(self.color_mpl_vel.tolist())
-                for i in range(len(colortemp)):
-                    colortemp[i][3] = min(colortemp[i][3], self.alpha_displayed / 100.0)
-                # redefine cmap_mpl_contour and norm_mpl_contour :
-                self.cmap_mpl_vel, self.norm_mpl_vel = matplotlib.colors.from_levels_and_colors(self.lvl_vel, colortemp)
-            # repaint
-            if self.meshlayer.draw:
-                self.meshlayer.triggerRepaint()
+        cm = self.colormanager.arrayStepRGBAToCmap(cm_raw)
+        self.cmap_mpl_vel, self.norm_mpl_vel, self.color_mpl_vel = self.colormanager.changeColorMap(cm, self.lvl_vel)
+        try:
+            qgis.utils.iface.legendInterface().refreshLayerSymbology(self.meshlayer)
+        except Exception as e:
+            qgis.utils.iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        # transparency - alpha changed
+        if self.color_mpl_vel != None:
+            colortemp = np.array(self.color_mpl_vel.tolist())
+            for i in range(len(colortemp)):
+                colortemp[i][3] = min(colortemp[i][3], self.alpha_displayed / 100.0)
+            # redefine cmap_mpl_contour and norm_mpl_contour :
+            self.cmap_mpl_vel, self.norm_mpl_vel = matplotlib.colors.from_levels_and_colors(self.lvl_vel, colortemp)
+        # repaint
+        if self.meshlayer.draw:
+            self.meshlayer.triggerRepaint()
         self.cmap_vel_leveled = self.colormanager.fromColorrampAndLevels(self.lvl_vel, cm_raw)
         if iface is not None:
             iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
@@ -843,9 +835,7 @@ class MeshRenderer(AbstractMeshRenderer):
                     GL_FRAGMENT_SHADER,
                 )
 
-                self.__shadersvel = shaders.compileProgram(
-                    vertex_shader_vel, fragment_shader_vel, geom_shader_vel
-                )
+                self.__shadersvel = shaders.compileProgram(vertex_shader_vel, fragment_shader_vel, geom_shader_vel)
 
                 glUseProgram(self.__shadersvel)
 
@@ -867,32 +857,25 @@ class MeshRenderer(AbstractMeshRenderer):
             if self.meshlayer.hydrauparser.parametres[self.meshlayer.param_displayed][2] == 0:
                 try:
                     if DEBUGTIME:
-                        self.debugtext += [
-                            "param render start : " + str(round(time.clock() - self.timestart, 3))
-                        ]
+                        self.debugtext += ["param render start : " + str(round(time.clock() - self.timestart, 3))]
                     glColor4f(0.2, 0.2, 0.2, 0.2)
                     vtx = self.__vtxfacetodraw[self.__idxfacetodraw1Darray]
                     if DEBUGTIME:
                         self.debugtext += [
-                            "param render vertex interm : "
-                            + str(round(time.clock() - self.timestart, 3))
+                            "param render vertex interm : " + str(round(time.clock() - self.timestart, 3))
                         ]
 
                     glVertexPointerf(vtx)
 
                     if DEBUGTIME:
-                        self.debugtext += [
-                            "param render vertex done : " + str(round(time.clock() - self.timestart, 3))
-                        ]
+                        self.debugtext += ["param render vertex done : " + str(round(time.clock() - self.timestart, 3))]
 
                     glDisable(GL_TEXTURE_2D)
                     glUseProgram(0)
                     glColor4f(0.2, 0.2, 0.2, 0.2)
 
                     if DEBUGTIME:
-                        self.debugtext += [
-                            "param render color begin : " + str(round(time.clock() - self.timestart, 3))
-                        ]
+                        self.debugtext += ["param render color begin : " + str(round(time.clock() - self.timestart, 3))]
                     colors = np.zeros((len(val), 4))
                     colors[:, :] = np.NAN
 
@@ -908,9 +891,7 @@ class MeshRenderer(AbstractMeshRenderer):
 
                     colors[colors[:, 0] == np.NAN] = np.array([0.0, 0.0, 0.0, 0.0])
                     if DEBUGTIME:
-                        self.debugtext += [
-                            "param render color end : " + str(round(time.clock() - self.timestart, 3))
-                        ]
+                        self.debugtext += ["param render color end : " + str(round(time.clock() - self.timestart, 3))]
 
                     first = self.__idxfacetotalcountidx[:-1]
                     count = np.diff(self.__idxfacetotalcountidx)
@@ -918,31 +899,27 @@ class MeshRenderer(AbstractMeshRenderer):
 
                     if DEBUGTIME:
                         self.debugtext += [
-                            "param render first count end : "
-                            + str(round(time.clock() - self.timestart, 3))
+                            "param render first count end : " + str(round(time.clock() - self.timestart, 3))
                         ]
 
                     colors2 = np.repeat(colors, count, axis=0)
 
                     if DEBUGTIME:
                         self.debugtext += [
-                            "param render first colorpointer begin : "
-                            + str(round(time.clock() - self.timestart, 3))
+                            "param render first colorpointer begin : " + str(round(time.clock() - self.timestart, 3))
                         ]
 
                     glEnableClientState(GL_COLOR_ARRAY)
                     glColorPointer(4, GL_FLOAT, 0, colors2)
                     if DEBUGTIME:
                         self.debugtext += [
-                            "param render first colorpointer end : "
-                            + str(round(time.clock() - self.timestart, 3))
+                            "param render first colorpointer end : " + str(round(time.clock() - self.timestart, 3))
                         ]
 
                     glMultiDrawArrays(GL_TRIANGLE_FAN, first, count, primcount)
                     if DEBUGTIME:
                         self.debugtext += [
-                            "param render first draw array end : "
-                            + str(round(time.clock() - self.timestart, 3))
+                            "param render first draw array end : " + str(round(time.clock() - self.timestart, 3))
                         ]
 
                     glDisableClientState(GL_COLOR_ARRAY)
@@ -960,32 +937,25 @@ class MeshRenderer(AbstractMeshRenderer):
             elif self.meshlayer.hydrauparser.parametres[self.meshlayer.param_displayed][2] == 2:
                 try:
                     if DEBUGTIME:
-                        self.debugtext += [
-                            "param render start : " + str(round(time.clock() - self.timestart, 3))
-                        ]
+                        self.debugtext += ["param render start : " + str(round(time.clock() - self.timestart, 3))]
                     glColor4f(0.2, 0.2, 0.2, 0.2)
                     vtx = self.__vtxfacetodraw[self.__idxfaceonlytodraw1Darray]
 
                     if DEBUGTIME:
                         self.debugtext += [
-                            "param render vertex interm : "
-                            + str(round(time.clock() - self.timestart, 3))
+                            "param render vertex interm : " + str(round(time.clock() - self.timestart, 3))
                         ]
                     glVertexPointerf(vtx)
 
                     if DEBUGTIME:
-                        self.debugtext += [
-                            "param render vertex done : " + str(round(time.clock() - self.timestart, 3))
-                        ]
+                        self.debugtext += ["param render vertex done : " + str(round(time.clock() - self.timestart, 3))]
 
                     glDisable(GL_TEXTURE_2D)
                     glUseProgram(0)
                     glColor4f(0.2, 0.2, 0.2, 0.2)
 
                     if DEBUGTIME:
-                        self.debugtext += [
-                            "param render color begin : " + str(round(time.clock() - self.timestart, 3))
-                        ]
+                        self.debugtext += ["param render color begin : " + str(round(time.clock() - self.timestart, 3))]
                     colors = np.zeros((len(val), 4))
                     colors[:, :] = np.NAN
 
@@ -1002,32 +972,26 @@ class MeshRenderer(AbstractMeshRenderer):
                     colors[colors[:, 0] == np.NAN] = np.array([0.0, 0.0, 0.0, 0.0])
 
                     if DEBUGTIME:
-                        self.debugtext += [
-                            "param render color end : " + str(round(time.clock() - self.timestart, 3))
-                        ]
+                        self.debugtext += ["param render color end : " + str(round(time.clock() - self.timestart, 3))]
 
                     if DEBUGTIME:
                         self.debugtext += [
-                            "param render first count end : "
-                            + str(round(time.clock() - self.timestart, 3))
+                            "param render first count end : " + str(round(time.clock() - self.timestart, 3))
                         ]
-
 
                     colors2 = np.repeat(colors, 2, axis=0)
 
                     if DEBUGTIME:
                         self.debugtext += [
-                            "param render first colorpointer begin : "
-                            + str(round(time.clock() - self.timestart, 3))
+                            "param render first colorpointer begin : " + str(round(time.clock() - self.timestart, 3))
                         ]
 
                     glEnableClientState(GL_COLOR_ARRAY)
                     glColorPointer(4, GL_FLOAT, 0, colors2)
-                    
+
                     if DEBUGTIME:
                         self.debugtext += [
-                            "param render first colorpointer end : "
-                            + str(round(time.clock() - self.timestart, 3))
+                            "param render first colorpointer end : " + str(round(time.clock() - self.timestart, 3))
                         ]
 
                     glLineWidth(5)  # or whatever
@@ -1035,8 +999,7 @@ class MeshRenderer(AbstractMeshRenderer):
 
                     if DEBUGTIME:
                         self.debugtext += [
-                            "param render first draw array end : "
-                            + str(round(time.clock() - self.timestart, 3))
+                            "param render first draw array end : " + str(round(time.clock() - self.timestart, 3))
                         ]
 
                     glDisableClientState(GL_COLOR_ARRAY)

@@ -35,9 +35,10 @@ from qgis.PyQt.QtWidgets import (
     QVBoxLayout,
     QDialogButtonBox,
     QLabel,
-    )
+)
 
 import os
+
 
 class postTelemacComboboxDialog(QDialog):
     def __init__(self, parent=None):

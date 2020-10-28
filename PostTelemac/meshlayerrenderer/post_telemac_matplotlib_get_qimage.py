@@ -45,6 +45,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 DEBUG = False
 PRECISION = 0.01
 
+
 class MeshRenderer(AbstractMeshRenderer):
 
     RENDERER_TYPE = "MatPlotLib"
@@ -181,7 +182,7 @@ class MeshRenderer(AbstractMeshRenderer):
             cmap=self.cmap_mpl_contour,
             norm=self.norm_mpl_contour,
             # alpha = meshlayer.alpha_displayed/100.0,
-            nchunk=10
+            nchunk=10,
         )
 
         if DEBUG:
@@ -261,7 +262,7 @@ class MeshRenderer(AbstractMeshRenderer):
             self.lvl_contour,
             cmap=self.cmap_mpl_contour,
             norm=self.norm_mpl_contour,
-            extend="neither"
+            extend="neither",
         )
 
         if self.meshlayer.showmesh:

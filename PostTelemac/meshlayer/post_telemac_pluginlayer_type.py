@@ -12,7 +12,7 @@
  ***************************************************************************/
 """
 
-from qgis.core import (QgsPluginLayerType, QgsPluginLayerRegistry)
+from qgis.core import QgsPluginLayerType, QgsPluginLayerRegistry
 from qgis.utils import iface
 
 # import PyQT
@@ -22,7 +22,7 @@ from qgis.PyQt.QtCore import Qt
 from .post_telemac_pluginlayer import SelafinPluginLayer
 
 
-class SelafinPluginLayerType(qgis.core.QgsPluginLayerType):
+class SelafinPluginLayerType(QgsPluginLayerType):
     def __init__(self):
         QgsPluginLayerType.__init__(self, SelafinPluginLayer.LAYER_TYPE)
         self.iface = iface

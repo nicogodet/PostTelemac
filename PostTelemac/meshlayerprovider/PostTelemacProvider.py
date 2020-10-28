@@ -18,6 +18,7 @@
 """
 
 from qgis.core import QgsProcessingProvider
+
 # from processing.core.ProcessingConfig import Setting, ProcessingConfig
 
 from ExampleAlgorithm import ExampleAlgorithm
@@ -27,7 +28,6 @@ from .shp_contour_Algorithm import ShpContourAlgorithm
 
 
 class PostTelemacProvider(QgsProcessingProvider):
-
     def __init__(self):
         """
         Default constructor.
@@ -55,7 +55,7 @@ class PostTelemacProvider(QgsProcessingProvider):
         string should be a unique, short, character only string, eg "qgis" or
         "gdal". This string should not be localised.
         """
-        return 'posttelemac'
+        return "posttelemac"
 
     def name(self):
         """
@@ -64,7 +64,7 @@ class PostTelemacProvider(QgsProcessingProvider):
 
         This string should be short (e.g. "Lastools") and localised.
         """
-        return self.tr('PostTelemac')
+        return self.tr("PostTelemac")
 
     def icon(self):
         """

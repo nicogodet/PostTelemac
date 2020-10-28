@@ -25,9 +25,9 @@ Versions :
 
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtCore import (QEvent, QObject, pyqtSignal)
+from qgis.PyQt.QtCore import QEvent, QObject, pyqtSignal
 
-from qgis.core import (QgsProject, QgsLayoutExporter, QgsLayoutItemPicture
+from qgis.core import QgsProject, QgsLayoutExporter, QgsLayoutItemPicture
 
 from .meshlayer_abstract_tool import *
 
@@ -121,14 +121,12 @@ class AnimationTool(AbstractMeshLayerTool, FORM_CLASS):
         try:
             composition = None
             for composeurview in QgsProject.instance().layoutManager().layouts():
-                composition = (QgsProject.instance().layoutManager().layoutByName(name))
+                composition = QgsProject.instance().layoutManager().layoutByName(name)
             self.comboBox_8.addItems([self.tr("no picture")])
 
             if composition != None:
                 images = [
-                    item.id()
-                    for item in composition.items()
-                    if isinstance(item, QgsLayoutItemPicture) and item.scene()
+                    item.id() for item in composition.items() if isinstance(item, QgsLayoutItemPicture) and item.scene()
                 ]
                 images = [str(image) for image in images]
                 self.comboBox_8.addItems(images)
@@ -197,19 +195,9 @@ class PostTelemacAnimation(QObject):
         # Init graph things if an image is choosen **************************************************************************
         matplotlibimagepath = None
         pitem = None
-        maps = [
-            item for item in composition.items() if isinstance(item, qgis._core.QgsLayoutItemMap) and item.scene()
-        ]
-        images = [
-            item
-            for item in composition.items()
-            if isinstance(item, QgsLayoutItemPicture) and item.scene()
-        ]
-        legends = [
-            item
-            for item in composition.items()
-            if isinstance(item, QgsLayoutItemLegend) and item.scene()
-        ]
+        maps = [item for item in composition.items() if isinstance(item, qgis._core.QgsLayoutItemMap) and item.scene()]
+        images = [item for item in composition.items() if isinstance(item, QgsLayoutItemPicture) and item.scene()]
+        legends = [item for item in composition.items() if isinstance(item, QgsLayoutItemLegend) and item.scene()]
 
         if self.tool.comboBox_8.currentIndex() != 0:
             tooltemp = None
@@ -327,12 +315,7 @@ class PostTelemacAnimation(QObject):
         self.finished.emit()
 
     def images_to_video(
-        self, 
-        tmp_img_dir="/tmp/vid/%03d.png", 
-        output_file="/tmp/vid/test.avi", 
-        fps=10, 
-        qual=1, 
-        ffmpeg_bin="ffmpeg"
+        self, tmp_img_dir="/tmp/vid/%03d.png", output_file="/tmp/vid/test.avi", fps=10, qual=1, ffmpeg_bin="ffmpeg"
     ):
 
         if qual == 0:  # lossless

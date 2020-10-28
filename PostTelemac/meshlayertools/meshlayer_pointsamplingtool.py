@@ -115,7 +115,7 @@ class PointSamplingTool(AbstractMeshLayerTool, FORM_CLASS):
             # writer for shapefile
             writer = qgis.core.QgsVectorFileWriter(
                 pathresult, "UTF8", fields, qgis.core.QgsWkbTypes.Point, self.meshlayer.realCRS, "ESRI Shapefile"
-            ) #TODO : Qgis3 deprec warning
+            )  # TODO : Qgis3 deprec warning
             # for projection
             xformutil = qgis.core.QgsCoordinateTransform(
                 parentlayer.crs(), self.meshlayer.realCRS, qgis.core.QgsProject.instance()

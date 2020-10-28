@@ -13,12 +13,12 @@
 """
 
 # import QT
-from qgis.PyQt.QtCore import (QSettings, QTranslator, QCoreApplication)
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import (QAction, QToolBar)
+from qgis.PyQt.QtWidgets import QAction, QToolBar
 
 # import qgis
-from qgis.core import (QgsProject, QgsApplication, QgsProcessingAlgorithm)
+from qgis.core import QgsProject, QgsApplication, QgsProcessingAlgorithm
 
 # Other standart libs import
 import os.path
@@ -36,16 +36,18 @@ from .meshlayerdialogs.posttelemac_about import aboutDialog
 DOPROCESSING = False  # set to false to make the plugin reloader work
 if DOPROCESSING:
     from .posttelemacprovider.PostTelemacProvider import PostTelemacProvider
+
     cmd_folder = os.path.split(inspect.getfile(inspect.currentframe()))[0]
     if cmd_folder not in sys.path:
         sys.path.insert(0, cmd_folder)
+
 
 class PostTelemac:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
         """Constructor.
-    
+
         :param iface: An interface instance that will be passed to this class
             which provides the hook by which you can manipulate the QGIS
             application at run time.
@@ -171,9 +173,8 @@ class PostTelemac:
 
         self.actions.append(action)
         return action
-        
+
         def initProcessing(self):
-        """Init Processing provider for QGIS >= 3.8."""
             self.provider = PostTelemacProvider()
             QgsApplication.processingRegistry().addProvider(self.provider)
 

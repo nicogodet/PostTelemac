@@ -7,6 +7,7 @@ from qgis.core import QgsMapLayerRenderer
 
 from qgis.PyQt.QtGui import QImage
 
+
 class PostTelemacPluginLayerRenderer(QgsMapLayerRenderer):
     def __init__(self, meshlayer, rendererContext):
         QgsMapLayerRenderer.__init__(self, meshlayer.id())

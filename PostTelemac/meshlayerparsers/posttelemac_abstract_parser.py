@@ -22,7 +22,7 @@ Versions :
 """
 from __future__ import unicode_literals
 
-from qgis.PyQt.QtCore import (QObject, pyqtSignal)
+from qgis.PyQt.QtCore import QObject, pyqtSignal
 
 from numpy import sin, cos, abs, int
 import numpy as np
@@ -34,6 +34,7 @@ import qgis
 
 try:
     from scipy.spatial import cKDTree
+
     SCIPYOK = True
 except:
     SCIPYOK = False
@@ -42,6 +43,7 @@ except:
 
 try:
     import matplotlib.tri
+
     MATPLOTLIBTRIOK = True
 except:
     MATPLOTLIBTRIOK = False
@@ -52,6 +54,7 @@ if MATPLOTLIBTRIOK:
 
 try:
     import networkx as nx
+
     NETWORKXOK = True
 except:
     NETWORKXOK = False
@@ -107,7 +110,7 @@ class PostTelemacAbstractParser(QObject):
     def initPathDependantVariablesWhenLoading(self):
         """
         Define at least :
-            self.hydraufile 
+            self.hydraufile
         """
         pass
 
@@ -134,7 +137,7 @@ class PostTelemacAbstractParser(QObject):
         xyz
         3T : /
         hec : Cells_Center_Coordinate
-        
+
         return (np.array(x), np.array(y) )
         """
         return (np.array([]), np.array([]))
@@ -143,17 +146,17 @@ class PostTelemacAbstractParser(QObject):
         """
         3T : /
         hec : value
-        
+
         return np.array[param number][node value for param number]
-        
+
         """
         return np.array([])
 
     def getElemRawTimeSerie(self, arraynumelemnode, arrayparam, layerparametres=None):
         """
-        
+
         return np.array[param][numelem][value for time t]
-        
+
         """
         return np.array([])
 
@@ -163,9 +166,9 @@ class PostTelemacAbstractParser(QObject):
         """
         3T : xyz
         hec : FacePoints_Coordinate
-        
+
         return (np.array(x), np.array(y) )
-        
+
         """
         return (np.array([]), np.array([]))
 
@@ -174,7 +177,7 @@ class PostTelemacAbstractParser(QObject):
         It's the mesh
         3T : ikle
         hec : Faces_FacePoint_Indexes
-        
+
         return np.array([facenodeindex linked with the elem ])
         """
         return np.array([])
@@ -182,18 +185,18 @@ class PostTelemacAbstractParser(QObject):
     def getFacesNodesRawValues(self, time1):
         """
         3T : getvalues
-        
+
         return np.array[param number][node value for param number]
-        
+
         """
         return np.array([])
 
     def getFacesNodesRawTimeSeries(self, arraynumelemnode, arrayparam, layerparametres=None):
         """
         3T : getvalues
-        
+
         return np.array[param][numelem][value for time t]
-        
+
         """
         return np.array([])
 
@@ -210,7 +213,7 @@ class PostTelemacAbstractParser(QObject):
         3T : /
         hec : velocity
         return np.array[param number][node value for param number]
-        
+
         """
         return np.array([])
 
@@ -218,12 +221,11 @@ class PostTelemacAbstractParser(QObject):
         """
         3T : /
         hec : velocity
-        
+
         return np.array[param][numelem][value for time t]
-        
+
         """
         return np.array([])
-
 
     def extent(self):
         x1, y1 = self.getElemNodes()
@@ -365,7 +367,7 @@ class PostTelemacAbstractParser(QObject):
         Set selafin variables
         """
         self.parametres = []
-        
+
         elemparcount = 0
         facenodeparcount = 0
         faceparcount = 0
@@ -382,7 +384,7 @@ class PostTelemacAbstractParser(QObject):
 
         if self.virtualparamtoloadoninit != None:
             # case of virtual parameters when loadin a selafin layer
-            if (len(self.virtualparamtoloadoninit["virtual_parameters"]) > 0):
+            if len(self.virtualparamtoloadoninit["virtual_parameters"]) > 0:
                 for param in self.virtualparamtoloadoninit["virtual_parameters"]:
                     self.parametres.append([len(self.parametres), param[1], param[2], None, param[3], None])
 
@@ -404,7 +406,7 @@ class PostTelemacAbstractParser(QObject):
 
         if self.virtualparamtoloadoninit != None:
             # case of virtual parameters when loadin a selafin layer
-            if (len(self.virtualparamtoloadoninit["virtual_parameters"]) > 0):
+            if len(self.virtualparamtoloadoninit["virtual_parameters"]) > 0:
                 for param in self.virtualparamtoloadoninit["virtual_parameters"]:
                     self.parametres.append([len(self.parametres), param[1], param[2], len(self.parametres)])
             if self.virtualparamtoloadoninit["xtranslation"] != 0 or self.virtualparamtoloadoninit["ytranslation"] != 0:
@@ -472,12 +474,12 @@ class PostTelemacAbstractParser(QObject):
     def getValues(self, time):
         """
         Get the values of paameters for time time
-        
+
         getElemRawValue
         getFacesNodesRawValues
-        
+
         typevar (0 : elem, 1 : facenode, 2 : face)]
-        
+
         """
         values = []
 
@@ -583,9 +585,7 @@ class PostTelemacAbstractParser(QObject):
                         if parametres[i][2] == 0:  # elem value
                             dico[a.format(i)] = self.getElemRawTimeSerie(enumpointorvalues, [parametres[i][3]])
                         elif parametres[i][2] == 1:  # face node value
-                            dico[a.format(i)] = self.getFacesNodesRawTimeSeries(
-                                enumpointorvalues, [parametres[i][3]]
-                            )
+                            dico[a.format(i)] = self.getFacesNodesRawTimeSeries(enumpointorvalues, [parametres[i][3]])
                         elif parametres[i][2] == 2:  # face  value
                             dico[a.format(i)] = self.getFacesRawTimeSeries(enumpointorvalues, [parametres[i][3]])
 

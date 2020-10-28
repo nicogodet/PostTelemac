@@ -24,13 +24,14 @@
 from __future__ import unicode_literals
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtGui import (QStandardItemModel, QStandardItem)
-from qgis.PyQt.QtWidgets import (QDialog, QTreeWidgetItem)
+from qgis.PyQt.QtGui import QStandardItemModel, QStandardItem
+from qgis.PyQt.QtWidgets import QDialog, QTreeWidgetItem
 
 import os.path
 import pickle
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "..", "ui", "def_variable.ui"))
+
 
 class DefVariablesDialog(QDialog, FORM_CLASS):
     def __init__(self, lst_param, lst_var, parent=None):

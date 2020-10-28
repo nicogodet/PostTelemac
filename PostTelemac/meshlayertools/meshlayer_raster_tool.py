@@ -94,7 +94,6 @@ class rasterize(QtCore.QObject):
         self.selafinlayer = selafin
         self.tool = tool
 
-
     def createRaster(self):
         try:
             if self.tool.comboBox_rasterextent.currentIndex() == 0:
@@ -140,7 +139,6 @@ class rasterize(QtCore.QObject):
                 + str(self.selafinlayer.hydrauparser.parametres[paramindex][1]),
             )
 
-
             try:
                 raster_ut += ".tif"
                 # xres = (xmax-xmin)/float(ncols)
@@ -149,14 +147,14 @@ class rasterize(QtCore.QObject):
                 yres = res
                 geotransform = (xmin, xres, 0, ymin, 0, yres)
 
-                    # raster_ut = os.path.join(os.path.dirname(self.selafinlayer.hydraufilepath),str(os.path.basename(self.selafinlayer.hydraufilepath).split('.')[0] ) + '_raster_'+str(self.selafinlayer.parametres[paramindex][1])+'.asc')
+                # raster_ut = os.path.join(os.path.dirname(self.selafinlayer.hydraufilepath),str(os.path.basename(self.selafinlayer.hydraufilepath).split('.')[0] ) + '_raster_'+str(self.selafinlayer.parametres[paramindex][1])+'.asc')
 
-                    # output_raster = gdal.GetDriverByName('GTiff').Create(raster_ut,ncols, nrows, 1 ,gdal.GDT_Float32,['TFW=YES', 'COMPRESS=PACKBITS'])  # Open the file, see here for information about compression: http://gis.stackexchange.com/questions/1104/should-gdal-be-set-to-produce-geotiff-files-with-compression-which-algorithm-sh
+                # output_raster = gdal.GetDriverByName('GTiff').Create(raster_ut,ncols, nrows, 1 ,gdal.GDT_Float32,['TFW=YES', 'COMPRESS=PACKBITS'])  # Open the file, see here for information about compression: http://gis.stackexchange.com/questions/1104/should-gdal-be-set-to-produce-geotiff-files-with-compression-which-algorithm-sh
                 output_raster = gdal.GetDriverByName(str("GTiff")).Create(
                     raster_ut, ncols, nrows, 1, gdal.GDT_Float32, ["TFW=YES"]
                 )  # Open the file, see here for information about compression: http://gis.stackexchange.com/questions/1104/should-gdal-be-set-to-produce-geotiff-files-with-compression-which-algorithm-sh
                 output_raster.SetGeoTransform(geotransform)  # Specify its coordinates
-                    # self.status.emit('raster created')
+                # self.status.emit('raster created')
                 srs = osr.SpatialReference()  # Establish its coordinate encoding
                 crstemp = self.selafinlayer.crs().authid()
                 if crstemp.startswith("EPSG:"):

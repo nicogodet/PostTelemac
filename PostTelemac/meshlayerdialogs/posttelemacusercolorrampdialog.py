@@ -27,7 +27,7 @@ from __future__ import unicode_literals
 
 from qgis.PyQt import uic
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtWidgets import (QDialog, QTableWidgetItem)
+from qgis.PyQt.QtWidgets import QDialog, QTableWidgetItem
 
 from qgis.gui import QgsColorButton
 
@@ -35,6 +35,7 @@ import os
 import sys
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "..", "ui", "usercolorramp.ui"))
+
 
 class UserColorRampDialog(QDialog, FORM_CLASS):
     def __init__(self, selafinlayer, parent=None):

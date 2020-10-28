@@ -36,6 +36,7 @@ BATHY = "elevation"
 
 TYPENDVAR = 1  # 0 for 1d array 1 for ReadAsArray
 
+
 class PostTelemacHDFParser(PostTelemacAbstractParser):
 
     SOFTWARE = "HECRAS"
@@ -96,11 +97,11 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
 
     def getVarNames(self):
         """
-        
+
         var 0 : bottom
-        
+
         self.varnames : [..., [ varname, type : 0 : elem 1 : facenode 2 : face , varnameinhdffile ], ...]
-        
+
         return np.array[varname, typevar (0 : elem, 1 : facenode, 2 : face)]
         """
         # return np.array([['test',0]])
@@ -202,7 +203,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         xyz
         3T : /
         hec : Cells_Center_Coordinate
-        
+
         return (np.array(x), np.array(y) )
         """
         return (np.array([]), np.array([]))
@@ -211,9 +212,9 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         """
         3T : /
         hec : value
-        
+
         return np.array[param number][node value for param number]
-        
+
         """
         # first : bottom
 
@@ -441,9 +442,9 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
 
     def getElemRawTimeSerie(self, arraynumelemnode, arrayparam, layerparametres=None):
         """
-        
+
         return np.array[param][numelem][value for time t]
-        
+
         """
         # print 'getElemRawTimeSerie'
 
@@ -476,9 +477,9 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         """
         3T : xyz
         hec : FacePoints_Coordinate
-        
+
         return (np.array(x), np.array(y) )
-        
+
         """
         if self.facenodes == None:
             FacePoints_Coordinate = []
@@ -511,7 +512,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         It's the mesh
         3T : ikle
         hec : Faces_FacePoint_Indexes
-        
+
         return np.array([facenodeindex linked with the elem ])
         """
         if self.elemfacesindex == None:
@@ -552,9 +553,9 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
     def getFacesNodesRawValues(self, time1):
         """
         3T : getvalues
-        
+
         return np.array[param number][node value for param number]
-        
+
         """
         """
         temp =  np.array( [np.array([0.0]*self.facesnodescount)] )
@@ -611,9 +612,9 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
     def getFacesNodesRawTimeSeries(self, arraynumelemnode, arrayparam, layerparametres=None):
         """
         3T : getvalues
-        
+
         return np.array[param][numelem][value for time t]
-        
+
         """
         return np.array([])
 
@@ -669,7 +670,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         3T : /
         hec : velocity
         return np.array[param number][node value for param number]
-        
+
         """
         # return np.array([])
         if False:
@@ -761,9 +762,9 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         """
         3T : /
         hec : velocity
-        
+
         return np.array[param][numelem][value for time t]
-        
+
         """
         # print 'getElemRawTimeSerie'
 

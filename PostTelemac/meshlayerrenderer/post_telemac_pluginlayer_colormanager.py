@@ -24,7 +24,7 @@ Versions :
 from __future__ import unicode_literals
 
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.PyQt.QtGui import (QPixmap, QColor)
+from qgis.PyQt.QtGui import QPixmap, QColor
 from qgis.PyQt.QtWidgets import QApplication
 
 import os
@@ -32,10 +32,10 @@ import numpy as np
 
 try:
     import matplotlib.colors
+
     MATPLOTLIBOK = True
 except:
     MATPLOTLIBOK = False
-
 
 
 class PostTelemacColorManager:

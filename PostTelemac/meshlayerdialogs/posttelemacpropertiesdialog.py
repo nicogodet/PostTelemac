@@ -25,8 +25,8 @@ from __future__ import unicode_literals
 
 # import Qt
 from qgis.PyQt import uic
-from qgis.PyQt.QtCore import (Qt, QCoreApplication, QSettings, QSize, pyqtSignal)
-from qgis.PyQt.QtGui import (QHeaderView, QColor, QFont, QIcon)
+from qgis.PyQt.QtCore import Qt, QCoreApplication, QSettings, QSize, pyqtSignal
+from qgis.PyQt.QtGui import QHeaderView, QColor, QFont, QIcon
 from qgis.PyQt.QtWidgets import (
     QDockWidget,
     QFileDialog,
@@ -34,7 +34,7 @@ from qgis.PyQt.QtWidgets import (
     QTableWidgetItem,
     QApplication,
     QMessageBox,
-    )
+)
 
 # other import
 import os
@@ -832,7 +832,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
 
     def deleteMapRamp(self):
         """
-        delete user defined color ramp 
+        delete user defined color ramp
         """
         name = self.dlg_color.lineEdit_name.text()
         if self.comboBox_clrramp_preset.findText(name) > -1:
@@ -1009,18 +1009,17 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
     def tr(self, message):
         """Used for translation"""
         # if False:
-            # try:
-                # return QCoreApplication.translate(
-                    # "PostTelemacPropertiesDialog", message, None, QApplication.UnicodeUTF8
-                # )
-            # except Exception as e:
-                # return message
+        # try:
+        # return QCoreApplication.translate(
+        # "PostTelemacPropertiesDialog", message, None, QApplication.UnicodeUTF8
+        # )
+        # except Exception as e:
+        # return message
         if True:
             return message
 
     def getTreeWidgetSelectedIndex(self, widget):
-        """
-        """
+        """"""
         getSelected = widget.selectedItems()
         if getSelected:
             baseNode = getSelected[0]
@@ -1030,8 +1029,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             return [-1, 0]
 
     def setTreeWidgetIndex(self, widget, pos0, pos1):
-        """
-        """
+        """"""
         widget.scrollToItem(widget.topLevelItem(pos1))
         widget.setCurrentItem(widget.topLevelItem(pos1))
         try:
@@ -1047,7 +1045,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             self.groupBox_volume2.setEnabled(False)
         else:
             self.groupBox_volume1.setEnabled(True)
-            self.groupBox_volume2.setEnabled(True) 
+            self.groupBox_volume2.setEnabled(True)
         """
 
         # enable veolocity tool if velocity u and v are present in parser params

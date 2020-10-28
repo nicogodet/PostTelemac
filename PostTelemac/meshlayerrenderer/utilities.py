@@ -2,7 +2,7 @@
 
 import time
 import os
-from math import (log, exp as exp_)
+from math import log, exp as exp_
 
 
 def complete_filename(name):
@@ -14,6 +14,7 @@ def format_(min_, max_):
     if max_ < 10000 and min_ >= 0.1:
         format_ = "%.1f"
     return format_
+
 
 def multiplier(value):
     """return a couple of multiplier and text representing it that are appropiate for
@@ -33,6 +34,7 @@ def multiplier(value):
         if x <= abs(value):
             mult = x
     return mult, multiplyers[mult]
+
 
 def linemerge(lines):
     """Returns a (set of) LineString(s) formed by sewing together a multilinestring."""

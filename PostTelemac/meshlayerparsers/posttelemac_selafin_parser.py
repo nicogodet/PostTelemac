@@ -31,6 +31,7 @@ try:
 except:
     pass
 
+
 class PostTelemacSelafinParser(PostTelemacAbstractParser):
 
     SOFTWARE = "TELEMAC"
@@ -78,9 +79,9 @@ class PostTelemacSelafinParser(PostTelemacAbstractParser):
         """
         3T : xyz
         hec : FacePoints_Coordinate
-        
+
         return (np.array(x), np.array(y) )
-        
+
         """
         return (self.hydraufile.MESHX + self.translatex, self.hydraufile.MESHY + self.translatey)
 
@@ -89,7 +90,7 @@ class PostTelemacSelafinParser(PostTelemacAbstractParser):
         It's the mesh
         3T : ikle
         hec : Faces_FacePoint_Indexes
-        
+
         return np.array([facenodeindex linked with the elem ])
         """
         return self.hydraufile.IKLE3
@@ -97,18 +98,18 @@ class PostTelemacSelafinParser(PostTelemacAbstractParser):
     def getFacesNodesRawValues(self, time1):
         """
         3T : getvalues
-        
+
         return np.array[param number][node value for param number]
-        
+
         """
         return self.hydraufile.getVALUES(time1)
 
     def getFacesNodesRawTimeSeries(self, arraynumfacenode, arrayparam, layerparametres=None):
         """
         3T : getvalues
-        
+
         return np.array[param][numelem][value for time t]
-        
+
         """
         """
         Warning : point index begin at 1

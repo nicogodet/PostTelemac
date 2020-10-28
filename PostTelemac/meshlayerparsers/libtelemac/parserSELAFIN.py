@@ -113,6 +113,7 @@ def putFileContent(file, lines):
     SrcF.close()
     return
 
+
 def subsetVariablesSLF(vars, ALLVARS):
     ids = []
     names = []
@@ -131,6 +132,7 @@ def subsetVariablesSLF(vars, ALLVARS):
         sys.exit(1)
 
     return ids, names
+
 
 def getValueHistorySLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsIndexes, varsName):
     f = hook["hook"]
@@ -175,6 +177,7 @@ def getValueHistorySLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsIndex
 
     return z
 
+
 def getValuePolylineSLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsIndexes, varsName):
     f = hook["hook"]
     endian = hook["endian"]
@@ -213,6 +216,7 @@ def getValuePolylineSLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsInde
 
     return z
 
+
 def getValuePolyplanSLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsIndexes, varsName):
     f = hook["hook"]
     endian = hook["endian"]
@@ -240,6 +244,7 @@ def getValuePolyplanSLF(hook, tags, time, support, NVAR, NPOIN3, NPLAN, varsInde
             f.read(4)
 
     return z
+
 
 def getEndianFromChar(f, nchar):
     pointer = f.tell()
@@ -425,27 +430,27 @@ class CONLIM:
 
 
 class SELAFIN:
-    """                                 (DOXYGEN parsing)
-   Class Selafin
+    """(DOXYGEN parsing)
+    Class Selafin
 
-   @brief
-      Read and create Selafin files with python
+    @brief
+       Read and create Selafin files with python
 
-   @details
-      The idea is to be able to set floatType and floatTypeSize from
-      outside when we start to write a selafinfiles.
-      This will make it possible to do some kind of converters
+    @details
+       The idea is to be able to set floatType and floatTypeSize from
+       outside when we start to write a selafinfiles.
+       This will make it possible to do some kind of converters
 
-   @history
-      - switch between big/little endian
-      - switch to double precission only for float
+    @history
+       - switch between big/little endian
+       - switch to double precission only for float
 
-   @TODO
-      - changes where only tested for simple reading, writing must still be done
-      - getSERIES was not tested
-      - all appen and put functions must be tested
-      - needs some intensive testing
-   """
+    @TODO
+       - changes where only tested for simple reading, writing must still be done
+       - getSERIES was not tested
+       - all appen and put functions must be tested
+       - needs some intensive testing
+    """
 
     # DATETIME = [1972,07,13,17,24,27]  # ... needed here because optional in SLF (static)
     DATETIME = [1972, 7, 13, 17, 24, 27]  # ... needed here because optional in SLF (static)
