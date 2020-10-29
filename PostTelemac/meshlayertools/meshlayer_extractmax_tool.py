@@ -23,14 +23,19 @@ Versions :
  ***************************************************************************/
 """
 
-from qgis.PyQt import uic, QtCore, QtGui
-from .meshlayer_abstract_tool import *
-import qgis, sys
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import QObject, QThread, pyqtSignal
 
+from qgis.core import QgsApplication, QgsProject
+from qgis.utils import iface
+
+from .meshlayer_abstract_tool import *
+from ..meshlayerparsers.libs_telemac.other.Class_Serafin import Serafin
+
+import sys
 import numpy as np
 import time
 import math
-from ..meshlayerparsers.libs_telemac.other.Class_Serafin import Serafin
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "ExtractMaxTool.ui"))
 
@@ -76,21 +81,21 @@ class ExtractMaxTool(AbstractMeshLayerTool, FORM_CLASS):
 
     def chargerSelafin(self, path):
         if path and self.checkBox_8.isChecked():
-            if qgis.utils.iface is not None:
+            if iface is not None:
                 slf = (
-                    qgis.core.QgsApplication.instance()
+                    QgsApplication.instance()
                     .pluginLayerRegistry()
                     .pluginLayerType("selafin_viewer")
                     .createLayer()
                 )
                 slf.setRealCrs(self.meshlayer.crs())
                 slf.load_selafin(path, "TELEMAC")
-                qgis.core.QgsProject.instance().addMapLayer(slf)
+                QgsProject.instance().addMapLayer(slf)
 
 
-class runGetMax(QtCore.QObject):
+class runGetMax(QObject):
     def __init__(self, selafinlayer, tool, intensite=False, direction=False, submersion=-1, duree=-1):
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         self.selafinlayer = selafinlayer
         self.tool = tool
         self.name_res = self.selafinlayer.hydraufilepath
@@ -133,10 +138,8 @@ class runGetMax(QtCore.QObject):
 
             ## On ajoute les deux nouvelles variables, pour cela il faut modifier la variable
             ## nbvar et nomvar (le nom de la variable ne doit pas depasser 72 caracteres
-            # print('params',self.selafinlayer.hydrauparser.parametres)
 
             for param in self.selafinlayer.hydrauparser.parametres:
-                # if param[2]:        #for virtual parameter
                 if param[4]:  # for virtual parameter
                     resout.nbvar += 1
                     resout.nomvar.append(str(param[1]))
@@ -159,11 +162,25 @@ class runGetMax(QtCore.QObject):
             ## Boucle sur tous les temps et récuperation des variables
             itermin = self.tool.spinBox_max_start.value()
             iterfin = self.tool.spinBox_max_end.value()
+            initialisation = True
             for timeslf in self.selafinlayer.hydrauparser.getTimes()[itermin:iterfin]:
                 num_time = np.where(self.selafinlayer.hydrauparser.getTimes() == timeslf)[0][0]
                 if (num_time - itermin) % 10 == 0:
                     self.status.emit(time.ctime() + " - Maximum creation - time " + str(timeslf))
-                if num_time != itermin:
+                if initialisation:  ## Ce else permet de d'initialiser notre variable max avec le premier pas de temps
+                    var_max = self.selafinlayer.hydrauparser.getValues(num_time)
+                    if self.submersion > -1 and self.selafinlayer.hydrauparser.parametreh != None:
+                        # var_sub = np.array([np.nan]*self.selafinlayer.hydrauparser.pointcount)
+                        var_sub = np.array([np.nan] * self.selafinlayer.hydrauparser.facesnodescount)
+                        pos_sub = np.where(var_max[self.selafinlayer.hydrauparser.parametreh] >= 0.05)[
+                            0
+                        ]  # la ou h est sup a 0.05 m
+                        var_sub[pos_sub] = timeslf
+                    if self.duree > -1 and self.selafinlayer.hydrauparser.parametreh != None:
+                        var_dur = np.array([0.0] * self.selafinlayer.hydrauparser.facesnodescount)
+                        previoustime = timeslf
+                    initialisation = False
+                else:
                     var = self.selafinlayer.hydrauparser.getValues(num_time)
                     for num_var, val_var in enumerate(var):
                         if (
@@ -174,9 +191,8 @@ class runGetMax(QtCore.QObject):
                                 or num_var == self.selafinlayer.hydrauparser.parametrevy
                             )
                         ):
-                            pos_max = np.where(np.abs(var[num_var]) > np.abs(var_max[num_var]))[
-                                0
-                            ]  ## On recherche tous les indicides du tableau ou les nouvelles valeurs sont supérieurs aux anciennes
+                            # On recherche tous les indicides du tableau ou les nouvelles valeurs sont supérieurs aux anciennes
+                            pos_max = np.where(var[num_var] > var_max[num_var])[0]
                             var_max[num_var][pos_max] = val_var[pos_max]
                         else:
                             if (
@@ -192,10 +208,10 @@ class runGetMax(QtCore.QObject):
                                     possubpreced = np.where(np.isnan(var_sub))[0]  # on cherche les valeurs encore a nan
                                     goodnum = np.intersect1d(pos_sub, possubpreced)  # on intersecte les deux
                                     var_sub[goodnum] = timeslf
-                            pos_max = np.where(var[num_var] > var_max[num_var])[
-                                0
-                            ]  ## On recherche tous les indicides du tableau ou les nouvelles valeurs sont supérieurs aux anciennes
+                            # On recherche tous les indicides du tableau ou les nouvelles valeurs sont supérieurs aux anciennes
+                            pos_max = np.where(var[num_var] > var_max[num_var])[0]
                             var_max[num_var][pos_max] = val_var[pos_max]
+
                     ## Maintenant on s'occuppe du cas particulier des vitesses
                     if (
                         self.selafinlayer.hydrauparser.parametrevx != None
@@ -218,23 +234,6 @@ class runGetMax(QtCore.QObject):
                         var_max[self.selafinlayer.hydrauparser.parametrevy][pos_vmax] = var[
                             self.selafinlayer.hydrauparser.parametrevy
                         ][pos_vmax]
-
-                else:  ## Ce else permet de d'initialiser notre variable max avec le premier pas de temps
-                    var_max = self.selafinlayer.hydrauparser.getValues(num_time)
-                    if self.submersion > -1 and self.selafinlayer.hydrauparser.parametreh != None:
-                        # var_sub = np.array([np.nan]*self.selafinlayer.hydrauparser.pointcount)
-                        var_sub = np.array([np.nan] * self.selafinlayer.hydrauparser.facesnodescount)
-                        pos_sub = np.where(var_max[self.selafinlayer.hydrauparser.parametreh] >= 0.05)[
-                            0
-                        ]  # la ou h est sup a 0.05 m
-                        var_sub[pos_sub] = timeslf
-                    if self.duree > -1 and self.selafinlayer.hydrauparser.parametreh != None:
-                        var_dur = np.array([0.0] * self.selafinlayer.hydrauparser.facesnodescount)
-                        previoustime = timeslf
-                        """
-                        pos_dur = np.where(var_max[self.selafinlayer.parametreh] >= 0.05)[0]  #la ou h est sup a 0.05 m
-                        var_dur[pos_dur] += 1
-                        """
 
             if self.submersion > -1 and self.selafinlayer.hydrauparser.parametreh != None:
                 var_sub = np.nan_to_num(var_sub)
@@ -283,16 +282,18 @@ class runGetMax(QtCore.QObject):
 
         except Exception as e:
             self.status.emit('getmax error : ' + str(e))
+            resin.close()
+            resout.close()
 
 
-    status = QtCore.pyqtSignal(str)
-    finished = QtCore.pyqtSignal(str)
+    status = pyqtSignal(str)
+    finished = pyqtSignal(str)
 
 
-class initRunGetMax(QtCore.QObject):
+class initRunGetMax(QObject):
     def __init__(self):
-        QtCore.QObject.__init__(self)
-        self.thread = QtCore.QThread()
+        QObject.__init__(self)
+        self.thread = QThread()
         self.worker = None
 
     def start(self, selafinlayer, tool, intensite, direction, submersion, duree):
@@ -313,5 +314,5 @@ class initRunGetMax(QtCore.QObject):
     def workerFinished(self, str1):
         self.finished1.emit(str1)
 
-    status = QtCore.pyqtSignal(str)
-    finished1 = QtCore.pyqtSignal(str)
+    status = pyqtSignal(str)
+    finished1 = pyqtSignal(str)

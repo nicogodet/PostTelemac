@@ -23,29 +23,38 @@ Versions :
  ***************************************************************************/
 """
 
-from qgis.PyQt import uic, QtCore, QtGui
+from qgis.PyQt import uic 
+from qgis.PyQt.QtCore import Qt, QObject, QThread, pyqtSignal
+from qgis.PyQt.QtGui import QCursor
 from qgis.PyQt.QtWidgets import QVBoxLayout, QApplication
+
+from qgis.core import (
+    QgsProject,
+    QgsCoordinateTransform,
+    QgsPointXY,
+    QgsGeometry,
+)
+from qgis.gui import QgsMapTool
+from qgis.utils import iface
 
 try:
     import shapely
 except:
     pass
 import math
-import qgis
 import numpy as np
-
-import matplotlib, sys
+import matplotlib
+import sys
 
 # local import
 from .meshlayer_abstract_tool import *
 from ..meshlayerlibs import pyqtgraph as pg
-
-pg.setConfigOption("background", "w")
-
 try:
     from ..meshlayerparsers.libs_telemac.samplers.meshes import *
 except:
     pass
+
+pg.setConfigOption("background", "w")
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "FlowTool.ui"))
 
@@ -165,14 +174,14 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
             self.lastClicked = [[-9999999999.9, 9999999999.9]]
             self.lastFreeHandPoints = []
         elif self.selectionmethod in [1, 2]:
-            layer = qgis.utils.iface.activeLayer()
+            layer = iface.activeLayer()
             if not (layer.type() == 0 and layer.geometryType() == 1):
                 QMessageBox.warning(
-                    qgis.utils.iface.mainWindow(), "PostTelemac", self.tr("Select a (poly)line vector layer")
+                    iface.mainWindow(), "PostTelemac", self.tr("Select a (poly)line vector layer")
                 )
             elif self.selectionmethod == 1 and len(layer.selectedFeatures()) == 0:
                 QMessageBox.warning(
-                    qgis.utils.iface.mainWindow(), "PostTelemac", self.tr("Select a line in a (poly)line vector layer")
+                    iface.mainWindow(), "PostTelemac", self.tr("Select a line in a (poly)line vector layer")
                 )
             else:
                 self.initclass1 = []
@@ -182,8 +191,8 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
                     iter = layer.getFeatures()
                 geomfinal = []
                 self.vectorlayerflowids = []
-                xformutil = qgis.core.QgsCoordinateTransform(
-                    self.meshlayer.realCRS, layer.crs(), qgis.core.QgsProject.instance()
+                xformutil = QgsCoordinateTransform(
+                    self.meshlayer.realCRS, layer.crs(), QgsProject.instance()
                 )
                 for i, feature in enumerate(iter):
                     try:
@@ -196,8 +205,8 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
                     geomstemp = []
                     for geom in geoms:
                         qgspoint = xformutil.transform(
-                            qgis.core.QgsPointXY(geom[0], geom[1]),
-                            qgis.core.QgsCoordinateTransform.ReverseTransform,
+                            QgsPointXY(geom[0], geom[1]),
+                            QgsCoordinateTransform.ReverseTransform,
                         )
                         geomstemp.append([qgspoint.x(), qgspoint.y()])
                     geomfinal.append(geomstemp)
@@ -302,17 +311,17 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
             points = []
             if len(x) > 1:
                 for i in range(len(x)):
-                    points.append(self.meshlayer.xform.transform(qgis.core.QgsPointXY(x[i], y[i])))
+                    points.append(self.meshlayer.xform.transform(QgsPointXY(x[i], y[i])))
                 self.meshlayer.rubberband.rubberbandface.addGeometry(
-                    qgis.core.QgsGeometry.fromPolygonXY([points]), None
+                    QgsGeometry.fromPolygonXY([points]), None
                 )
             else:
-                qgspoint = self.meshlayer.xform.transform(qgis.core.QgsPointXY(x[0], y[0]))
+                qgspoint = self.meshlayer.xform.transform(QgsPointXY(x[0], y[0]))
 
                 self.meshlayer.rubberband.rubberbandface.addPoint(qgspoint)
                 self.meshlayer.rubberband.rubberbandfacenode.addPoint(qgspoint)
         else:
-            qgspoint = self.meshlayer.xform.transform(qgis.core.QgsPointXY(x, y))
+            qgspoint = self.meshlayer.xform.transform(QgsPointXY(x, y))
             self.meshlayer.rubberband.rubberbandface.addPoint(qgspoint)
 
     def updateProgressBar(self, float1):
@@ -343,9 +352,9 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
                 self.meshlayer.rubberband.reset()
                 for i in range(0, len(self.pointstoDraw)):
                     self.meshlayer.rubberband.rubberbandface.addPoint(
-                        qgis.core.QgsPointXY(self.pointstoDraw[i][0], self.pointstoDraw[i][1])
+                        QgsPointXY(self.pointstoDraw[i][0], self.pointstoDraw[i][1])
                     )
-                self.meshlayer.rubberband.rubberbandface.addPoint(qgis.core.QgsPointXY(mapPos.x(), mapPos.y()))
+                self.meshlayer.rubberband.rubberbandface.addPoint(QgsPointXY(mapPos.x(), mapPos.y()))
 
     def rightClicked(self, position):  # used to quit the current action
         if self.selectionmethod == 0:
@@ -383,7 +392,7 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
             pointstoDrawfinal = []
             for point in self.pointstoDraw:
                 qgspoint = xform.transform(
-                    qgis.core.QgsPointXY(point[0], point[1]), qgis.core.QgsCoordinateTransform.ReverseTransform
+                    QgsPointXY(point[0], point[1]), QgsCoordinateTransform.ReverseTransform
                 )
                 pointstoDrawfinal.append([qgspoint.x(), qgspoint.y()])
             # launch analyses
@@ -393,25 +402,24 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
             self.pointstoDraw = []
             # temp point to distinct leftclick and dbleclick
             self.dblclktemp = newPoints
-            # iface.mainWindow().statusBar().showMessage(self.textquit0)
 
     def cleaning(self):  # used on right click
         self.meshlayer.canvas.setMapTool(self.propertiesdialog.maptooloriginal)
-        qgis.utils.iface.mainWindow().statusBar().showMessage("")
+        iface.mainWindow().statusBar().showMessage("")
 
 
-class FlowMapTool(qgis.gui.QgsMapTool):
+class FlowMapTool(QgsMapTool):
     def __init__(self, canvas, button):
-        qgis.gui.QgsMapTool.__init__(self, canvas)
+        QgsMapTool.__init__(self, canvas)
         self.canvas = canvas
-        self.cursor = QtGui.QCursor(QtCore.Qt.CrossCursor)
+        self.cursor = QCursor(Qt.CrossCursor)
         self.button = button
 
     def canvasMoveEvent(self, event):
         self.moved.emit({"x": event.pos().x(), "y": event.pos().y()})
 
     def canvasReleaseEvent(self, event):
-        if event.button() == QtCore.Qt.RightButton:
+        if event.button() == Qt.RightButton:
             self.rightClicked.emit({"x": event.pos().x(), "y": event.pos().y()})
         else:
             self.leftClicked.emit({"x": event.pos().x(), "y": event.pos().y()})
@@ -420,21 +428,21 @@ class FlowMapTool(qgis.gui.QgsMapTool):
         self.doubleClicked.emit({"x": event.pos().x(), "y": event.pos().y()})
 
     def activate(self):
-        qgis.gui.QgsMapTool.activate(self)
+        QgsMapTool.activate(self)
         self.canvas.setCursor(self.cursor)
 
     def deactivate(self):
         self.desactivate.emit()
-        qgis.gui.QgsMapTool.deactivate(self)
+        QgsMapTool.deactivate(self)
 
     def setCursor(self, cursor):
-        self.cursor = QtGui.QCursor(cursor)
+        self.cursor = QCursor(cursor)
 
-    moved = QtCore.pyqtSignal(dict)
-    rightClicked = QtCore.pyqtSignal(dict)
-    leftClicked = QtCore.pyqtSignal(dict)
-    doubleClicked = QtCore.pyqtSignal(dict)
-    desactivate = QtCore.pyqtSignal()
+    moved = pyqtSignal(dict)
+    rightClicked = pyqtSignal(dict)
+    leftClicked = pyqtSignal(dict)
+    doubleClicked = pyqtSignal(dict)
+    desactivate = pyqtSignal()
 
 
 # *********************************************************************************************
@@ -442,15 +450,12 @@ class FlowMapTool(qgis.gui.QgsMapTool):
 # ********************************************************************************************
 
 
-class computeFlow(QtCore.QObject):
+class computeFlow(QObject):
     def __init__(self, selafin, method, line):
-
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         self.selafinlayer = selafin
         self.polyline = line
-        # self.fig = matplotlib.pyplot.figure(0)
         self.fig = matplotlib.pyplot.figure(self.selafinlayer.instancecount + 4)
-        # self.tool = tool
         self.method = method
 
     def computeFlowMain(self):
@@ -649,13 +654,13 @@ class computeFlow(QtCore.QObject):
         print(list1, list2, list3)
         self.finished.emit(list1, list2, list3)
 
-    progress = QtCore.pyqtSignal(int)
-    status = QtCore.pyqtSignal(str)
-    error = QtCore.pyqtSignal(str)
-    killed = QtCore.pyqtSignal()
-    finished = QtCore.pyqtSignal(list, list, list)
-    emitpoint = QtCore.pyqtSignal(float, float)
-    emitprogressbar = QtCore.pyqtSignal(float)
+    progress = pyqtSignal(int)
+    status = pyqtSignal(str)
+    error = pyqtSignal(str)
+    killed = pyqtSignal()
+    finished = pyqtSignal(list, list, list)
+    emitpoint = pyqtSignal(float, float)
+    emitprogressbar = pyqtSignal(float)
 
     def getLines(self, polyline1, METHOD):
         """
@@ -665,7 +670,7 @@ class computeFlow(QtCore.QObject):
         """
         DEBUG = True
 
-        templine2 = qgis.core.QgsGeometry.fromPolylineXY([qgis.core.QgsPointXY(i[0], i[1]) for i in polyline1[:-1]])
+        templine2 = QgsGeometry.fromPolylineXY([QgsPointXY(i[0], i[1]) for i in polyline1[:-1]])
 
         if DEBUG:
             self.status.emit("templine2" + str(templine2.asPolyline()))
@@ -685,8 +690,8 @@ class computeFlow(QtCore.QObject):
         for collection in triplotcontourf.collections:
             for path in collection.get_paths():
                 for polygon in path.to_polygons():
-                    polygons2 = qgis.core.QgsGeometry.fromPolygonXY(
-                        [[qgis.core.QgsPointXY(i[0], i[1]) for i in polygon]]
+                    polygons2 = QgsGeometry.fromPolygonXY(
+                        [[QgsPointXY(i[0], i[1]) for i in polygon]]
                     )
 
                     if templine2.intersects(polygons2):
@@ -698,8 +703,8 @@ class computeFlow(QtCore.QObject):
                                 else:
                                     for line3 in inter.asMultiPolyline():
                                         temp3_out.append(
-                                            qgis.core.QgsGeometry.fromPolylineXY(
-                                                [qgis.core.QgsPointXY(i[0], i[1]) for i in line3]
+                                            QgsGeometry.fromPolylineXY(
+                                                [QgsPointXY(i[0], i[1]) for i in line3]
                                             )
                                         )
 
@@ -717,8 +722,8 @@ class computeFlow(QtCore.QObject):
                                 else:
                                     for line3 in inter.asMultiPolyline():
                                         temp3_out.append(
-                                            qgis.core.QgsGeometry.fromPolyline(
-                                                [qgis.core.QgsPoint(i[0], i[1]) for i in line3]
+                                            QgsGeometry.fromPolyline(
+                                                [QgsPoint(i[0], i[1]) for i in line3]
                                             )
                                         )
 
@@ -744,15 +749,15 @@ class computeFlow(QtCore.QObject):
                 else:
                     for line3 in templine.asMultiPolyline():
                         linefinal2.append(
-                            qgis.core.QgsGeometry.fromPolylineXY([qgis.core.QgsPointXY(i[0], i[1]) for i in line3])
+                            QgsGeometry.fromPolylineXY([QgsPointXY(i[0], i[1]) for i in line3])
                         )
 
         if DEBUG:
             self.status.emit("linefinal2" + str([line.asPolyline() for line in linefinal2]))
 
         # to keep line direction qgis
-        geomtemp = [[qgis.core.QgsPointXY(i[0], i[1]) for i in line.asPolyline()] for line in linefinal2]
-        multitemp = qgis.core.QgsGeometry.fromMultiPolylineXY(geomtemp)
+        geomtemp = [[QgsPointXY(i[0], i[1]) for i in line.asPolyline()] for line in linefinal2]
+        multitemp = QgsGeometry.fromMultiPolylineXY(geomtemp)
         multidef2 = templine2.intersection(multitemp.buffer(0.01, 12))
 
         if DEBUG:
@@ -779,7 +784,7 @@ class computeFlow(QtCore.QObject):
             self.status.emit("getLines - polylin : " + str(polyline1))
         templine1 = shapely.geometry.linestring.LineString([(i[0], i[1]) for i in polyline1[:-1]])
 
-        templine2 = qgis.core.QgsGeometry.fromPolyline([qgis.core.QgsPoint(i[0], i[1]) for i in polyline1[:-1]])
+        templine2 = QgsGeometry.fromPolyline([QgsPointXY(i[0], i[1]) for i in polyline1[:-1]])
 
         temp2_in = []
         temp2_out = []
@@ -801,7 +806,7 @@ class computeFlow(QtCore.QObject):
                 for polygon in path.to_polygons():
                     tuplepoly = [(i[0], i[1]) for i in polygon]
                     polygons = shapely.geometry.polygon.Polygon(tuplepoly)
-                    polygons2 = qgis.core.QgsGeometry.fromPolygon([[qgis.core.QgsPoint(i[0], i[1]) for i in polygon]])
+                    polygons2 = QgsGeometry.fromPolygon([[QgsPointXY(i[0], i[1]) for i in polygon]])
                     # shapely
                     if templine1.intersects(polygons):
                         if np.cross(polygon, np.roll(polygon, -1, axis=0)).sum() / 2.0 > 0:  # outer polygon
@@ -842,11 +847,11 @@ class computeFlow(QtCore.QObject):
         temp2in_line = shapely.geometry.multilinestring.MultiLineString(temp2_in)
 
         temp3out_line = [
-            qgis.core.QgsGeometry.fromMultiPolyline([[qgis.core.QgsPoint(i[0], i[1]) for i in line]])
+            QgsGeometry.fromMultiPolyline([[QgsPointXY(i[0], i[1]) for i in line]])
             for line in temp3_out
         ]
         temp3in_line = [
-            qgis.core.QgsGeometry.fromMultiPolyline([[qgis.core.QgsPoint(i[0], i[1]) for i in line]])
+            QgsGeometry.fromMultiPolyline([[QgsPointXY(i[0], i[1]) for i in line]])
             for line in temp3_in
         ]
         linefinal = []
@@ -889,9 +894,9 @@ class computeFlow(QtCore.QObject):
         geomtemp = []
         for multiline in linefinal2:
             for line in multiline.asMultiPolyline():
-                geomtemp.append([qgis.core.QgsPoint(i[0], i[1]) for i in line])
+                geomtemp.append([QgsPointXY(i[0], i[1]) for i in line])
 
-        multitemp = qgis.core.QgsGeometry.fromMultiPolyline(geomtemp)
+        multitemp = QgsGeometry.fromMultiPolyline(geomtemp)
         multidef2 = templine2.intersection(multitemp.buffer(0.01, 12))
 
         self.status.emit(str(multidef))
@@ -1084,10 +1089,10 @@ class computeFlow(QtCore.QObject):
 # ********************************************************************************************
 
 
-class InitComputeFlow(QtCore.QObject):
+class InitComputeFlow(QObject):
     def __init__(self):
-        QtCore.QObject.__init__(self)
-        self.thread = QtCore.QThread()
+        QObject.__init__(self)
+        self.thread = QThread()
         self.worker = None
         self.processtype = 0
 
@@ -1127,8 +1132,8 @@ class InitComputeFlow(QtCore.QObject):
     def updateProgressBar(self, float1):
         self.emitprogressbar.emit(float1)
 
-    status = QtCore.pyqtSignal(str)
-    error = QtCore.pyqtSignal(str)
-    finished1 = QtCore.pyqtSignal(list, list, list)
-    emitpoint = QtCore.pyqtSignal(float, float)
-    emitprogressbar = QtCore.pyqtSignal(float)
+    status = pyqtSignal(str)
+    error = pyqtSignal(str)
+    finished1 = pyqtSignal(list, list, list)
+    emitpoint = pyqtSignal(float, float)
+    emitprogressbar = pyqtSignal(float)
