@@ -23,12 +23,13 @@ Versions :
  ***************************************************************************/
 """
 
-from qgis.PyQt import uic, QtCore, QtGui
+from qgis.PyQt import uic
 from qgis.PyQt.QtWidgets import QTableWidgetItem
 
-from .meshlayer_abstract_tool import *
+from qgis.core import QgsPointXY, QgsCoordinateTransform
+from qgis.gui import QgsMapToolEmitPoint
 
-import qgis
+from .meshlayer_abstract_tool import *
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "ValueTool.ui"))
 
@@ -42,7 +43,7 @@ class ValueTool(AbstractMeshLayerTool, FORM_CLASS):
 
     def initTool(self):
         self.setupUi(self)
-        self.clickTool = qgis.gui.QgsMapToolEmitPoint(self.propertiesdialog.canvas)
+        self.clickTool = QgsMapToolEmitPoint(self.propertiesdialog.canvas)
         self.propertiesdialog.updateparamsignal.connect(self.updateParams)
         self.iconpath = os.path.join(os.path.dirname(__file__), "..", "icons", "tools", "Information_48x48.png")
 
@@ -54,14 +55,13 @@ class ValueTool(AbstractMeshLayerTool, FORM_CLASS):
             except Exception as e:
                 pass
             self.clickTool.canvasClicked.connect(self.valeurs_click)
-            self.valeurs_click(qgis.core.QgsPointXY(0.0, 0.0))
+            self.valeurs_click(QgsPointXY(0.0, 0.0))
 
     def onDesactivation(self):
         try:
             self.clickTool.canvasClicked.disconnect()
         except Exception as e:
             pass
-
         self.meshlayer.rubberband.reset()
 
     def valeurs_click(self, qgspointfromcanvas):
@@ -71,8 +71,8 @@ class ValueTool(AbstractMeshLayerTool, FORM_CLASS):
         """
         if self.comboBox_values_method.currentIndex() == 0:
             qgspoint = self.meshlayer.xform.transform(
-                qgis.core.QgsPointXY(qgspointfromcanvas[0], qgspointfromcanvas[1]),
-                qgis.core.QgsCoordinateTransform.ReverseTransform,
+                QgsPointXY(qgspointfromcanvas[0], qgspointfromcanvas[1]),
+                QgsCoordinateTransform.ReverseTransform,
             )
             point1 = [[qgspoint.x(), qgspoint.y()]]
             numnearestfacenode = self.meshlayer.hydrauparser.getNearestFaceNode(point1[0][0], point1[0][1])
@@ -118,12 +118,8 @@ class ValueTool(AbstractMeshLayerTool, FORM_CLASS):
                 color = self.meshlayer.rubberband.pointcolor
             elif param[2] == 2:
                 color = self.meshlayer.rubberband.facecolor
-
             self.tableWidget_values.setItem(i, 0, QTableWidgetItem(param[1]))
-            try:
-                self.tableWidget_values.item(i, 0).setTextColor(color)
-            except:
-                self.tableWidget_values.item(i, 0).setForeground(color)
+            self.tableWidget_values.item(i, 0).setForeground(color)
 
         self.tableWidget_values.setFixedHeight(
             (self.tableWidget_values.rowHeight(0) - 1) * (len(self.meshlayer.hydrauparser.parametres) + 1) + 1

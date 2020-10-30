@@ -23,10 +23,12 @@ Versions :
  ***************************************************************************/
 """
 
-
-# import Qt
-from qgis.PyQt import uic, QtCore, QtGui
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import QObject, QVariant, pyqtSignal
 from qgis.PyQt.QtWidgets import QVBoxLayout, QApplication, QFrame
+
+from qgis.core import QgsCoordinateTransform, QgsPointXY
+from qgis.utils import iface
 
 import qgis
 import numpy as np
@@ -154,20 +156,20 @@ class TemporalGraphTool(AbstractMeshLayerTool, FORM_CLASS):
                 if not self.graphtempactive:
                     xformutil = self.meshlayer.xform
                     qgspointtransformed = xformutil.transform(
-                        qgspointfromcanvas, qgis.core.QgsCoordinateTransform.ReverseTransform
+                        qgspointfromcanvas, QgsCoordinateTransform.ReverseTransform
                     )
                     self.launchThread([[qgspointtransformed.x(), qgspointtransformed.y()]])
 
             elif self.selectionmethod == 1:
-                layer = qgis.utils.iface.activeLayer()
+                layer = iface.activeLayer()
                 if not (layer.type() == 0 and layer.geometryType() == 0):
                     QMessageBox.warning(
-                        qgis.utils.iface.mainWindow(), "PostTelemac", self.tr("Select a point vector layer")
+                        iface.mainWindow(), "PostTelemac", self.tr("Select a point vector layer")
                     )
                 else:
-                    xformutil = qgis.core.QgsCoordinateTransform(self.meshlayer.realCRS, layer.crs())
+                    xformutil = QgsCoordinateTransform(self.meshlayer.realCRS, layer.crs())
                     self.checkBox.setChecked(True)
-                    layer = qgis.utils.iface.activeLayer()
+                    layer = iface.activeLayer()
                     iter = layer.getFeatures()
                     geomfinal = []
                     self.vectorlayerflowids = []
@@ -178,7 +180,7 @@ class TemporalGraphTool(AbstractMeshLayerTool, FORM_CLASS):
                             self.vectorlayerflowids.append(str(feature.id()))
                         geom = feature.geometry().asPoint()
                         temp1 = xformutil.transform(
-                            qgis.core.QgsPoint(geom[0], geom[1]), qgis.core.QgsCoordinateTransform.ReverseTransform
+                            QgsPointXY(geom[0], geom[1]), QgsCoordinateTransform.ReverseTransform
                         )
                         geom = [temp1.x(), temp1.y()]
 
@@ -208,7 +210,7 @@ class TemporalGraphTool(AbstractMeshLayerTool, FORM_CLASS):
                 if len(self.plotitem) > 0:
                     for plot in self.plotitem:
                         print(type(plot[0]))
-                        if isinstance(plot[0], QtCore.QVariant):
+                        if isinstance(plot[0], QVariant):
                             continue
                         self.pyqtgraphwdg.getPlotItem().removeItem(plot[0])
 
@@ -301,10 +303,9 @@ class TemporalGraphTool(AbstractMeshLayerTool, FORM_CLASS):
 # ********************************************************************************************
 
 
-class GraphTemp(QtCore.QObject):
+class GraphTemp(QObject):
     def __init__(self, selafin, graphtemptool, qgspoints, compare):
-
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         self.selafinlayer = selafin
         self.points = qgspoints
         self.compare = compare
@@ -378,14 +379,14 @@ class GraphTemp(QtCore.QObject):
             self.error.emit("meshlayer_temporalgraph_tool - createGraphTemp " + str(e))
             self.finished.emit([], [])
 
-    progress = QtCore.pyqtSignal(int)
-    status = QtCore.pyqtSignal(str)
-    error = QtCore.pyqtSignal(str)
-    killed = QtCore.pyqtSignal()
-    finished = QtCore.pyqtSignal(list, list)
-    emitpoint = QtCore.pyqtSignal(list, list)
-    emitprogressbar = QtCore.pyqtSignal(float)
-    emitnum = QtCore.pyqtSignal(list, int)
+    progress = pyqtSignal(int)
+    status = pyqtSignal(str)
+    error = pyqtSignal(str)
+    killed = pyqtSignal()
+    finished = pyqtSignal(list, list)
+    emitpoint = pyqtSignal(list, list)
+    emitprogressbar = pyqtSignal(float)
+    emitnum = pyqtSignal(list, int)
 
 
 # *********************************************************************************************
@@ -393,18 +394,17 @@ class GraphTemp(QtCore.QObject):
 # ********************************************************************************************
 
 
-class InitGraphTemp(QtCore.QObject):
+class InitGraphTemp(QObject):
     def __init__(self):
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         self.thread = None
         self.worker = None
         self.processtype = 0
         self.compare = False
 
     def start(self, selafin, graphtemptool, qgspoints):
-
         # Launch worker
-        self.thread = QtCore.QThread()
+        self.thread = QThread()
         self.worker = GraphTemp(selafin, graphtemptool, qgspoints, self.compare)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.createGraphTemp)
@@ -446,9 +446,9 @@ class InitGraphTemp(QtCore.QObject):
     def emitNum(self, list1, int1):
         self.emitnum.emit(list1, int1)
 
-    status = QtCore.pyqtSignal(str)
-    error = QtCore.pyqtSignal(str)
-    emitnum = QtCore.pyqtSignal(list, int)
-    finished1 = QtCore.pyqtSignal(list, list)
-    emitpoint = QtCore.pyqtSignal(list, list)
-    emitprogressbar = QtCore.pyqtSignal(float)
+    status = pyqtSignal(str)
+    error = pyqtSignal(str)
+    emitnum = pyqtSignal(list, int)
+    finished1 = pyqtSignal(list, list)
+    emitpoint = pyqtSignal(list, list)
+    emitprogressbar = pyqtSignal(float)

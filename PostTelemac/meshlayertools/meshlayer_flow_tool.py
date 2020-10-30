@@ -79,6 +79,7 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
         self.vectorlayerflowids = None
         self.maptool = None
         self.pointstoDraw = []
+        self.DEBUG = False
         self.meshlayer.rubberband.createRubberbandFace()
         self.meshlayer.rubberband.createRubberbandFaceNode()
         # Tools tab - temporal graph
@@ -262,9 +263,9 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
         self.propertiesdialog.progressBar.reset()
         self.pyqtgraphwdg.scene().sigMouseMoved.connect(self.mouseMoved)
 
-    def mouseMoved(self, pos):  # si connexion directe du signal "mouseMoved" : la fonction reçoit le point courant
-        if self.pyqtgraphwdg.sceneBoundingRect().contains(pos):  # si le point est dans la zone courante
-            mousePoint = self.vb.mapSceneToView(pos)  # récupère le point souris à partir ViewBox
+    def mouseMoved(self, pos):
+        if self.pyqtgraphwdg.sceneBoundingRect().contains(pos):
+            mousePoint = self.vb.mapSceneToView(pos)
             datax = self.plotitem[-1][1]
             datay = self.plotitem[-1][2]
             nearestindex = np.argmin(abs(np.array(datax) - mousePoint.x()))
@@ -464,15 +465,13 @@ class computeFlow(QObject):
 
         """
 
-        DEBUG = True
-
         list1 = []
         list2 = []
         list3 = []
 
         METHOD = self.method
 
-        if DEBUG:
+        if self.DEBUG:
             self.status.emit("polyline raw " + str(self.polyline))
 
         try:
@@ -486,14 +485,12 @@ class computeFlow(QObject):
                 if METHOD == 0:  # Method0 : shortest path and vector computation
                     if self.selafinlayer.hydrauparser.networkxgraph == None:
                         self.selafinlayer.hydrauparser.createNetworkxGraph()
-
-                    shortests = []  # list of shortests path
-
+                    
+                    shortests = []
+                    
                     for line in temp3:
                         linetemp = line
                         resulttemp = []
-                        self.status.emit("line : " + str(linetemp))
-
                         # find shortests path
                         for points in range(len(linetemp) - 1):
                             try:
@@ -520,8 +517,6 @@ class computeFlow(QObject):
 
                     totalpointsonshortest = len(sum(shortests, []))
                     compteur1 = 0
-
-                    self.status.emit("shortests : " + str(shortests))
 
                     for shortest in shortests:
                         for i, elem in enumerate(shortest):
@@ -592,17 +587,17 @@ class computeFlow(QObject):
                         linetemp = np.array([[point[0], point[1]] for point in line.coords])
                         resulttemp = []
                         flow = None
-                        temp_edges, temp_point, temp_bary = self.getCalcPointsSlice(line)
-                        for i in range(len(temp_point)):
+                        temp_edges, temp_points, temp_bary = self.getCalcPointsSlice(line)
+                        for i in range(len(temp_points)):
                             if i == 0:
-                                h2 = self.valuebetweenEdges(temp_point[i], temp_edges[i], parameterh)
-                                uv2 = self.valuebetweenEdges(temp_point[i], temp_edges[i], parameteruv)
+                                h2 = self.valuebetweenEdges(temp_points[i], temp_edges[i], parameterh)
+                                uv2 = self.valuebetweenEdges(temp_points[i], temp_edges[i], parameteruv)
                                 uv2 = np.array([[value, 0.0] for value in uv2])
-                                vv2 = self.valuebetweenEdges(temp_point[i], temp_edges[i], parametervv)
+                                vv2 = self.valuebetweenEdges(temp_points[i], temp_edges[i], parametervv)
                                 vv2 = np.array([[0.0, value] for value in vv2])
                                 v2vect = uv2 + vv2
-                                xy2 = temp_point[i]
-                                self.emitpoint.emit(temp_point[i][0], temp_point[i][1])
+                                xy2 = temp_points[i]
+                                self.emitpoint.emit(temp_points[i][0], temp_points[i][1])
                                 x, y = self.selafinlayer.hydrauparser.getFaceNodeXYFromNumPoint([temp_edges[i][0]])[0]
                                 self.emitpoint.emit(x, y)
                                 x, y = self.selafinlayer.hydrauparser.getFaceNodeXYFromNumPoint([temp_edges[i][1]])[0]
@@ -612,20 +607,20 @@ class computeFlow(QObject):
                                 h1 = h2
                                 v1vect = v2vect
                                 xy1 = xy2
-                                h2 = self.valuebetweenEdges(temp_point[i], temp_edges[i], parameterh)
-                                uv2 = self.valuebetweenEdges(temp_point[i], temp_edges[i], parameteruv)
+                                h2 = self.valuebetweenEdges(temp_points[i], temp_edges[i], parameterh)
+                                uv2 = self.valuebetweenEdges(temp_points[i], temp_edges[i], parameteruv)
                                 uv2 = np.array([[value, 0.0] for value in uv2])
-                                vv2 = self.valuebetweenEdges(temp_point[i], temp_edges[i], parametervv)
+                                vv2 = self.valuebetweenEdges(temp_points[i], temp_edges[i], parametervv)
                                 vv2 = np.array([[0.0, value] for value in vv2])
                                 v2vect = uv2 + vv2
-                                xy2 = temp_point[i]
+                                xy2 = temp_points[i]
                                 lenght = np.linalg.norm(np.array([xy2[0] - xy1[0], xy2[1] - xy1[1]]))
                                 if lenght > 0:
                                     if "flow" in locals():
                                         flow = flow + self.computeFlowBetweenPoints(xy1, h1, v1vect, xy2, h2, v2vect)
                                     else:
                                         flow = self.computeFlowBetweenPoints(xy1, h1, v1vect, xy2, h2, v2vect)
-                                    self.emitpoint.emit(temp_point[i][0], temp_point[i][1])
+                                    self.emitpoint.emit(temp_points[i][0], temp_points[i][1])
                                     x, y = self.selafinlayer.hydrauparser.getFaceNodeXYFromNumPoint([temp_edges[i][0]])[
                                         0
                                     ]
@@ -668,11 +663,10 @@ class computeFlow(QObject):
         Method0 : line slighlty inside the area of modelisation
         Method1 : line slighlty outside
         """
-        DEBUG = True
 
         templine2 = QgsGeometry.fromPolylineXY([QgsPointXY(i[0], i[1]) for i in polyline1[:-1]])
 
-        if DEBUG:
+        if self.DEBUG:
             self.status.emit("templine2" + str(templine2.asPolyline()))
 
         temp3_in = []
@@ -710,11 +704,9 @@ class computeFlow(QObject):
 
                         else:  # inner polygon
                             inter = templine2.intersection(polygons2.buffer(buffervalue, 12))
-                            if DEBUG:
+                            if self.DEBUG:
                                 self.status.emit("inter" + str(inter.asMultiPolyline()))
-                            if DEBUG:
                                 self.status.emit("inter" + str(inter.asPolyline()))
-                            if DEBUG:
                                 self.status.emit("inter" + str(inter.type()))
                             if inter.type() == 1:
                                 if len(inter.asMultiPolyline()) == 0:
@@ -730,9 +722,8 @@ class computeFlow(QObject):
         temp3out_line = temp3_out
         temp3in_line = temp3_in
 
-        if DEBUG:
+        if self.DEBUG:
             self.status.emit("temp3out_line" + str([line.asPolyline() for line in temp3out_line]))
-        if DEBUG:
             self.status.emit("temp3in_line" + str([line.asPolyline() for line in temp3in_line]))
 
         linefinal2 = []
@@ -752,7 +743,7 @@ class computeFlow(QObject):
                             QgsGeometry.fromPolylineXY([QgsPointXY(i[0], i[1]) for i in line3])
                         )
 
-        if DEBUG:
+        if self.DEBUG:
             self.status.emit("linefinal2" + str([line.asPolyline() for line in linefinal2]))
 
         # to keep line direction qgis
@@ -760,7 +751,7 @@ class computeFlow(QObject):
         multitemp = QgsGeometry.fromMultiPolylineXY(geomtemp)
         multidef2 = templine2.intersection(multitemp.buffer(0.01, 12))
 
-        if DEBUG:
+        if self.DEBUG:
             self.status.emit("multidef2" + str(multidef2))
 
         # qgis
@@ -778,17 +769,14 @@ class computeFlow(QObject):
         Method1 : line slighlty outside
         """
 
-        DEBUG = True
-
-        if DEBUG:
+        if self.DEBUG:
             self.status.emit("getLines - polylin : " + str(polyline1))
+        
         templine1 = shapely.geometry.linestring.LineString([(i[0], i[1]) for i in polyline1[:-1]])
-
-        templine2 = QgsGeometry.fromPolyline([QgsPointXY(i[0], i[1]) for i in polyline1[:-1]])
+        templine2 = QgsGeometry.fromPolylineXY([QgsPointXY(i[0], i[1]) for i in polyline1[:-1]])
 
         temp2_in = []
         temp2_out = []
-
         temp3_in = []
         temp3_out = []
 
@@ -806,7 +794,7 @@ class computeFlow(QObject):
                 for polygon in path.to_polygons():
                     tuplepoly = [(i[0], i[1]) for i in polygon]
                     polygons = shapely.geometry.polygon.Polygon(tuplepoly)
-                    polygons2 = QgsGeometry.fromPolygon([[QgsPointXY(i[0], i[1]) for i in polygon]])
+                    polygons2 = QgsGeometry.fromPolygonXY([[QgsPointXY(i[0], i[1]) for i in polygon]])
                     # shapely
                     if templine1.intersects(polygons):
                         if np.cross(polygon, np.roll(polygon, -1, axis=0)).sum() / 2.0 > 0:  # outer polygon
@@ -847,11 +835,11 @@ class computeFlow(QObject):
         temp2in_line = shapely.geometry.multilinestring.MultiLineString(temp2_in)
 
         temp3out_line = [
-            QgsGeometry.fromMultiPolyline([[QgsPointXY(i[0], i[1]) for i in line]])
+            QgsGeometry.fromMultiPolylineXY([[QgsPointXY(i[0], i[1]) for i in line]])
             for line in temp3_out
         ]
         temp3in_line = [
-            QgsGeometry.fromMultiPolyline([[QgsPointXY(i[0], i[1]) for i in line]])
+            QgsGeometry.fromMultiPolylineXY([[QgsPointXY(i[0], i[1]) for i in line]])
             for line in temp3_in
         ]
         linefinal = []
@@ -883,8 +871,9 @@ class computeFlow(QObject):
                     for line3 in templine.asMultiPolyline():
                         linefinal2.append(line3)
 
-        self.status.emit("linefinal : " + str(linefinal))
-        self.status.emit("linefinal2 : " + str([line.asMultiPolyline() for line in linefinal2]))
+        if self.DEBUG:
+            self.status.emit("linefinal : " + str(linefinal))
+            self.status.emit("linefinal2 : " + str([line.asMultiPolyline() for line in linefinal2]))
 
         # to keep line direction shapely
         multitemp = shapely.geometry.multilinestring.MultiLineString(linefinal)
@@ -896,11 +885,12 @@ class computeFlow(QObject):
             for line in multiline.asMultiPolyline():
                 geomtemp.append([QgsPointXY(i[0], i[1]) for i in line])
 
-        multitemp = QgsGeometry.fromMultiPolyline(geomtemp)
+        multitemp = QgsGeometry.fromMultiPolylineXY(geomtemp)
         multidef2 = templine2.intersection(multitemp.buffer(0.01, 12))
 
-        self.status.emit(str(multidef))
-        self.status.emit(str(multidef2.asMultiPolyline()))
+        if self.DEBUG:
+            self.status.emit(str(multidef))
+            self.status.emit(str(multidef2.asMultiPolyline()))
 
         # shapely
         if isinstance(multidef, shapely.geometry.linestring.LineString):
@@ -914,15 +904,15 @@ class computeFlow(QObject):
         # qgis
         result2 = np.array(multidef2.asMultiPolyline())
 
-        self.status.emit("result " + str(result))
-        self.status.emit("result2 " + str(result2))
+        if self.DEBUG:
+            self.status.emit("result " + str(result))
+            self.status.emit("result2 " + str(result2))
 
         return result
 
     def getCalcPointsSlice(self, line):
         linetemp = np.array([[point[0], point[1]] for point in line.coords])
-        # print str(line)
-        temp_point_final = []
+        temp_points_final = []
         temp_edges_final = []
         temp_bary_final = []
         for i in range(len(linetemp) - 1):
@@ -933,14 +923,11 @@ class computeFlow(QObject):
             )
             meshx, meshy = self.selafinlayer.hydrauparser.getFacesNodes()
             ikle = self.selafinlayer.hydrauparser.getElemFaces()
-
             quoi = sliceMesh(lintemp1, np.asarray(ikle), np.asarray(meshx), np.asarray(meshy))
 
-            temp_point = []
+            temp_points = []
             temp_edges = []
             temp_bary = []
-
-            # linebuf = line.buffer(1.0)
 
             for i, edgestemp in enumerate(quoi[0][1]):  # slicemesh - quoi[0][1] is list of egdes intersected by line
                 x1, y1 = self.selafinlayer.hydrauparser.getFaceNodeXYFromNumPoint([edgestemp[0]])[0]
@@ -954,7 +941,7 @@ class computeFlow(QObject):
 
             # check direction
             dir1 = lintemp1shapely.coords[1][0] - lintemp1shapely.coords[0][0]
-            dir2 = temp_point[1][0] - temp_point[0][0]
+            dir2 = temp_points[1][0] - temp_points[0][0]
 
             if dir1 > 0 and dir2 > 0:
                 pass
@@ -962,14 +949,14 @@ class computeFlow(QObject):
                 pass
             else:
                 temp_edges = temp_edges[::-1]
-                temp_point = temp_point[::-1]
+                temp_points = temp_points[::-1]
                 temp_bary = temp_bary[::-1]
 
-            temp_point_final = temp_point_final + temp_point
-            temp_edges_final = temp_edges_final + temp_edges
-            temp_bary_final = temp_bary_final + temp_bary
+            temp_points_final += temp_points
+            temp_edges_final += temp_edges
+            temp_bary_final += temp_bary
 
-        return temp_edges_final, temp_point_final, temp_bary_final
+        return temp_edges_final, temp_points_final, temp_bary_final
 
     def computeFlowBetweenPoints(self, xy1, h1, v1vect, xy2, h2, v2vect):
         vectorface = np.array([xy2[0] - xy1[0], xy2[1] - xy1[1]])
@@ -991,7 +978,6 @@ class computeFlow(QObject):
         av = deltav / lenght
         bv = v1
 
-        # self.status.emit( 'ah : '+str(ah.shape)+'  bh : '+str(bh.shape)+' av :  '+str(av.shape)+' bv : '+str(bv.shape))
         flow = (
             1.0 / 3.0 * (ah * av) * math.pow(lenght, 3)
             + 1.0 / 2.0 * (ah * bv + av * bh) * math.pow(lenght, 2)
@@ -1024,8 +1010,8 @@ class computeFlow(QObject):
 
         e1 = np.array(self.selafinlayer.hydrauparser.getFaceNodeXYFromNumPoint([edges[0]]))
         e2 = np.array(self.selafinlayer.hydrauparser.getFaceNodeXYFromNumPoint([edges[1]]))
-
         rap = np.linalg.norm(xytemp - e1) / np.linalg.norm(e2 - e1)
+        
         return (1.0 - rap) * h11 + (rap) * h12
 
     def getNearest(self, x, y, triangle):

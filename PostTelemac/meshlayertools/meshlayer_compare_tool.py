@@ -23,11 +23,10 @@ Versions :
  ***************************************************************************/
 """
 
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import QObject
 
-# from PyQt4 import uic, QtCore, QtGui
-from qgis.PyQt import uic, QtCore, QtGui
 from .meshlayer_abstract_tool import *
-import qgis
 
 import matplotlib
 import numpy as np
@@ -90,11 +89,9 @@ class CompareTool(AbstractMeshLayerTool, FORM_CLASS):
             # Launch thread
             self.checkBox_6.setEnabled(False)
             self.compareselafin()
-            # self.writeSelafinCaracteristics(self.textEdit_3,self.postutils.compareprocess.hydrauparsercompared)
             self.writeSelafinCaracteristics(self.textEdit_3, self.compareprocess.hydrauparsercompared)
 
     def reset_dialog(self):
-        # self.textEdit_2.clear()
         self.textEdit_3.clear()
         self.lineEdit_5.clear()
         self.lineEdit.clear()
@@ -111,7 +108,7 @@ class CompareTool(AbstractMeshLayerTool, FORM_CLASS):
             for var in hydrauparser.parametres:
                 textedit.append(str(var[0]) + " : " + str(var[1]))
 
-            textedit.append("nombre d elements : " + str(len(hydrauparser.getValues(0)[0])))
+            textedit.append("nombre d'éléments : " + str(len(hydrauparser.getValues(0)[0])))
 
     def layerChanged(self):
         self.writeSelafinCaracteristics(self.textEdit_2, self.meshlayer.hydrauparser)
@@ -145,7 +142,6 @@ class CompareTool(AbstractMeshLayerTool, FORM_CLASS):
     def compare1(self, int1):
         # selafinlayer
         try:
-            # if int1 == 2 :
             if self.checkBox_6.checkState() == 2:
                 self.getCorrespondingParameters()
                 # change signals
@@ -163,7 +159,6 @@ class CompareTool(AbstractMeshLayerTool, FORM_CLASS):
                 except Exception as e:
                     pass
 
-                # self.initclassgraphtemp.compare = True
                 self.meshlayer.triinterp = None
                 # desactive non matching parameters
                 for i in range(len(self.meshlayer.hydrauparser.parametres)):
@@ -191,7 +186,6 @@ class CompareTool(AbstractMeshLayerTool, FORM_CLASS):
                 except Exception as e:
                     pass
 
-                # self.initclassgraphtemp.compare = False
                 self.meshlayer.triinterp = None
                 self.meshlayer.forcerefresh = True
                 self.reinitCorrespondingParameters()
@@ -202,39 +196,27 @@ class CompareTool(AbstractMeshLayerTool, FORM_CLASS):
                 self.meshlayer.updateSelafinValuesEmit()
                 self.meshlayer.triggerRepaint()
         except Exception as e:
-            print(str(e))
+            self.status.emit("compare tool : " + str(e))
 
 
-class getCompareValue(QtCore.QObject):
+class getCompareValue(QObject):
     def __init__(self, layer, tool):
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         self.layer = layer
         self.tool = tool
-        # self.slf1 = layer.slf
-        # self.slf2 = SELAFIN(layer.propertiesdialog.lineEdit_5.toPlainText())
-        # self.slf2 = SELAFIN(layer.propertiesdialog.lineEdit_5.text())
         self.hydrauparsercompared = PostTelemacSelafinParser()
         self.hydrauparsercompared.loadHydrauFile(self.tool.lineEdit_5.text())
         self.hydrauparsercompared.setXYTranslation(
             self.layer.hydrauparser.translatex, self.layer.hydrauparser.translatey
         )
-
-        # layer.compare = True
-
-        # layer.updatevalue.connect(self.updateSelafinValue)
         self.triinterp = None
-        # self.comparetime = None
         self.values = None
-        # self.transmitvalues = False
-        # self.var_corresp = var_corresp
 
     def oppositeValues(self):
         self.values = -self.values
 
     def updateInterpolatorCompare(self, time1):
-
         if self.layer.hydrauparser.triangulationisvalid[0]:
-            # self.triinterp = [matplotlib.tri.LinearTriInterpolator(self.hydrauparser.triangulation, self.values[i]) for i in range(len(self.hydrauparser.parametres))]
             values = self.layer.values
             self.layer.hydrauparser.interpolator = [
                 matplotlib.tri.LinearTriInterpolator(self.layer.hydrauparser.triangulation, values[i])
@@ -247,12 +229,8 @@ class getCompareValue(QtCore.QObject):
     def updateSelafinValueCompare(self, onlyparamtimeunchanged=-1):
         temp1 = []
         lenvarnames = len(self.layer.hydrauparser.parametres)
-        # meshx1,meshy1 = self.layer.hydrauparser.getMesh()
         meshx1, meshy1 = self.layer.hydrauparser.getFacesNodes()
-        # ikle1 = self.layer.hydrauparser.getIkle()
         ikle1 = self.layer.hydrauparser.getElemFaces()
-        # meshx2,meshy2 = self.hydrauparsercompared.getMesh()
-        # ikle2 = self.hydrauparsercompared.getIkle()
         meshx2, meshy2 = self.hydrauparsercompared.getFacesNodes()
         ikle2 = self.hydrauparsercompared.getElemFaces()
 
@@ -260,8 +238,6 @@ class getCompareValue(QtCore.QObject):
             # desactive non matching parameters
             if onlyparamtimeunchanged < 0:
                 if np.array_equal(ikle1, ikle2) and np.array_equal(meshx1, meshx2) and np.array_equal(meshy1, meshy2):
-
-                    # self.status.emit("fichiers identiques ")
                     self.layer.propertiesdialog.textBrowser_2.append("fichiers identiques ")
                     valuetab = []
                     for i in range(lenvarnames):
@@ -281,11 +257,7 @@ class getCompareValue(QtCore.QObject):
                         self.oppositeValues()
 
                 else:
-                    # self.status.emit("fichiers non egaux")
-                    self.layer.propertiesdialog.textBrowser_2.append("fichiers non egaux")
-
-                    # projection of slf2 to slf1
-                    # triinterp
+                    self.layer.propertiesdialog.textBrowser_2.append("fichiers non égaux")
                     triang = matplotlib.tri.Triangulation(meshx2, meshy2, np.array(ikle2))
                     self.triinterp = []
                     for i in range(lenvarnames):
@@ -301,7 +273,6 @@ class getCompareValue(QtCore.QObject):
                         else:
                             self.triinterp.append(None)
                     valuesslf2 = []
-                    # count = self.layer.hydrauparser.pointcount
                     count = self.layer.hydrauparser.facesnodescount
                     # projection for matching parameters
                     tabtemp = []
@@ -324,9 +295,5 @@ class getCompareValue(QtCore.QObject):
                 self.layer.value = self.values[self.layer.param_displayed]
 
         except Exception as e:
-            print(str("updateSelafinValue :" + str(e)))
-            # self.status.emit("updateSelafinValue :"+str(e))
+            self.status.emit("updateSelafinValue :" + str(e))
             self.values = None
-            # self.finished.emit()
-
-        # self.comparetime = self.layer.time_displayed

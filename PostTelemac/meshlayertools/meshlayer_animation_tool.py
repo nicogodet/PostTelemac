@@ -23,7 +23,6 @@ Versions :
  ***************************************************************************/
 """
 
-
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import QEvent, QObject, pyqtSignal
 
