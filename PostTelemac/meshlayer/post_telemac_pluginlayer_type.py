@@ -12,7 +12,7 @@
  ***************************************************************************/
 """
 
-from qgis.core import QgsPluginLayerType, QgsPluginLayerRegistry
+from qgis.core import QgsPluginLayerType
 from qgis.utils import iface
 
 # import PyQT
@@ -34,13 +34,6 @@ class SelafinPluginLayerType(QgsPluginLayerType):
         self.iface.addDockWidget(Qt.RightDockWidgetArea, layer.propertiesdialog)
         self.iface.mapCanvas().setRenderFlag(True)
         return True
-
-    def addToRegistry(self):
-        # Add telemac_viewer in QgsPluginLayerRegistry
-        if u"selafin_viewer" in QgsPluginLayerRegistry.instance().pluginLayerTypes():
-            QgsPluginLayerRegistry.instance().removePluginLayerType("selafin_viewer")
-        self.pluginLayerType = self()
-        QgsPluginLayerRegistry.instance().addPluginLayerType(self.pluginLayerType)
 
     def setTransformContext(self, transformContext):
         pass

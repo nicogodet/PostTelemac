@@ -34,8 +34,6 @@ from qgis.utils import iface
 
 # Qt
 from qgis.PyQt.QtCore import pyqtSignal, QSettings
-
-# from qgis.PyQt.QtGui import QPixmap
 from qgis.PyQt.QtWidgets import QApplication
 
 # other import
@@ -172,6 +170,10 @@ class SelafinPluginLayer(QgsPluginLayer):
 
     def pluginLayerType(self):
         return self.LAYER_TYPE
+    
+    # Override existing function to avoid crash on qgis close
+    def providerType(self):
+        return 'virtual'
 
     def loadParsers(self):
         import glob, inspect, importlib
@@ -641,10 +643,10 @@ class SelafinPluginLayer(QgsPluginLayer):
         )
         # user
         element.setAttribute("level_user_name", self.propertiesdialog.comboBox_clrramp_preset.currentText())
-        # translation
+        # XYtranslation
         element.setAttribute("xtranslation", self.hydrauparser.translatex)
         element.setAttribute("ytranslation", self.hydrauparser.translatey)
-        # Virtuall param things
+        # Virtual param things
         strtrmp = ""
         for param in self.hydrauparser.parametres:
             if param[4]:

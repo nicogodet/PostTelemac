@@ -144,7 +144,7 @@ class rasterize(QObject):
                 yres = res
                 geotransform = (xmin, xres, 0, ymin, 0, yres)
                 output_raster = gdal.GetDriverByName(str("GTiff")).Create(
-                    raster_ut, ncols, nrows, 1, gdal.GDT_Float32, ["TFW=YES", "COMPRESS=LZW", "PREDICATE=2", "ZLEVEL=9"]
+                    raster_ut, ncols, nrows, 1, gdal.GDT_Float32, ["TFW=YES", "COMPRESS=LZW", "PREDICTOR=2", "ZLEVEL=9"]
                 )
                 output_raster.SetGeoTransform(geotransform)  # Specify its coordinates
                 srs = osr.SpatialReference()  # Establish its coordinate encoding
@@ -180,7 +180,7 @@ class rasterize(QObject):
 # ********************************************************************************************
 
 
-class InitRasterize(.QObject):
+class InitRasterize(QObject):
     def __init__(self):
         QObject.__init__(self)
         self.thread = None

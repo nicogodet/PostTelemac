@@ -62,7 +62,6 @@ class PostTelemac:
         # initialize locale
         locale = QSettings().value("locale/userLocale")[0:2]
         locale_path = os.path.join(self.plugin_dir, "i18n", "posttelemac_{}.qm".format(locale))
-
         if os.path.exists(locale_path):
             self.translator = QTranslator()
             self.translator.load(locale_path)
@@ -73,11 +72,9 @@ class PostTelemac:
         self.pluginLayerType = None
         self.addToRegistry()
         self.slf = []
-
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u"&PostTelemac")
-        # TODO: We are going to let the user set this up in a future iteration
         # toolbar
         toolbars = self.iface.mainWindow().findChildren(QToolBar)
         test = True
@@ -174,9 +171,9 @@ class PostTelemac:
         self.actions.append(action)
         return action
 
-        def initProcessing(self):
-            self.provider = PostTelemacProvider()
-            QgsApplication.processingRegistry().addProvider(self.provider)
+    def initProcessing(self):
+        self.provider = PostTelemacProvider()
+        QgsApplication.processingRegistry().addProvider(self.provider)
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
@@ -239,7 +236,7 @@ class PostTelemac:
     # Specific functions
     def addToRegistry(self):
         # Add telemac_viewer in QgsPluginLayerRegistry
-        reg = QgsApplication.pluginLayerRegistry()
+        reg = QgsApplication.instance().pluginLayerRegistry()
         if u"selafin_viewer" in reg.pluginLayerTypes():
             reg.removePluginLayerType("selafin_viewer")
         self.pluginLayerType = SelafinPluginLayerType()
