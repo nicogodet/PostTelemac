@@ -87,6 +87,7 @@ class SelafinPluginLayer(QgsPluginLayer):
         self.meshrenderer = None  # the class used to get qimage for canvas or composer
         self.renderer = None  # the qgis renderer class
         self.setValid(True)
+        self.setProviderType('virtual') # Prevent Qgis crash on clear() 
         self.realCRS = QgsCoordinateReferenceSystem()
         self.xform = None  # transformation class for reprojection
 
@@ -170,10 +171,6 @@ class SelafinPluginLayer(QgsPluginLayer):
 
     def pluginLayerType(self):
         return self.LAYER_TYPE
-    
-    # Override existing function to avoid crash on qgis close
-    def providerType(self):
-        return 'virtual'
 
     def loadParsers(self):
         import glob, inspect, importlib
