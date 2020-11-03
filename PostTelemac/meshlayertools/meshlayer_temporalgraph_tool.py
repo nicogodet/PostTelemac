@@ -24,7 +24,7 @@ Versions :
 """
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtCore import QObject, QVariant, pyqtSignal
+from qgis.PyQt.QtCore import QObject, QVariant, QThread, pyqtSignal
 from qgis.PyQt.QtWidgets import QVBoxLayout, QApplication, QFrame
 
 from qgis.core import QgsCoordinateTransform, QgsPointXY
@@ -188,7 +188,7 @@ class TemporalGraphTool(AbstractMeshLayerTool, FORM_CLASS):
                     if not self.graphtempactive:
                         self.launchThread(geomfinal)
         except Exception as e:
-            print(str(e))
+            self.error.emit("computeGraphTemp : " + str(e))
 
     def launchThread(self, geom):
         if not self.checkBox.isChecked():

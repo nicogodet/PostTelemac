@@ -1,38 +1,33 @@
 # unicode behaviour
 from __future__ import unicode_literals
 
-# Qgis
-import qgis
-from qgis.core import *
-from qgis.gui import *
-from qgis.utils import *
-import sys
-
-from qgis.core import QgsVectorFileWriter
-
-# import numpy
-import numpy as np
-
-# import matplotlib
-from matplotlib.path import Path
-import matplotlib.pyplot as plt
-from matplotlib import tri
-
 # import PyQT
+from qgis.PyQt.QtCore import QObject, QThread,, QVariant, pyqtSignal
 
-from qgis.PyQt.QtCore import *
-from qgis.PyQt.QtGui import *
-from qgis.PyQt import QtCore, QtGui
+# Qgis
+from qgis.core import (
+    QgsFields,
+    QgsVectorFileWriter,
+    QgsWkbTypes,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsCoordinateTransformContext,
+    QgsProject,
+    QgsFeature,
+    QgsField,
+    QgsGeometry,
+    QgsPointXY,
+    QgsVectorLayer,
+)
 
 # imports divers
-import threading
 from time import ctime
+import threading
+import numpy as np
 import math
-from os import path
-
-# from shapely.geometry import Polygon
+import os
 import sys
-import os.path
+
 
 from ...meshlayerparsers.posttelemac_selafin_parser import *
 
@@ -75,9 +70,9 @@ def isFileLocked(file, readLockCheck=False):
     return False
 
 
-def workerFinished(str1):
-    vlayer = QgsVectorLayer(str1, os.path.basename(str1).split(".")[0], "ogr")
-    QgsMapLayerRegistry.instance().addMapLayer(vlayer)
+#def workerFinished(str1):
+#    vlayer = QgsVectorLayer(str1, os.path.basename(str1).split(".")[0], "ogr")
+#    QgsMapLayerRegistry.instance().addMapLayer(vlayer)
 
 
 # *********************************************************************************************
@@ -85,7 +80,7 @@ def workerFinished(str1):
 # ********************************************************************************************
 
 
-class SelafinContour2Shp(QtCore.QObject):
+class SelafinContour2Shp(QObject):
     def __init__(
         self,
         processtype,  # 0 : thread inside qgis plugin) - 1 : thread processing - 2 : modeler (no thread) - 3 : modeler + shpouput - 4: outsideqgis
@@ -104,7 +99,7 @@ class SelafinContour2Shp(QtCore.QObject):
         outputprocessing=None,
     ):  # case of use in modeler
 
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         # donnees process
         self.processtype = processtype
         # donnes delafin
@@ -162,21 +157,26 @@ class SelafinContour2Shp(QtCore.QObject):
             self.xform = QgsCoordinateTransform(
                 QgsCoordinateReferenceSystem(str(self.slf_crs)),
                 QgsCoordinateReferenceSystem(str(self.slf_shpcrs)),
-                qgis.core.QgsProject.instance(),
+                QgsProject.instance(),
             )
         else:
             self.slf_shpcrs = self.slf_crs
             self.xform = None
 
         if self.processtype in [0, 1, 3, 4]:
-            geomtype = qgis.core.QgsWkbTypes.MultiPolygon
-            self.writerw_shp = QgsVectorFileWriter(
-                self.outputshpfile,
-                "utf-8",
-                champs,
-                geomtype,
-                QgsCoordinateReferenceSystem(self.slf_shpcrs),
-                driverName="ESRI Shapefile",
+            geomtype = QgsWkbTypes.MultiPolygon
+            # writer for shapefile
+            self.writerw_shp = None
+            options = QgsVectorFileWriter.SaveVectorOptions()
+            options.driverName = "ESRI Shapefile"
+            options.fileEncoding = 'utf-8'
+            self.writerw_shp = QgsVectorFileWriter.create(
+                fileName=self.outputshpfile,
+                fields=champs,
+                geometryType=QgsWkbTypes.MultiPolygon,
+                srs=QgsCoordinateReferenceSystem(self.slf_shpcrs),
+                transformContext=QgsCoordinateTransformContext(),
+                options=options
             )
 
         # donnees shp - processing result
@@ -292,11 +292,11 @@ class SelafinContour2Shp(QtCore.QObject):
     def raiseError(self, str1):
         self.error.emit(str(str1))
 
-    progress = QtCore.pyqtSignal(int)
-    status = QtCore.pyqtSignal(str)
-    error = QtCore.pyqtSignal(str)
-    killed = QtCore.pyqtSignal()
-    finished = QtCore.pyqtSignal(str)
+    progress = pyqtSignal(int)
+    status = pyqtSignal(str)
+    error = pyqtSignal(str)
+    killed = pyqtSignal()
+    finished = pyqtSignal(str)
 
 
 # *********************************************************************************************
@@ -304,10 +304,10 @@ class SelafinContour2Shp(QtCore.QObject):
 # ********************************************************************************************
 
 
-class InitSelafinMesh2Shp(QtCore.QObject):
+class InitSelafinMesh2Shp(QObject):
     def __init__(self):
-        QtCore.QObject.__init__(self)
-        self.thread = QtCore.QThread()
+        QObject.__init__(self)
+        self.thread = QThread()
         self.worker = None
 
     def start(
@@ -411,9 +411,9 @@ class InitSelafinMesh2Shp(QtCore.QObject):
     def workerFinished(self, str1):
         self.finished1.emit(str(str1))
 
-    status = QtCore.pyqtSignal(str)
-    error = QtCore.pyqtSignal(str)
-    finished1 = QtCore.pyqtSignal(str)
+    status = pyqtSignal(str)
+    error = pyqtSignal(str)
+    finished1 = pyqtSignal(str)
 
 
 if __name__ == "__main__":

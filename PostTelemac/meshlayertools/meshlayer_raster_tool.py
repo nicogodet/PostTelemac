@@ -118,7 +118,7 @@ class rasterize(QObject):
             if self.selafinlayer.hydrauparser.interpolator is None:
                 self.selafinlayer.hydrauparser.createInterpolator()
             success = self.selafinlayer.hydrauparser.updateInterpolatorEmit(self.selafinlayer.time_displayed)
-            self.status.emit("Raster Tool - Interpolator creation success " + str(success))
+            self.status.emit("Raster Tool - Interpolator check " + str(self.selafinlayer.hydrauparser.interpolator))
             
             paramindex = self.tool.comboBox_parametreschooser_2.currentIndex()
 
@@ -165,7 +165,7 @@ class rasterize(QObject):
             self.finished.emit(raster_ut)
 
         except Exception as e:
-            self.status.emit("Raster tool - createRaster : " + str(e))
+            self.status.emit("Raster Tool - createRaster : " + str(e))
             self.finished.emit(None)
 
     progress = pyqtSignal(int)

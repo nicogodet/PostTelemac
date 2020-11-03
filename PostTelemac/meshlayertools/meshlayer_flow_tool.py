@@ -79,7 +79,6 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
         self.vectorlayerflowids = None
         self.maptool = None
         self.pointstoDraw = []
-        self.DEBUG = False
         self.meshlayer.rubberband.createRubberbandFace()
         self.meshlayer.rubberband.createRubberbandFaceNode()
         # Tools tab - temporal graph
@@ -458,6 +457,7 @@ class computeFlow(QObject):
         self.polyline = line
         self.fig = matplotlib.pyplot.figure(self.selafinlayer.instancecount + 4)
         self.method = method
+        self.DEBUG = False
 
     def computeFlowMain(self):
         """
@@ -1038,9 +1038,9 @@ class computeFlow(QObject):
         meshx, meshy = self.selafinlayer.hydrauparser.getFacesNodes()
         ikle = self.selafinlayer.hydrauparser.getElemFaces()
         for num in np.array(ikle)[triangle]:
-            trianglepoints.append(np.array([np.array([meshx[num], meshy[num]]), num]))
+            trianglepoints.append(np.array([np.array([meshx[num], meshy[num]], dtype=object), num], dtype=object))
         num1 = np.array(ikle)[triangle][0]
-        trianglepoints.append(np.array([np.array([meshx[num1], meshy[num1]]), num1]))
+        trianglepoints.append(np.array([np.array([meshx[num1], meshy[num1]], dtype=object), num1], dtype=object))
 
         for i in range(len(trianglepoints) - 1):
             dist = np.linalg.norm(

@@ -35,6 +35,7 @@ from qgis.core import (
     QgsCoordinateTransformContext,
     QgsProject,
     QgsFeature,
+    QgsField,
     QgsGeometry,
     QgsVectorLayer,
 )
