@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 # import PyQT
-from qgis.PyQt.QtCore import QObject, QThread,, QVariant, pyqtSignal
+from qgis.PyQt.QtCore import QObject, QThread, QVariant, pyqtSignal
 
 # Qgis
 from qgis.core import (
@@ -164,7 +164,6 @@ class SelafinContour2Shp(QObject):
             self.xform = None
 
         if self.processtype in [0, 1, 3, 4]:
-            geomtype = QgsWkbTypes.MultiPolygon
             # writer for shapefile
             self.writerw_shp = None
             options = QgsVectorFileWriter.SaveVectorOptions()

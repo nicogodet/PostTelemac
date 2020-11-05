@@ -26,9 +26,10 @@ Versions :
 from qgis.PyQt import uic
 
 from qgis.core import QgsProject, QgsVectorLayer
+from qgis.gui import QgsProjectionSelectionDialog
+from qgis.utils import iface
 
 import os
-import qgis
 
 from .meshlayer_abstract_tool import *
 from .toshape.posttelemac_util_extractshp import *
@@ -55,7 +56,7 @@ class ToShapeTool(AbstractMeshLayerTool, FORM_CLASS):
         self.pushButton_10.clicked.connect(self.create_shp_maillage)
         self.checkBox_5.stateChanged.connect(self.enablecheckbox)
         self.pushButton_2.clicked.connect(self.create_shp_points)
-        self.crsselector = qgis.gui.QgsProjectionSelectionDialog()
+        self.crsselector = QgsProjectionSelectionDialog()
 
     def onActivation(self):
         pass
@@ -112,7 +113,7 @@ class ToShapeTool(AbstractMeshLayerTool, FORM_CLASS):
         self.initclass.status.connect(self.propertiesdialog.logMessage)
         self.initclass.error.connect(self.propertiesdialog.errorMessage)
 
-        if qgis.utils.iface is None:
+        if iface is None:
             self.initclass.status.connect(print)
             self.initclass.error.connect(print)
 
@@ -145,7 +146,7 @@ class ToShapeTool(AbstractMeshLayerTool, FORM_CLASS):
         self.initclass.status.connect(self.propertiesdialog.logMessage)
         self.initclass.error.connect(self.propertiesdialog.errorMessage)
 
-        if qgis.utils.iface is None:
+        if iface is None:
             self.initclass.status.connect(print)
             self.initclass.error.connect(print)
 
@@ -188,6 +189,7 @@ class ToShapeTool(AbstractMeshLayerTool, FORM_CLASS):
             self.initclass.finished1.connect(self.workerFinishedHillshade)
         else:
             self.initclass.finished1.connect(self.workershapeFinished)
+            
         self.propertiesdialog.normalMessage(self.tr("2Shape - mesh creation launched - watch progress on log tab"))
         self.initclass.start(
             0,  # 0 : thread inside qgis (plugin) - 1 : thread processing - 2 : modeler (no thread) - 3 : modeler + shpouput - 4: outsideqgis

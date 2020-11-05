@@ -1,53 +1,36 @@
-##[01_Telemac]=group
-
-
-# *************************************************************************
 """
 Versions :
 0.0 premier script
 0.2 : un seul script pour modeleur ou non
 
 """
-# *************************************************************************
-
-##Type_de_traitement=selection En arriere plan;Modeler;Modeler avec creation de fichiers
-
-##Fichier_resultat_telemac=file
-##Temps_a_exploiter_fichier_max_0=number 0.0
-##Pas_d_espace_0_si_tous_les_points=number 0.0
-##fichier_point_avec_vecteur_vitesse=boolean False
-##Parametre_vitesse_X=string UVmax
-##Parametre_vitesse_Y=string VVmax
-##systeme_de_projection=crs EPSG:2154
-##forcage_attribut_fichier_de_sortie=string
-
-##fichier_de_sortie_points=output vector
 
 # unicode behaviour
 from __future__ import unicode_literals
 
+from qgis.PyQt.QtCore import QObject, QThread, QVariant, pyqtSignal
+
+from qgis.core import (
+    QgsFields,
+    QgsVectorFileWriter,
+    QgsWkbTypes,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsCoordinateTransformContext,
+    QgsFeature,
+    QgsField,
+    QgsGeometry,
+    QgsPointXY,
+)
+
+import os
 import sys
-
-from qgis.PyQt.QtCore import *
-from qgis.PyQt.QtGui import *
-from qgis.PyQt import QtCore, QtGui
-
-from qgis.core import *
-from qgis.gui import *
-from os import path
-import numpy as np
-from matplotlib.path import Path
-import sys
-
-from qgis.core import QgsVectorFileWriter
-import matplotlib.pyplot as plt
-from matplotlib import tri
-
-from qgis.utils import *
-
-import threading
-from time import ctime
 import math
+import numpy as np
+
+import matplotlib.pyplot as plt
+from time import ctime
+
 from ...meshlayerparsers.posttelemac_selafin_parser import *
 
 
@@ -88,7 +71,7 @@ def isFileLocked(file, readLockCheck=False):
 # *************************************************************************
 
 
-class SelafinContour2Pts(QtCore.QObject):
+class SelafinContour2Pts(QObject):
 
     # def __init__(self, donnees_d_entree):
     def __init__(
@@ -110,10 +93,10 @@ class SelafinContour2Pts(QtCore.QObject):
         outputprocessing=None,
     ):  # needed for toolbox processing
 
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
 
         self.traitementarriereplan = processtype
-        # donnes delafin
+
         self.parserhydrau = PostTelemacSelafinParser()
         self.parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
 
@@ -142,12 +125,13 @@ class SelafinContour2Pts(QtCore.QObject):
                 + str(outputshpname)
                 + str(".shp")
             )
+            
         if not outputshppath:
             outputshppath = os.path.dirname(os.path.normpath(selafinfilepath))
+            
         self.pathshp = os.path.join(outputshppath, outputshpname)
 
         # Fields creation
-        test = [False, False]
         tabparam = []
         fields = QgsFields()
         paramsname = [param[0] for param in self.parserhydrau.getVarNames()]
@@ -156,7 +140,6 @@ class SelafinContour2Pts(QtCore.QObject):
             tabparam.append([i, name.strip()])
             fields.append(QgsField(str(name.strip()), QVariant.Double))
         self.vlayer = ""
-
         self.vitesse = "0"
 
         if self.computevelocity:
@@ -167,13 +150,18 @@ class SelafinContour2Pts(QtCore.QObject):
             self.vitesse = "1"
 
         if self.traitementarriereplan == 0 or self.traitementarriereplan == 2:
-            self.writerw1 = QgsVectorFileWriter(  ##FIX deprecation warning C:\Users\GODET\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\pointsamplingtool\doPointSamplingTool.py
-                self.pathshp,
-                None,
-                fields,
-                QgsWkbTypes.Point,
-                QgsCoordinateReferenceSystem(str(self.crs)),
-                "ESRI Shapefile",
+            # writer for shapefile
+            self.writerw1 = None
+            options = QgsVectorFileWriter.SaveVectorOptions()
+            options.driverName = "ESRI Shapefile"
+            options.fileEncoding = 'utf-8'
+            self.writerw1 = QgsVectorFileWriter.create(
+                fileName=self.pathshp,
+                fields=fields,
+                geometryType=QgsWkbTypes.Point,
+                srs=QgsCoordinateReferenceSystem(str(self.crs)),
+                transformContext=QgsCoordinateTransformContext(),
+                options=options
             )
 
     def run(self):
@@ -184,46 +172,35 @@ class SelafinContour2Pts(QtCore.QObject):
             + " - fichier : "
             + os.path.basename(self.pathshp)
         )
-
         self.writeOutput(strtxt)
 
         fet = QgsFeature()
+        
         try:
             if self.paramvalueX == None:
                 boolvitesse = False
             else:
                 boolvitesse = True
-            # ------------------------------------- TRaitement de tous les points
+
             if self.pasespace == 0:
                 noeudcount = len(self.x)
-                strtxt = str(ctime()) + " - Thread - Traitement des vitesses - " + str(noeudcount) + " noeuds"
-                """
-                    if self.traitementarriereplan  == 0 : self.status.emit(strtxt) 
-                    else : progress.setText(strtxt)
-                    """
+                
+                strtxt = str(ctime()) + " - Thread - Traitement des points - " + str(noeudcount) + " noeuds"
                 self.writeOutput(strtxt)
 
                 for k in range(len(self.x)):
                     if k % 5000 == 0:
                         strtxt = str(ctime()) + " - Thread - noeud n " + str(k) + "/" + str(noeudcount)
-                        """
-                            if self.traitementarriereplan  == 0 : self.status.emit(strtxt) 
-                            else : progress.setText(strtxt)
-                            """
                         self.writeOutput(strtxt)
-                        """
-                            
-                            if self.traitementarriereplan  == 0 : self.progress.emit(int(100.0*k/noeudcount))
-                            else : progress.setPercentage(int(100.0*k/noeudcount))
-                            """
 
                     fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(self.x[k]), float(self.y[k]))))
-                    # self.writeOutput('temp1')
+                    
                     tabattr = []
+                    
                     if len(self.ztri) > 0:
                         for l in range(len(self.ztri)):
                             tabattr.append(float(self.ztri[l][k]))
-                    # self.writeOutput('temp2')
+                            
                     if boolvitesse:
                         norme = (
                             (float(self.ztri[self.paramvalueX][k])) ** 2.0
@@ -237,19 +214,18 @@ class SelafinContour2Pts(QtCore.QObject):
                         if angle < 0:
                             angle = angle + 360
 
-                        # angle YML
-                        # angle = atanUVVV*180.0/math.pi+min(atanUVVV,0)/atanUVVV*360.0
                         tabattr.append(float(self.ztri[self.paramvalueX][k]))
                         tabattr.append(float(self.ztri[self.paramvalueY][k]))
                         tabattr.append(norme)
                         tabattr.append(angle)
-                    # self.writeOutput('temp3')
+                        
                     fet.setAttributes(tabattr)
+                    
                     if self.traitementarriereplan == 0 or self.traitementarriereplan == 2:
                         self.writerw1.addFeature(fet)
                     if self.traitementarriereplan == 1 or self.traitementarriereplan == 2:
                         self.writerw2.addFeature(fet)
-            # ------------------------------------- Traitement  du pas d'espace des points
+
         except Exception as e:
             strtxt = str(ctime()) + " ************ PROBLEME CALCUL DES VITESSES : " + str(e)
             self.writeOutput(strtxt)
@@ -258,8 +234,8 @@ class SelafinContour2Pts(QtCore.QObject):
             del self.writerw1
         if self.traitementarriereplan == 1 or self.traitementarriereplan == 2:
             del self.writerw2
-        strtxt = str(ctime()) + " - Thread - fichier " + self.pathshp + " cree"
 
+        strtxt = str(ctime()) + " - Thread - fichier " + self.pathshp + " crée"
         self.writeOutput(strtxt)
 
         if self.traitementarriereplan == 0:
@@ -276,11 +252,11 @@ class SelafinContour2Pts(QtCore.QObject):
     def raiseError(self, str1):
         self.error.emit(str(str1))
 
-    progress = QtCore.pyqtSignal(int)
-    status = QtCore.pyqtSignal(str)
-    error = QtCore.pyqtSignal(str)
-    killed = QtCore.pyqtSignal()
-    finished = QtCore.pyqtSignal(str)
+    progress = pyqtSignal(int)
+    status = pyqtSignal(str)
+    error = pyqtSignal(str)
+    killed = pyqtSignal()
+    finished = pyqtSignal(str)
 
 
 # ****************************************************************************
@@ -288,10 +264,10 @@ class SelafinContour2Pts(QtCore.QObject):
 # ****************************************************************************
 
 
-class InitSelafinMesh2Pts(QtCore.QObject):
+class InitSelafinMesh2Pts(QObject):
     def __init__(self):
-        QtCore.QObject.__init__(self)
-        self.thread = QtCore.QThread()
+        QObject.__init__(self)
+        self.thread = QThread()
         self.worker = None
 
     def start(
@@ -313,7 +289,6 @@ class InitSelafinMesh2Pts(QtCore.QObject):
         outputprocessing=None,
     ):  # needed for toolbox processing
 
-        # Check validity
         self.processtype = processtype
 
         try:
@@ -321,10 +296,9 @@ class InitSelafinMesh2Pts(QtCore.QObject):
             parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
             slf = parserhydrau.hydraufile
         except:
-            self.raiseError("fichier selafin n existe pas")
+            self.raiseError("Le fichier selafin n'existe pas.")
 
         # check time
-        # times = slf.tags["times"]
         times = parserhydrau.getTimes()
         if isinstance(time, int):  # cas des plugins et scripts
             if not time in range(len(times)):
@@ -335,24 +309,23 @@ class InitSelafinMesh2Pts(QtCore.QObject):
             else:
                 self.raiseError(str(ctime()) + " Time non trouve dans  " + str(times))
 
-        # check velocity creation
         self.worker = SelafinContour2Pts(
-            processtype,  # 0 : thread inside qgis (plugin) - 1 : thread processing - 2 : modeler (no thread) - 3 : modeler + shpouput - 4: outsideqgis
-            selafinfilepath,  # path to selafin file
-            time,  # time to process (selafin time in interation if int, or second if str)
-            spacestep,  # space step
-            computevelocity,  # bool for comuting velocity
+            processtype,
+            selafinfilepath,
+            time,
+            spacestep,
+            computevelocity,
             paramvx,
             paramvy,
-            ztri,  # tab of values
-            selafincrs,  # selafin crs
+            ztri,
+            selafincrs,
             translatex=translatex,
             translatey=translatey,
-            selafintransformedcrs=selafintransformedcrs,  # if no none, specify crs of output file
-            outputshpname=outputshpname,  # change generic outputname to specific one
-            outputshppath=outputshppath,  # if not none, create shp in this directory
+            selafintransformedcrs=selafintransformedcrs,
+            outputshpname=outputshpname,
+            outputshppath=outputshppath,
             outputprocessing=outputprocessing,
-        )  # needed for toolbox processing
+        )
 
         if processtype in [0, 1]:
             self.worker.moveToThread(self.thread)
@@ -363,16 +336,6 @@ class InitSelafinMesh2Pts(QtCore.QObject):
             self.worker.finished.connect(self.worker.deleteLater)
             self.thread.finished.connect(self.thread.deleteLater)
             self.worker.finished.connect(self.thread.quit)
-            champ = QgsFields()
-
-            if processtype in [1]:
-                writercontour = VectorWriter(
-                    outputprocessing,
-                    None,
-                    champ,
-                    QgsWkbTypes.MultiPolygon,
-                    QgsCoordinateReferenceSystem(str(selafincrs)),
-                )
             self.thread.start()
         else:
             self.worker.createShp()
@@ -392,152 +355,6 @@ class InitSelafinMesh2Pts(QtCore.QObject):
     def workerFinished(self, str1):
         self.finished1.emit(str(str1))
 
-    status = QtCore.pyqtSignal(str)
-    error = QtCore.pyqtSignal(str)
-    finished1 = QtCore.pyqtSignal(str)
-
-
-class InitSelafinMesh2Pts2:
-    def __init__(self, donnees_d_entree):
-        self.donnees_d_entree = donnees_d_entree
-        self.thread = QtCore.QThread()
-
-        if donnees_d_entree["forcage_attribut_fichier_de_sortie"] == "":
-            if self.donnees_d_entree["pasdespace"] == 0:
-                self.donnees_d_entree["pathshp"] = os.path.join(
-                    os.path.dirname(self.donnees_d_entree["pathselafin"]),
-                    os.path.basename(self.donnees_d_entree["pathselafin"]).split(".")[0]
-                    + "_points_t_"
-                    + str(int(self.donnees_d_entree["temps"]))
-                    + str(".shp"),
-                )
-            else:
-                self.donnees_d_entree["pathshp"] = os.path.join(
-                    os.path.dirname(self.donnees_d_entree["pathselafin"]),
-                    os.path.basename(self.donnees_d_entree["pathselafin"]).split(".")[0]
-                    + "_points_"
-                    + str(int(self.donnees_d_entree["pasdespace"]))
-                    + "m_t_"
-                    + str(int(self.donnees_d_entree["temps"]))
-                    + str(".shp"),
-                )
-        else:
-            self.donnees_d_entree["pathshp"] = os.path.join(
-                os.path.dirname(self.donnees_d_entree["pathselafin"]),
-                os.path.basename(self.donnees_d_entree["pathselafin"]).split(".")[0]
-                + "_"
-                + str(self.donnees_d_entree["forcage_attribut_fichier_de_sortie"])
-                + str(".shp"),
-            )
-
-        if self.donnees_d_entree["fichier_point_avec_vecteur_vitesse"]:
-            self.donnees_d_entree["Parametre_vitesse_X"] = donnees_d_entree["Parametre_vitesse_X"]
-            self.donnees_d_entree["Parametre_vitesse_Y"] = donnees_d_entree["Parametre_vitesse_Y"]
-        else:
-            self.donnees_d_entree["Parametre_vitesse_X"] = None
-            self.donnees_d_entree["Parametre_vitesse_Y"] = None
-
-        self.worker = ""
-
-    def main1(self):
-        progress.setPercentage(0)
-        progress.setText(str(ctime()) + " - Initialisation - Debut du script")
-        # Chargement du fichier .res****************************************
-        slf = SELAFIN(self.donnees_d_entree["pathselafin"])
-
-        # Recherche du temps a traiter ***********************************************
-        test = False
-        for i, time in enumerate(slf.tags["times"]):
-            progress.setText(
-                str(ctime()) + " - Initialisation - Temps present dans le fichier : " + str(np.float64(time))
-            )
-            # print str(i) +" "+ str(time) + str(type(time))
-            if float(time) == float(self.donnees_d_entree["temps"]):
-                test = True
-                values = slf.getVALUES(i)
-        if test:
-            progress.setText(
-                str(ctime()) + " - Initialisation - Temps traite : " + str(np.float64(self.donnees_d_entree["temps"]))
-            )
-        else:
-            raise GeoAlgorithmExecutionException(
-                str(ctime())
-                + " - Initialisation - Erreur : \
-                                   Temps non trouve"
-            )
-
-        # Recherche de la variable a traiter ****************************************
-        test = [False, False]
-        tabparam = []
-        donnees_d_entree["champs"] = QgsFields()
-        for i, name in enumerate(slf.VARNAMES):
-            progress.setText(str(ctime()) + " - Initialisation - Variable dans le fichier res : " + name.strip())
-            tabparam.append([i, name.strip()])
-            donnees_d_entree["champs"].append(QgsField(str(name.strip()).translate(None, "?,!.;"), QVariant.Double))
-            if self.donnees_d_entree["Parametre_vitesse_X"] != None:
-                if str(name).strip() == self.donnees_d_entree["Parametre_vitesse_X"].strip():
-                    test[0] = True
-                    self.donnees_d_entree["paramvalueX"] = i
-                if str(name).strip() == self.donnees_d_entree["Parametre_vitesse_Y"].strip():
-                    test[1] = True
-                    self.donnees_d_entree["paramvalueY"] = i
-            else:
-                self.donnees_d_entree["paramvalueX"] = None
-                self.donnees_d_entree["paramvalueY"] = None
-        if self.donnees_d_entree["Parametre_vitesse_X"] != None:
-            if test == [True, True]:
-                progress.setText(
-                    str(ctime())
-                    + " - Initialisation - Parametre trouvee : "
-                    + str(tabparam[self.donnees_d_entree["paramvalueX"]][1]).strip()
-                    + " "
-                    + str(tabparam[self.donnees_d_entree["paramvalueY"]][1]).strip()
-                )
-            else:
-                raise GeoAlgorithmExecutionException(
-                    str(ctime())
-                    + " - Initialisation - Erreur : \
-                                     Parametre vitesse non trouve"
-                )
-
-        # Chargement de la topologie du .res ********************************************
-        self.donnees_d_entree["mesh"] = np.array(slf.IKLE3)
-        self.donnees_d_entree["x"] = slf.MESHX
-        self.donnees_d_entree["y"] = slf.MESHY
-
-        # Verifie que le shp n existe pas
-        if isFileLocked(self.donnees_d_entree["pathshp"], True):
-            raise GeoAlgorithmExecutionException(
-                str(ctime())
-                + " - Initialisation - Erreur :\
-                                   Fichier shape deja charge !!"
-            )
-
-        # Chargement des donnees  ***********************************
-        self.donnees_d_entree["ztri"] = []
-        for i in range(len(tabparam)):
-            self.donnees_d_entree["ztri"].append(values[i])
-
-        # Lancement du thread **************************************************************************************
-
-        self.worker = Worker(donnees_d_entree)
-        if donnees_d_entree["traitementarriereplan"] == 0:
-            self.worker.moveToThread(self.thread)
-            self.thread.started.connect(self.worker.run)
-            self.worker.progress.connect(progress.setPercentage)
-            self.worker.status.connect(progress.setText)
-            self.worker.finished.connect(workerFinished)
-            self.worker.finished.connect(self.worker.deleteLater)
-            self.thread.finished.connect(self.thread.deleteLater)
-            self.worker.finished.connect(self.thread.quit)
-            champ = QgsFields()
-            writercontour = VectorWriter(
-                self.donnees_d_entree["fichierdesortie_point"],
-                None,
-                champ,
-                QgsWkbTypes.MultiPoint,
-                QgsCoordinateReferenceSystem(str(self.donnees_d_entree["crs"])),
-            )
-            self.thread.start()
-        else:
-            self.worker.run()
+    status = pyqtSignal(str)
+    error = pyqtSignal(str)
+    finished1 = pyqtSignal(str)
