@@ -14,6 +14,8 @@ from qgis.core import (
     QgsField,
     QgsGeometry,
     QgsPointXY,
+    QgsVectorLayer,
+    QgsSpatialIndex,
 )
 
 # import numpy

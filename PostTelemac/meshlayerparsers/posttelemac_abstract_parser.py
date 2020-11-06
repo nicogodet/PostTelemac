@@ -34,7 +34,6 @@ import qgis
 
 try:
     from scipy.spatial import cKDTree
-
     SCIPYOK = True
 except:
     SCIPYOK = False
@@ -43,7 +42,6 @@ except:
 
 try:
     import matplotlib.tri
-
     MATPLOTLIBTRIOK = True
 except:
     MATPLOTLIBTRIOK = False
@@ -54,7 +52,6 @@ if MATPLOTLIBTRIOK:
 
 try:
     import networkx as nx
-
     NETWORKXOK = True
 except:
     NETWORKXOK = False
@@ -261,15 +258,10 @@ class PostTelemacAbstractParser(QObject):
         self.initClassicThingsAndCkdTreeAndMatplotLib()
 
     def initClassicThingsAndCkdTreeAndMatplotLib(self):
-        if False:
-            self.pointcount = len(self.getMesh()[0])
-            self.meshcount = len(self.getIkle())
-            self.itertimecount = len(self.getTimes()) - 1
-        if True:
-            self.elemcount = len(self.getElemFaces())
-            self.facesnodescount = len(self.getFacesNodes()[0])
-            self.facescount = len(self.getFaces())
-            self.itertimecount = len(self.getTimes()) - 1
+        self.elemcount = len(self.getElemFaces())
+        self.facesnodescount = len(self.getFacesNodes()[0])
+        self.facescount = len(self.getFaces())
+        self.itertimecount = len(self.getTimes()) - 1
 
         if SCIPYOK:
             self.initCkdTree()

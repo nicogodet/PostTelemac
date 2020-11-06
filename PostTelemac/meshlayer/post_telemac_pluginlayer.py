@@ -264,6 +264,7 @@ class SelafinPluginLayer(QgsPluginLayer):
                 filetype = self.parsers[self.propertiesdialog.combodialog.combobox.currentIndex()][1]
             else:
                 return False
+
         self.hydrauparser.loadHydrauFile(self.hydraufilepath)
         self.propertiesdialog.groupBox_Title.setTitle(filetype + " file")
         self.propertiesdialog.loadTools(filetype)
@@ -300,6 +301,7 @@ class SelafinPluginLayer(QgsPluginLayer):
                 self.realCRS, self.canvas.mapSettings().destinationCrs(), QgsProject.instance()
             )
         self.meshrenderer.changeTriangulationCRS()
+        
         # update selafin values
         self.updateSelafinValuesEmit()
 
