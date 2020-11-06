@@ -117,7 +117,6 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
     # ********************************************************************************************
 
     def appendCursor(self):
-
         self.pyqtgraphwdg.addItem(self.datavline)
         self.pyqtgraphwdg.addItem(self.datahline)
 
@@ -126,7 +125,7 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
         self.pyqtgraphwdg.removeItem(self.datahline)
 
     def layerChanged(self):
-        # enable  flow if depth, veolocuty are present in parser params
+        # enable flow if depth, velocities are present in parser params
         if (
             self.meshlayer.hydrauparser.parametreh != None
             and self.meshlayer.hydrauparser.parametrevx != None
@@ -646,7 +645,6 @@ class computeFlow(QObject):
         except Exception as e:
             self.error.emit("flow calculation error : " + str(e))
 
-        print(list1, list2, list3)
         self.finished.emit(list1, list2, list3)
 
     progress = pyqtSignal(int)
