@@ -12,7 +12,7 @@ about= Post treatment of open Telemac results (and Anuga , HECRAS 2D as experime
 qgisMinimumVersion=3.8
 qgisMaximumVersion=3.99
 description=Post Treatment for Telemac (and Anuga , HECRAS 2D as experimental)
-version=1.1.7
+version=1.1.90
 author=Artelia Eau et Environnement
 email=patrice.verchere@arteliagroup.com
 
@@ -66,7 +66,7 @@ repository=https://github.com/ArteliaTelemac/PostTelemac
 category=Plugins
 icon=icons/posttelemac.png
 # experimental flag
-experimental=False
+experimental=True
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False

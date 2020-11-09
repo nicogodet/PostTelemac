@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 
 
 # imports divers
-from time import ctime
+from time import strftime, localtime
 import math
 import sys
 import os
@@ -162,7 +162,7 @@ class SelafinContour2Shp(QObject):
 
         if isFileLocked(self.outputshpfile, True):
             self.raiseError(
-                str(ctime())
+                str(strftime("%H:%M:%S",localtime()))
                 + " - Initialisation - Erreur : Fichier shape deja charge !!"
             )
 
@@ -199,7 +199,7 @@ class SelafinContour2Shp(QObject):
         # ******** Informations de lancement de la tache  *****************************************************
         fet = QgsFeature()
         
-        strtxt = str(ctime()) + " - creation shapefile :" + "\n" + str(self.outputshpfile)
+        strtxt = str(strftime("%H:%M:%S",localtime())) + " - creation shapefile :" + "\n" + str(self.outputshpfile)
         self.writeOutput(strtxt)
 
         # ******** Iteration sur les  niveaux *******************************************************************
@@ -207,7 +207,7 @@ class SelafinContour2Shp(QObject):
             lvltemp1 = [self.levels[lvltemp], self.levels[lvltemp + 1]]
             
             strtxt = (
-                str(ctime()) + " - " + str(self.slf_param[1]) + " - lvl " + str(lvltemp1) + " - Matplotlib integration"
+                str(strftime("%H:%M:%S",localtime())) + " - " + str(self.slf_param[1]) + " - lvl : " + str(lvltemp1) + " - Matplotlib integration"
             )
             self.writeOutput(strtxt)
             
@@ -224,7 +224,7 @@ class SelafinContour2Shp(QObject):
             vlInnerTemp, vlOuterTemp, vlOuterTempIndex = self.createInnerOutertempLayer(triplotcontourf)
 
             # Debut du traitement des iles
-            strtxt = str(ctime()) + " - " + str(self.slf_param[1]) + " - lvl " + str(lvltemp1) + " - Ring process"
+            strtxt = str(strftime("%H:%M:%S",localtime())) + " - " + str(self.slf_param[1]) + " - lvl : " + str(lvltemp1) + " - Ring process"
             self.writeOutput(strtxt)
 
             allfeatures2 = {feature.id(): feature for (feature) in vlOuterTemp.getFeatures()}  
@@ -284,7 +284,7 @@ class SelafinContour2Shp(QObject):
             self.writeOutput("Process finished - " + str(self.outputshpfile))
 
     def verboseOutput(self, param, lvl, geomelem=None, geomtot=None, ileelem=None, iletot=None):
-        strtxt = str(ctime()) + " - " + str(param) + " - lvl : " + str(lvl)
+        strtxt = str(strftime("%H:%M:%S",localtime())) + " - " + str(param) + " - lvl : " + str(lvl)
         if geomelem:
             strtxt = strtxt + " - geom : " + str(geomelem) + "/" + str(geomtot)
         if ileelem:
@@ -365,7 +365,7 @@ class SelafinContour2Shp(QObject):
                 if f1geom.area() < f1.geometry().area():
                     f1geom = f1.geometry()
                     self.writeOutput(
-                        ctime() + " - Warning : geometry " + str(f1.id()) + " not valid before inserting rings"
+                        strftime("%H:%M:%S",localtime()) + " - Warning : geometry " + str(f1.id()) + " not valid before inserting rings"
                     )
             else:
                 f1geom = f1.geometry()
@@ -399,7 +399,7 @@ class SelafinContour2Shp(QObject):
                                 f1geom = f1geom.difference(tab[k][1])
                     except Exception as e:
                         strtxt = (
-                            str(ctime())
+                            str(strftime("%H:%M:%S",localtime()))
                             + " - "
                             + str(self.slf_param[1])
                             + " - Thread - Traitement du niveau "
@@ -427,7 +427,7 @@ class SelafinContour2Shp(QObject):
                     f1geom = f1geomtemp
                 else:
                     self.writeOutput(
-                        ctime() + " - Warning : geometry " + str(f1.id()) + " not valid after inserting rings"
+                        strftime("%H:%M:%S",localtime()) + " - Warning : geometry " + str(f1.id()) + " not valid after inserting rings"
                     )
                     
             if self.xform:
@@ -440,7 +440,7 @@ class SelafinContour2Shp(QObject):
             return fet
             
         except Exception as e:
-            self.writeOutput(str(ctime()) + " - Erreur creation ring : " + str(e))
+            self.writeOutput(str(strftime("%H:%M:%S",localtime())) + " - Erreur creation ring : " + str(e))
             return f1
 
     def do_ring(self, geom3):
@@ -553,12 +553,12 @@ class InitSelafinContour2Shp(QObject):
         times = parserhydrau.getTimes()
         if isinstance(time, int):  # cas des plugins et scripts
             if not time in range(len(times)):
-                self.raiseError(str(ctime()) + " Time non trouve dans  " + str(times))
+                self.raiseError(str(strftime("%H:%M:%S",localtime())) + " Time non trouve dans  " + str(times))
         elif isinstance(time, str):  # cas de la ligne de commande python - utilise time en s
             if time in times:
                 time = list(times).index(int(time))
             else:
-                self.raiseError(str(ctime()) + " Time non trouve dans  " + str(times))
+                self.raiseError(str(strftime("%H:%M:%S",localtime())) + " Time non trouve dans  " + str(times))
 
         parameters = [str(parserhydrau.getVarNames()[i]).strip() for i in range(len(parserhydrau.getVarNames()))]
         if not parameter.isdigit():
