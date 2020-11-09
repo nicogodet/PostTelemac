@@ -576,7 +576,14 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
                 self.meshlayer.updateSelafinValuesEmit()
                 self.setTreeWidgetIndex(self.treeWidget_parameters, 0, len(self.meshlayer.hydrauparser.parametres) - 1)
             elif source == self.pushButton_param_edit:
-                self.meshlayer.hydrauparser.parametres[index] = [index, new_var[0], new_var[1]]
+                self.meshlayer.hydrauparser.parametres[index] = [
+                    index,
+                    new_var[0],
+                    self.meshlayer.hydrauparser.parametres[index][2],
+                    self.meshlayer.hydrauparser.parametres[index][3],
+                    new_var[1],
+                    self.meshlayer.hydrauparser.parametres[index][5],
+                ]
                 self.populatecombobox_param()
                 self.meshlayer.updateSelafinValuesEmit()
                 self.setTreeWidgetIndex(self.treeWidget_parameters, 0, index)
