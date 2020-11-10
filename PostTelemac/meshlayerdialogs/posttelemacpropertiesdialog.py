@@ -43,6 +43,7 @@ from qgis.core import (
     QgsSymbolLayerUtils,
 )
 from qgis.gui import QgsProjectionSelectionDialog
+from qgis.utils import iface
 
 # other import
 import os
@@ -430,7 +431,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
 
                 self.meshlayer.forcerefresh = True
                 self.meshlayer.triggerRepaint()
-                qgis.utils.iface.mapCanvas().setExtent(self.meshlayer.extent())
+                iface.mapCanvas().setExtent(self.meshlayer.extent())
         else:
             QMessageBox.about(self, "My message box", "Load a file first")
 
