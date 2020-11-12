@@ -163,9 +163,7 @@ class TemporalGraphTool(AbstractMeshLayerTool, FORM_CLASS):
             elif self.selectionmethod == 1:
                 layer = iface.activeLayer()
                 if not (layer.type() == 0 and layer.geometryType() == 0):
-                    QMessageBox.warning(
-                        iface.mainWindow(), "PostTelemac", self.tr("Select a point vector layer")
-                    )
+                    QMessageBox.warning(iface.mainWindow(), "PostTelemac", self.tr("Select a point vector layer"))
                 else:
                     xformutil = QgsCoordinateTransform(self.meshlayer.realCRS, layer.crs())
                     self.checkBox.setChecked(True)

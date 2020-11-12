@@ -125,10 +125,10 @@ class SelafinContour2Pts(QObject):
                 + str(outputshpname)
                 + str(".shp")
             )
-            
+
         if not outputshppath:
             outputshppath = os.path.dirname(os.path.normpath(selafinfilepath))
-            
+
         self.pathshp = os.path.join(outputshppath, outputshpname)
 
         # Fields creation
@@ -154,14 +154,14 @@ class SelafinContour2Pts(QObject):
             self.writerw1 = None
             options = QgsVectorFileWriter.SaveVectorOptions()
             options.driverName = "ESRI Shapefile"
-            options.fileEncoding = 'utf-8'
+            options.fileEncoding = "utf-8"
             self.writerw1 = QgsVectorFileWriter.create(
                 fileName=self.pathshp,
                 fields=fields,
                 geometryType=QgsWkbTypes.Point,
                 srs=QgsCoordinateReferenceSystem(str(self.crs)),
                 transformContext=QgsCoordinateTransformContext(),
-                options=options
+                options=options,
             )
 
     def run(self):
@@ -175,7 +175,7 @@ class SelafinContour2Pts(QObject):
         self.writeOutput(strtxt)
 
         fet = QgsFeature()
-        
+
         try:
             if self.paramvalueX == None:
                 boolvitesse = False
@@ -184,7 +184,7 @@ class SelafinContour2Pts(QObject):
 
             if self.pasespace == 0:
                 noeudcount = len(self.x)
-                
+
                 strtxt = str(ctime()) + " - Thread - Traitement des points - " + str(noeudcount) + " noeuds"
                 self.writeOutput(strtxt)
 
@@ -194,13 +194,13 @@ class SelafinContour2Pts(QObject):
                         self.writeOutput(strtxt)
 
                     fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(self.x[k]), float(self.y[k]))))
-                    
+
                     tabattr = []
-                    
+
                     if len(self.ztri) > 0:
                         for l in range(len(self.ztri)):
                             tabattr.append(float(self.ztri[l][k]))
-                            
+
                     if boolvitesse:
                         norme = (
                             (float(self.ztri[self.paramvalueX][k])) ** 2.0
@@ -218,9 +218,9 @@ class SelafinContour2Pts(QObject):
                         tabattr.append(float(self.ztri[self.paramvalueY][k]))
                         tabattr.append(norme)
                         tabattr.append(angle)
-                        
+
                     fet.setAttributes(tabattr)
-                    
+
                     if self.traitementarriereplan == 0 or self.traitementarriereplan == 2:
                         self.writerw1.addFeature(fet)
                     if self.traitementarriereplan == 1 or self.traitementarriereplan == 2:

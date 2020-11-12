@@ -23,6 +23,7 @@ import numpy as np
 
 # import matplotlib
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
@@ -81,6 +82,7 @@ def isFileLocked(file, readLockCheck=False):
             return True
 
     return False
+
 
 # *********************************************************************************************
 # *************** Classe de traitement **********************************************************
@@ -162,16 +164,14 @@ class SelafinContour2Shp(QObject):
 
         if isFileLocked(self.outputshpfile, True):
             self.raiseError(
-                str(strftime("[%H:%M:%S] ",localtime()))
-                + "Initialisation - Erreur : Fichier shape deja charge !!"
+                str(strftime("[%H:%M:%S] ", localtime())) + "Initialisation - Erreur : Fichier shape deja charge !!"
             )
 
         self.slf_crs = selafincrs
         if selafintransformedcrs:
             self.slf_shpcrs = selafintransformedcrs
             self.xform = QgsCoordinateTransform(
-                QgsCoordinateReferenceSystem(str(self.slf_crs)),
-                QgsCoordinateReferenceSystem(str(self.slf_shpcrs))
+                QgsCoordinateReferenceSystem(str(self.slf_crs)), QgsCoordinateReferenceSystem(str(self.slf_shpcrs))
             )
         else:
             self.slf_shpcrs = self.slf_crs
@@ -182,14 +182,14 @@ class SelafinContour2Shp(QObject):
             self.writerw_shp = None
             options = QgsVectorFileWriter.SaveVectorOptions()
             options.driverName = "ESRI Shapefile"
-            options.fileEncoding = 'utf-8'
+            options.fileEncoding = "utf-8"
             self.writerw_shp = QgsVectorFileWriter.create(
                 fileName=self.outputshpfile,
                 fields=champs,
                 geometryType=QgsWkbTypes.MultiPolygon,
                 srs=QgsCoordinateReferenceSystem(self.slf_shpcrs),
                 transformContext=QgsCoordinateTransformContext(),
-                options=options
+                options=options,
             )
 
         self.levels = levels
@@ -206,7 +206,7 @@ class SelafinContour2Shp(QObject):
             level = [self.levels[lvl], self.levels[lvl + 1]]
 
             self.writeOutput(str(self.slf_param[1]) + " - level : " + str(level) + " - Matplotlib integration")
-            
+
             # l'outil de matplotlib qui cree la triangulation
             triplotcontourf = plt.tricontourf(
                 self.slf_x,
@@ -214,7 +214,7 @@ class SelafinContour2Shp(QObject):
                 self.slf_mesh,
                 self.slf_value,
                 level,
-            )  
+            )
 
             # Iteration sur les contours fournis par triplotcontourf  et inclusion des outers et inners dans une table temporaire
             vlOuterTemp, vlInnerTemp, vlInnerTempIndex = self.createInnerOutertempLayer(triplotcontourf)
@@ -222,7 +222,7 @@ class SelafinContour2Shp(QObject):
             # Debut du traitement des iles
             self.writeOutput(str(self.slf_param[1]) + " - level : " + str(level) + " - Ring process")
 
-            FeatsInnerTemp = {feature.id(): feature for (feature) in vlInnerTemp.getFeatures()}  
+            FeatsInnerTemp = {feature.id(): feature for (feature) in vlInnerTemp.getFeatures()}
             # creation d'un index spatial des inners pour aller plus vite
             map(vlInnerTempIndex.insertFeature, FeatsInnerTemp.values())
 
@@ -230,16 +230,16 @@ class SelafinContour2Shp(QObject):
                 for inner in vlInnerTemp.getFeatures():
                     fet.setGeometry(inner.geometry())
                     fet.setAttributes([level[0], level[1], "False"])
-                    
+
                     if self.processtype in [0, 2]:
                         self.writerw_shp.addFeature(fet)
                     if self.processtype in [1, 2]:
                         self.writerw_process.addFeature(fet)
-                        
+
                 for outer in vlOuterTemp.getFeatures():
                     fet.setGeometry(outer.geometry())
                     fet.setAttributes([level[0], level[1], "True"])
-                    
+
                     if self.processtype in [0, 2]:
                         self.writerw_shp.addFeature(fet)
                     if self.processtype in [1, 2]:
@@ -251,7 +251,7 @@ class SelafinContour2Shp(QObject):
                 for outer in vlOuterTemp.getFeatures():
                     if int(outer.id()) % 50 == 0:
                         self.verboseOutput(self.slf_param[1], level, outer.id(), counttotal)
-                        
+
                     fet = self.InsertRinginFeature(outer, FeatsInnerTemp, vlInnerTempIndex, level, counttotal)
 
                     if self.processtype in [0, 1, 3, 4]:
@@ -289,7 +289,7 @@ class SelafinContour2Shp(QObject):
 
     def writeOutput(self, str1):
         if self.processtype in [0, 1, 2, 3]:
-            self.status.emit(str(strftime("[%H:%M:%S] ",localtime())) + str(str1))
+            self.status.emit(str(strftime("[%H:%M:%S] ", localtime())) + str(str1))
         elif self.processtype == 4:
             print(str1)
 
@@ -298,16 +298,16 @@ class SelafinContour2Shp(QObject):
 
     def createInnerOutertempLayer(self, triplotcontourf):
         fet = QgsFeature()
-        
+
         for collection in triplotcontourf.collections:
             vl1temp1 = QgsVectorLayer("Multipolygon?crs=" + str(self.slf_crs), "temporary_poly_outer ", "memory")
             pr1 = vl1temp1.dataProvider()
             vl1temp1.startEditing()
-            
+
             vl2temp1 = QgsVectorLayer("Multipolygon?crs=" + str(self.slf_crs), "temporary_poly_inner ", "memory")
             pr2 = vl2temp1.dataProvider()
             vl2temp1.startEditing()
-            
+
             for path in collection.get_paths():
                 for polygon in path.to_polygons():
                     if len(polygon) >= 3:
@@ -332,10 +332,10 @@ class SelafinContour2Shp(QObject):
             or str(geom.__class__) == "<class 'qgis._core.QgsGeometry'>"
         ):
             geompolygon = geom.asPolygon()
-            
+
             for i in range(len(geompolygon)):
                 geomtemp2 = []
-                
+
                 for j in range(len(geompolygon[i])):
                     geomtemp2.append(QgsPointXY(geompolygon[i][j][0], geompolygon[i][j][1]))
                 geomcheck = QgsGeometry.fromPolygonXY([geomtemp2])
@@ -345,18 +345,18 @@ class SelafinContour2Shp(QObject):
                 geomtemp1.append(geomcheck)
         else:
             geomtemp2 = []
-            
+
             for i in range(len(geom)):
                 geomtemp2.append(QgsPointXY(geom[i][0], geom[i][1]))
             geomtemp1.append(QgsGeometry.fromPolygonXY([geomtemp2]))
-            
+
         return geomtemp1
 
     def InsertRinginFeature(self, outer, FeatsInnerTemp, vlInnerTempIndex, lvltemp1, counttotal):
         # Correction des erreurs de geometrie des outers
         if len(outer.geometry().validateGeometry()) != 0:
             outergeom = outer.geometry().buffer(0.01, 5)
-            
+
             if outergeom.area() < outer.geometry().area():
                 outergeom = outer.geometry()
                 self.writeOutput("Warning : geometry " + str(outer.id()) + " not valid before inserting rings")
@@ -375,7 +375,7 @@ class SelafinContour2Shp(QObject):
             if len(f2geom.validateGeometry()) != 0:
                 f2geom = f2geom.buffer(0.00, 5)
             tab.append([f2geom.area(), f2geom])
-            
+
         if len(tab) > 0:
             tab.sort(reverse=True)
             # Iteration pour enlever les inner des outers - coeur du script
@@ -393,7 +393,7 @@ class SelafinContour2Shp(QObject):
                 except Exception as e:
                     self.writeOutput("Erreur creation ring : " + str(e))
                     return outer
-                    
+
         if len(outergeom.validateGeometry()) != 0:
             outergeomtemp = outergeom.buffer(0.01, 5)
             if outergeomtemp.area() > outergeom.area():
@@ -403,11 +403,11 @@ class SelafinContour2Shp(QObject):
 
         if self.xform:
             outergeom.transform(self.xform)
-            
+
         fet = QgsFeature()
         fet.setGeometry(outergeom)
         fet.setAttributes([lvltemp1[0], lvltemp1[1]])
-        
+
         return fet
 
     def do_ring(self, geom3):
@@ -419,7 +419,7 @@ class SelafinContour2Shp(QObject):
         for i in range(len(polygon)):
             ring.append(QgsPointXY(polygon[i][0], polygon[i][1]))
         ring.append(QgsPointXY(polygon[0][0], polygon[0][1]))
-        
+
         return ring
 
     def repairPolygon(self, geometry):
@@ -512,7 +512,7 @@ class InitSelafinContour2Shp(QObject):
 
         # Check validity
         self.processtype = processtype
-        
+
         try:
             parserhydrau = PostTelemacSelafinParser()
             parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
@@ -523,12 +523,12 @@ class InitSelafinContour2Shp(QObject):
         times = parserhydrau.getTimes()
         if isinstance(time, int):  # cas des plugins et scripts
             if not time in range(len(times)):
-                self.raiseError(str(strftime("[%H:%M:%S] ",localtime())) + "Time non trouve dans  " + str(times))
+                self.raiseError(str(strftime("[%H:%M:%S] ", localtime())) + "Time non trouve dans  " + str(times))
         elif isinstance(time, str):  # cas de la ligne de commande python - utilise time en s
             if time in times:
                 time = list(times).index(int(time))
             else:
-                self.raiseError(str(strftime("[%H:%M:%S] ",localtime())) + "Time non trouve dans  " + str(times))
+                self.raiseError(str(strftime("[%H:%M:%S] ", localtime())) + "Time non trouve dans  " + str(times))
 
         parameters = [str(parserhydrau.getVarNames()[i]).strip() for i in range(len(parserhydrau.getVarNames()))]
         if not parameter.isdigit():

@@ -38,6 +38,7 @@ from .toshape.posttelemac_util_extractpts import *
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "ToshapeTool.ui"))
 
+
 class ToShapeTool(AbstractMeshLayerTool, FORM_CLASS):
 
     NAME = "TOSHAPETOOL"
@@ -172,8 +173,7 @@ class ToShapeTool(AbstractMeshLayerTool, FORM_CLASS):
             self.meshlayer.crs().authid(),
             translatex=self.meshlayer.hydrauparser.translatex,
             translatey=self.meshlayer.hydrauparser.translatey,
-            selafintransformedcrs=self.pushButton_contourcrs.text()
-            if self.checkBox_contourcrs.isChecked() else None,
+            selafintransformedcrs=self.pushButton_contourcrs.text() if self.checkBox_contourcrs.isChecked() else None,
             quickprocessing=False,
             outputshpname=name,
             outputshppath=None,
@@ -189,7 +189,7 @@ class ToShapeTool(AbstractMeshLayerTool, FORM_CLASS):
             self.initclass.finished1.connect(self.workerFinishedHillshade)
         else:
             self.initclass.finished1.connect(self.workershapeFinished)
-            
+
         self.propertiesdialog.normalMessage(self.tr("2Shape - mesh creation launched - watch progress on log tab"))
         self.initclass.start(
             0,  # 0 : thread inside qgis (plugin) - 1 : thread processing - 2 : modeler (no thread) - 3 : modeler + shpouput - 4: outsideqgis

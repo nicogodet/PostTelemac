@@ -119,7 +119,7 @@ class rasterize(QObject):
                 self.selafinlayer.hydrauparser.createInterpolator()
             success = self.selafinlayer.hydrauparser.updateInterpolatorEmit(self.selafinlayer.time_displayed)
             self.status.emit("Raster Tool - Interpolator check " + str(self.selafinlayer.hydrauparser.interpolator))
-            
+
             paramindex = self.tool.comboBox_parametreschooser_2.currentIndex()
 
             try:

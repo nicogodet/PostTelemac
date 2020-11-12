@@ -82,12 +82,7 @@ class ExtractMaxTool(AbstractMeshLayerTool, FORM_CLASS):
     def chargerSelafin(self, path):
         if path and self.checkBox_8.isChecked():
             if iface is not None:
-                slf = (
-                    QgsApplication.instance()
-                    .pluginLayerRegistry()
-                    .pluginLayerType("selafin_viewer")
-                    .createLayer()
-                )
+                slf = QgsApplication.instance().pluginLayerRegistry().pluginLayerType("selafin_viewer").createLayer()
                 slf.setRealCrs(self.meshlayer.crs())
                 slf.load_selafin(path, "TELEMAC")
                 QgsProject.instance().addMapLayer(slf)
@@ -281,10 +276,9 @@ class runGetMax(QObject):
             self.finished.emit(self.name_res_out)
 
         except Exception as e:
-            self.status.emit('getmax error : ' + str(e))
+            self.status.emit("getmax error : " + str(e))
             resin.close()
             resout.close()
-
 
     status = pyqtSignal(str)
     finished = pyqtSignal(str)

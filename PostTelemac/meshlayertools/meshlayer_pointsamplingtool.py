@@ -125,19 +125,17 @@ class PointSamplingTool(AbstractMeshLayerTool, FORM_CLASS):
             writer = None
             options = QgsVectorFileWriter.SaveVectorOptions()
             options.driverName = "ESRI Shapefile"
-            options.fileEncoding = 'utf-8'
+            options.fileEncoding = "utf-8"
             writer = QgsVectorFileWriter.create(
                 fileName=pathresult,
                 fields=fields,
                 geometryType=QgsWkbTypes.Point,
                 srs=self.meshlayer.realCRS,
                 transformContext=QgsCoordinateTransformContext(),
-                options=options
+                options=options,
             )
             # for projection
-            xformutil = QgsCoordinateTransform(
-                parentlayer.crs(), self.meshlayer.realCRS, QgsProject.instance()
-            )
+            xformutil = QgsCoordinateTransform(parentlayer.crs(), self.meshlayer.realCRS, QgsProject.instance())
             # check interpolator
             if self.meshlayer.hydrauparser.interpolator is None:
                 self.meshlayer.hydrauparser.createInterpolator()

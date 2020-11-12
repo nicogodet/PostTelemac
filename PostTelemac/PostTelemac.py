@@ -74,18 +74,18 @@ class PostTelemac:
         self.slf = []
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u"&PostTelemac")
+        self.menu = self.tr("&PostTelemac")
         # toolbar
         toolbars = self.iface.mainWindow().findChildren(QToolBar)
         test = True
         for toolbar1 in toolbars:
-            if toolbar1.windowTitle() == u"Telemac":
+            if toolbar1.windowTitle() == "Telemac":
                 self.toolbar = toolbar1
                 test = False
                 break
         if test:
-            self.toolbar = self.iface.addToolBar(u"Telemac")
-            self.toolbar.setObjectName(u"Telemac")
+            self.toolbar = self.iface.addToolBar("Telemac")
+            self.toolbar.setObjectName("Telemac")
 
         self.dlg_about = None
 
@@ -179,17 +179,17 @@ class PostTelemac:
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         icon_path = ":/plugins/PostTelemac/icons/posttelemac.png"
-        self.add_action(icon_path, text=self.tr(u"PostTelemac"), callback=self.run, parent=self.iface.mainWindow())
+        self.add_action(icon_path, text=self.tr("PostTelemac"), callback=self.run, parent=self.iface.mainWindow())
         self.add_action(
             icon_path,
-            text=self.tr(u"PostTelemac Help"),
+            text=self.tr("PostTelemac Help"),
             add_to_toolbar=False,
             callback=self.showHelp,
             parent=self.iface.mainWindow(),
         )
         self.add_action(
             icon_path,
-            text=self.tr(u"PostTelemac About"),
+            text=self.tr("PostTelemac About"),
             add_to_toolbar=False,
             callback=self.showAbout,
             parent=self.iface.mainWindow(),
@@ -202,7 +202,7 @@ class PostTelemac:
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
-            self.iface.removePluginMenu(self.tr(u"&PostTelemac"), action)
+            self.iface.removePluginMenu(self.tr("&PostTelemac"), action)
             self.toolbar.removeAction(action)
         # remove the toolbar
         if len(self.toolbar.actions()) == 0:
@@ -235,7 +235,7 @@ class PostTelemac:
     def addToRegistry(self):
         # Add telemac_viewer in QgsPluginLayerRegistry
         reg = QgsApplication.instance().pluginLayerRegistry()
-        if u"selafin_viewer" in reg.pluginLayerTypes():
+        if "selafin_viewer" in reg.pluginLayerTypes():
             reg.removePluginLayerType("selafin_viewer")
         self.pluginLayerType = SelafinPluginLayerType()
         reg.addPluginLayerType(self.pluginLayerType)

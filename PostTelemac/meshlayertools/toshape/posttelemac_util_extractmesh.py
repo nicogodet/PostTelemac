@@ -70,7 +70,7 @@ def isFileLocked(file, readLockCheck=False):
     return False
 
 
-#def workerFinished(str1):
+# def workerFinished(str1):
 #    vlayer = QgsVectorLayer(str1, os.path.basename(str1).split(".")[0], "ogr")
 #    QgsMapLayerRegistry.instance().addMapLayer(vlayer)
 
@@ -168,14 +168,14 @@ class SelafinContour2Shp(QObject):
             self.writerw_shp = None
             options = QgsVectorFileWriter.SaveVectorOptions()
             options.driverName = "ESRI Shapefile"
-            options.fileEncoding = 'utf-8'
+            options.fileEncoding = "utf-8"
             self.writerw_shp = QgsVectorFileWriter.create(
                 fileName=self.outputshpfile,
                 fields=champs,
                 geometryType=QgsWkbTypes.MultiPolygon,
                 srs=QgsCoordinateReferenceSystem(self.slf_shpcrs),
                 transformContext=QgsCoordinateTransformContext(),
-                options=options
+                options=options,
             )
 
         # donnees shp - processing result

@@ -23,7 +23,7 @@ Versions :
  ***************************************************************************/
 """
 
-from qgis.PyQt import uic 
+from qgis.PyQt import uic
 from qgis.PyQt.QtCore import Qt, QObject, QThread, pyqtSignal
 from qgis.PyQt.QtGui import QCursor
 from qgis.PyQt.QtWidgets import QVBoxLayout, QApplication
@@ -49,6 +49,7 @@ import sys
 # local import
 from .meshlayer_abstract_tool import *
 from ..meshlayerlibs import pyqtgraph as pg
+
 try:
     from ..meshlayerparsers.libs_telemac.samplers.meshes import *
 except:
@@ -175,9 +176,7 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
         elif self.selectionmethod in [1, 2]:
             layer = iface.activeLayer()
             if not (layer.type() == 0 and layer.geometryType() == 1):
-                QMessageBox.warning(
-                    iface.mainWindow(), "PostTelemac", self.tr("Select a (poly)line vector layer")
-                )
+                QMessageBox.warning(iface.mainWindow(), "PostTelemac", self.tr("Select a (poly)line vector layer"))
             elif self.selectionmethod == 1 and len(layer.selectedFeatures()) == 0:
                 QMessageBox.warning(
                     iface.mainWindow(), "PostTelemac", self.tr("Select a line in a (poly)line vector layer")
@@ -190,9 +189,7 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
                     iter = layer.getFeatures()
                 geomfinal = []
                 self.vectorlayerflowids = []
-                xformutil = QgsCoordinateTransform(
-                    self.meshlayer.realCRS, layer.crs(), QgsProject.instance()
-                )
+                xformutil = QgsCoordinateTransform(self.meshlayer.realCRS, layer.crs(), QgsProject.instance())
                 for i, feature in enumerate(iter):
                     try:
                         self.vectorlayerflowids.append(str(feature[0]))
@@ -311,9 +308,7 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
             if len(x) > 1:
                 for i in range(len(x)):
                     points.append(self.meshlayer.xform.transform(QgsPointXY(x[i], y[i])))
-                self.meshlayer.rubberband.rubberbandface.addGeometry(
-                    QgsGeometry.fromPolygonXY([points]), None
-                )
+                self.meshlayer.rubberband.rubberbandface.addGeometry(QgsGeometry.fromPolygonXY([points]), None)
             else:
                 qgspoint = self.meshlayer.xform.transform(QgsPointXY(x[0], y[0]))
 
@@ -390,9 +385,7 @@ class FlowTool(AbstractMeshLayerTool, FORM_CLASS):
             xform = self.meshlayer.xform
             pointstoDrawfinal = []
             for point in self.pointstoDraw:
-                qgspoint = xform.transform(
-                    QgsPointXY(point[0], point[1]), QgsCoordinateTransform.ReverseTransform
-                )
+                qgspoint = xform.transform(QgsPointXY(point[0], point[1]), QgsCoordinateTransform.ReverseTransform)
                 pointstoDrawfinal.append([qgspoint.x(), qgspoint.y()])
             # launch analyses
             self.launchThread([pointstoDrawfinal])
@@ -484,9 +477,9 @@ class computeFlow(QObject):
                 if METHOD == 0:  # Method0 : shortest path and vector computation
                     if self.selafinlayer.hydrauparser.networkxgraph == None:
                         self.selafinlayer.hydrauparser.createNetworkxGraph()
-                    
+
                     shortests = []
-                    
+
                     for line in temp3:
                         linetemp = line
                         resulttemp = []
@@ -682,9 +675,7 @@ class computeFlow(QObject):
         for collection in triplotcontourf.collections:
             for path in collection.get_paths():
                 for polygon in path.to_polygons():
-                    polygons2 = QgsGeometry.fromPolygonXY(
-                        [[QgsPointXY(i[0], i[1]) for i in polygon]]
-                    )
+                    polygons2 = QgsGeometry.fromPolygonXY([[QgsPointXY(i[0], i[1]) for i in polygon]])
 
                     if templine2.intersects(polygons2):
                         if np.cross(polygon, np.roll(polygon, -1, axis=0)).sum() / 2.0 > 0:  # outer polygon
@@ -695,9 +686,7 @@ class computeFlow(QObject):
                                 else:
                                     for line3 in inter.asMultiPolyline():
                                         temp3_out.append(
-                                            QgsGeometry.fromPolylineXY(
-                                                [QgsPointXY(i[0], i[1]) for i in line3]
-                                            )
+                                            QgsGeometry.fromPolylineXY([QgsPointXY(i[0], i[1]) for i in line3])
                                         )
 
                         else:  # inner polygon
@@ -712,9 +701,7 @@ class computeFlow(QObject):
                                 else:
                                     for line3 in inter.asMultiPolyline():
                                         temp3_out.append(
-                                            QgsGeometry.fromPolyline(
-                                                [QgsPoint(i[0], i[1]) for i in line3]
-                                            )
+                                            QgsGeometry.fromPolyline([QgsPoint(i[0], i[1]) for i in line3])
                                         )
 
         temp3out_line = temp3_out
@@ -737,9 +724,7 @@ class computeFlow(QObject):
                     linefinal2.append(templine)
                 else:
                     for line3 in templine.asMultiPolyline():
-                        linefinal2.append(
-                            QgsGeometry.fromPolylineXY([QgsPointXY(i[0], i[1]) for i in line3])
-                        )
+                        linefinal2.append(QgsGeometry.fromPolylineXY([QgsPointXY(i[0], i[1]) for i in line3]))
 
         if self.DEBUG:
             self.status.emit("linefinal2" + str([line.asPolyline() for line in linefinal2]))
@@ -769,7 +754,7 @@ class computeFlow(QObject):
 
         if self.DEBUG:
             self.status.emit("getLines - polylin : " + str(polyline1))
-        
+
         templine1 = shapely.geometry.linestring.LineString([(i[0], i[1]) for i in polyline1[:-1]])
         templine2 = QgsGeometry.fromPolylineXY([QgsPointXY(i[0], i[1]) for i in polyline1[:-1]])
 
@@ -833,13 +818,9 @@ class computeFlow(QObject):
         temp2in_line = shapely.geometry.multilinestring.MultiLineString(temp2_in)
 
         temp3out_line = [
-            QgsGeometry.fromMultiPolylineXY([[QgsPointXY(i[0], i[1]) for i in line]])
-            for line in temp3_out
+            QgsGeometry.fromMultiPolylineXY([[QgsPointXY(i[0], i[1]) for i in line]]) for line in temp3_out
         ]
-        temp3in_line = [
-            QgsGeometry.fromMultiPolylineXY([[QgsPointXY(i[0], i[1]) for i in line]])
-            for line in temp3_in
-        ]
+        temp3in_line = [QgsGeometry.fromMultiPolylineXY([[QgsPointXY(i[0], i[1]) for i in line]]) for line in temp3_in]
         linefinal = []
         linefinal2 = []
 
@@ -1009,7 +990,7 @@ class computeFlow(QObject):
         e1 = np.array(self.selafinlayer.hydrauparser.getFaceNodeXYFromNumPoint([edges[0]]))
         e2 = np.array(self.selafinlayer.hydrauparser.getFaceNodeXYFromNumPoint([edges[1]]))
         rap = np.linalg.norm(xytemp - e1) / np.linalg.norm(e2 - e1)
-        
+
         return (1.0 - rap) * h11 + (rap) * h12
 
     def getNearest(self, x, y, triangle):

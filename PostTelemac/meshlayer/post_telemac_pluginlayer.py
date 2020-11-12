@@ -87,7 +87,7 @@ class SelafinPluginLayer(QgsPluginLayer):
         self.meshrenderer = None  # the class used to get qimage for canvas or composer
         self.renderer = None  # the qgis renderer class
         self.setValid(True)
-        self.setProviderType('virtual') # Prevent Qgis crash on clear() 
+        self.setProviderType("virtual")  # Prevent Qgis crash on clear()
         self.realCRS = QgsCoordinateReferenceSystem()
         self.xform = None  # transformation class for reprojection
 
@@ -301,7 +301,7 @@ class SelafinPluginLayer(QgsPluginLayer):
                 self.realCRS, self.canvas.mapSettings().destinationCrs(), QgsProject.instance()
             )
         self.meshrenderer.changeTriangulationCRS()
-        
+
         # update selafin values
         self.updateSelafinValuesEmit()
 
