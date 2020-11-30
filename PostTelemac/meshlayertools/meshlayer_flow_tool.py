@@ -574,7 +574,7 @@ class computeFlow(QObject):
                         compteur1 += len(shortest)
                         result.append([None, flow])
 
-                if METHOD == 1:
+                elif METHOD == 1:
                     for line in temp3:
                         linetemp = np.array([[point[0], point[1]] for point in line.coords])
                         resulttemp = []
@@ -962,15 +962,15 @@ class computeFlow(QObject):
             + 1.0 / 2.0 * (ah * bv + av * bh) * math.pow(lenght, 2)
             + (bh * bv) * lenght
         )
-        if np.isnan(flow).any():
-            self.status.emit(
-                " vecor "
-                + str(vectorface)
-                + "lenght "
-                + str(np.linalg.norm(vectorface))
-                + " norm "
-                + str(vectorfacenormcross)
-            )
+        # if np.isnan(flow).any():
+        # self.status.emit(
+        # " vecor "
+        # + str(vectorface)
+        # + "lenght "
+        # + str(np.linalg.norm(vectorface))
+        # + " norm "
+        # + str(vectorfacenormcross)
+        # )
 
         return flow
 

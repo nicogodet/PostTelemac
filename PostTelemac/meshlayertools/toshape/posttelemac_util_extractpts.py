@@ -23,13 +23,13 @@ from qgis.core import (
     QgsPointXY,
 )
 
+import time
 import os
 import sys
 import math
 import numpy as np
 
 import matplotlib.pyplot as plt
-from time import ctime
 
 from ...meshlayerparsers.posttelemac_selafin_parser import *
 
@@ -136,7 +136,7 @@ class SelafinContour2Pts(QObject):
         fields = QgsFields()
         paramsname = [param[0] for param in self.parserhydrau.getVarNames()]
         for i, name in enumerate(paramsname):
-            self.writeOutput(str(ctime()) + " - Initialisation - Variable dans le fichier res : " + name.strip())
+            self.writeOutput("Initialisation - Variable dans le fichier res : " + name.strip())
             tabparam.append([i, name.strip()])
             fields.append(QgsField(str(name.strip()), QVariant.Double))
         self.vlayer = ""
@@ -166,11 +166,7 @@ class SelafinContour2Pts(QObject):
 
     def run(self):
         strtxt = (
-            str(ctime())
-            + " - Thread - repertoire : "
-            + os.path.dirname(self.pathshp)
-            + " - fichier : "
-            + os.path.basename(self.pathshp)
+            "Thread - repertoire : " + os.path.dirname(self.pathshp) + " - fichier : " + os.path.basename(self.pathshp)
         )
         self.writeOutput(strtxt)
 
@@ -185,12 +181,12 @@ class SelafinContour2Pts(QObject):
             if self.pasespace == 0:
                 noeudcount = len(self.x)
 
-                strtxt = str(ctime()) + " - Thread - Traitement des points - " + str(noeudcount) + " noeuds"
+                strtxt = str("Thread - Traitement des points - " + str(noeudcount) + " noeuds")
                 self.writeOutput(strtxt)
 
                 for k in range(len(self.x)):
                     if k % 5000 == 0:
-                        strtxt = str(ctime()) + " - Thread - noeud n " + str(k) + "/" + str(noeudcount)
+                        strtxt = str("Thread - noeud n " + str(k) + "/" + str(noeudcount))
                         self.writeOutput(strtxt)
 
                     fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(self.x[k]), float(self.y[k]))))
@@ -227,7 +223,7 @@ class SelafinContour2Pts(QObject):
                         self.writerw2.addFeature(fet)
 
         except Exception as e:
-            strtxt = str(ctime()) + " ************ PROBLEME CALCUL DES VITESSES : " + str(e)
+            strtxt = str("************ PROBLEME CALCUL DES VITESSES : " + str(e))
             self.writeOutput(strtxt)
 
         if self.traitementarriereplan == 0 or self.traitementarriereplan == 2:
@@ -235,7 +231,7 @@ class SelafinContour2Pts(QObject):
         if self.traitementarriereplan == 1 or self.traitementarriereplan == 2:
             del self.writerw2
 
-        strtxt = str(ctime()) + " - Thread - fichier " + self.pathshp + " crée"
+        strtxt = str("Thread - fichier " + self.pathshp + " crée")
         self.writeOutput(strtxt)
 
         if self.traitementarriereplan == 0:
@@ -302,12 +298,12 @@ class InitSelafinMesh2Pts(QObject):
         times = parserhydrau.getTimes()
         if isinstance(time, int):  # cas des plugins et scripts
             if not time in range(len(times)):
-                self.raiseError(str(ctime()) + " Time non trouve dans  " + str(times))
+                self.raiseError("Time non trouve dans  " + str(times))
         elif isinstance(time, str):  # cas de la ligne de commande python - utilise time en s
             if time in times:
                 time = list(times).index(int(time))
             else:
-                self.raiseError(str(ctime()) + " Time non trouve dans  " + str(times))
+                self.raiseError("Time non trouve dans  " + str(times))
 
         self.worker = SelafinContour2Pts(
             processtype,

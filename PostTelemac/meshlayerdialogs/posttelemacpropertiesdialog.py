@@ -333,7 +333,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """
         self.textBrowser_main.setTextColor(QColor("red"))
         self.textBrowser_main.setFontWeight(QFont.Bold)
-        self.textBrowser_main.append(time.ctime() + " - " + message)
+        self.textBrowser_main.append(str(time.strftime("[%H:%M:%S] ", time.localtime())) + str(message))
         self.textBrowser_main.setTextColor(QColor("black"))
         self.textBrowser_main.setFontWeight(QFont.Normal)
         self.textBrowser_main.verticalScrollBar().setValue(self.textBrowser_main.verticalScrollBar().maximum())
@@ -345,7 +345,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """
         Show message error str in main textbrowser
         """
-        self.textBrowser_main.append(time.ctime() + " - " + message)
+        self.textBrowser_main.append(str(time.strftime("[%H:%M:%S] ", time.localtime())) + str(message))
         self.textBrowser_main.setTextColor(QColor("black"))
         self.textBrowser_main.setFontWeight(QFont.Normal)
         self.textBrowser_main.verticalScrollBar().setValue(self.textBrowser_main.verticalScrollBar().maximum())
@@ -357,7 +357,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         """
         Show message error str in main textbrowser
         """
-        self.textBrowser_2.append(message)
+        self.textBrowser_2.append(str(time.strftime("[%H:%M:%S] ", time.localtime())) + str(message))
         if self.debugtoprint:
             print("log message : ", message)
 

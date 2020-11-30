@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 
 
 # imports divers
-from time import strftime, localtime
+import time
 import math
 import sys
 import os
@@ -163,9 +163,7 @@ class SelafinContour2Shp(QObject):
         self.outputshpfile = os.path.join(outputshppath, outputshpname)
 
         if isFileLocked(self.outputshpfile, True):
-            self.raiseError(
-                str(strftime("[%H:%M:%S] ", localtime())) + "Initialisation - Erreur : Fichier shape deja charge !!"
-            )
+            self.raiseError("Initialisation - Erreur : Fichier shape deja charge !!")
 
         self.slf_crs = selafincrs
         if selafintransformedcrs:
@@ -289,7 +287,7 @@ class SelafinContour2Shp(QObject):
 
     def writeOutput(self, str1):
         if self.processtype in [0, 1, 2, 3]:
-            self.status.emit(str(strftime("[%H:%M:%S] ", localtime())) + str(str1))
+            self.status.emit(str(str1))
         elif self.processtype == 4:
             print(str1)
 
@@ -523,12 +521,12 @@ class InitSelafinContour2Shp(QObject):
         times = parserhydrau.getTimes()
         if isinstance(time, int):  # cas des plugins et scripts
             if not time in range(len(times)):
-                self.raiseError(str(strftime("[%H:%M:%S] ", localtime())) + "Time non trouve dans  " + str(times))
+                self.raiseError("Time non trouve dans  " + str(times))
         elif isinstance(time, str):  # cas de la ligne de commande python - utilise time en s
             if time in times:
                 time = list(times).index(int(time))
             else:
-                self.raiseError(str(strftime("[%H:%M:%S] ", localtime())) + "Time non trouve dans  " + str(times))
+                self.raiseError("Time non trouve dans  " + str(times))
 
         parameters = [str(parserhydrau.getVarNames()[i]).strip() for i in range(len(parserhydrau.getVarNames()))]
         if not parameter.isdigit():

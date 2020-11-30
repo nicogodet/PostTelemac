@@ -21,7 +21,7 @@ from qgis.core import (
 )
 
 # imports divers
-from time import ctime
+import time
 import threading
 import numpy as np
 import math
@@ -145,11 +145,7 @@ class SelafinContour2Shp(QObject):
         self.outputshpfile = os.path.join(outputshppath, outputshpname)
 
         if isFileLocked(self.outputshpfile, True):
-            self.raiseError(
-                str(ctime())
-                + " - Initialisation - Erreur : \
-                                    Fichier shape deja charge !!"
-            )
+            self.raiseError("Initialisation - Erreur : Fichier shape deja charge !!")
 
         self.slf_crs = selafincrs
         if selafintransformedcrs:
@@ -218,13 +214,13 @@ class SelafinContour2Shp(QObject):
     def createShp(self):
         # ******** Informations de lancement de la tache  *****************************************************
         fet = QgsFeature()
-        strtxt = str(ctime()) + " - creation shapefile :" + "\n" + str(self.outputshpfile)
+        strtxt = str("Création shapefile :" + "\n" + str(self.outputshpfile))
         self.writeOutput(strtxt)
         nombre = len(self.slf_mesh)
 
         for i in range(len(self.slf_mesh)):
             if i % 5000 == 0:
-                strtxt = str(ctime()) + " - Thread element n " + str(i) + "/" + str(nombre)
+                strtxt = str("Thread element n " + str(i) + "/" + str(nombre))
                 self.writeOutput(strtxt)
 
             geom = []
@@ -275,7 +271,7 @@ class SelafinContour2Shp(QObject):
             self.writeOutput("Process finished - " + str(self.outputshpfile))
 
     def verboseOutput(self, param, lvl, geomelem=None, geomtot=None, ileelem=None, iletot=None):
-        strtxt = str(ctime()) + " - " + str(param) + " - lvl : " + str(lvl)
+        strtxt = str(param) + " - lvl : " + str(lvl)
         if geomelem:
             strtxt = strtxt + " - geom : " + str(geomelem) + "/" + str(geomtot)
         if ileelem:
@@ -340,12 +336,12 @@ class InitSelafinMesh2Shp(QObject):
         times = parserhydrau.getTimes()
         if isinstance(time, int):  # cas des plugins et scripts
             if not time in range(len(times)):
-                self.raiseError(str(ctime()) + " Time non trouve dans  " + str(times))
+                self.raiseError("Time non trouve dans  " + str(times))
         elif isinstance(time, str):  # cas de la ligne de commande python - utilise time en s
             if time in times:
                 time = list(times).index(int(time))
             else:
-                self.raiseError(str(ctime()) + " Time non trouve dans  " + str(times))
+                self.raiseError("Time non trouve dans  " + str(times))
 
         if parameter is not None:
             parameters = [param[0] for param in parserhydrau.getVarNames()]

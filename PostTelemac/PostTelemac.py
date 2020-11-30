@@ -70,6 +70,7 @@ class PostTelemac:
         # ***********************************************************************
 
         self.pluginLayerType = None
+        self.provider = None
         self.addToRegistry()
         self.slf = []
         # Declare instance attributes

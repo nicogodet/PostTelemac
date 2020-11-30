@@ -161,7 +161,7 @@ class PostTelemacAnimation(QObject):
         self.pluginlayer.propertiesdialog.tabWidget.setCurrentIndex(2)
         qgis.utils.iface.mapCanvas().freeze(True)
 
-        txt = time.ctime() + " Film - NE PAS MODIFIER L'ESPACE DESSIN DURANT L'OPERATION "
+        txt = "Film - NE PAS MODIFIER L'ESPACE DESSIN DURANT L'OPERATION "
         if self.outputtype:
             self.pluginlayer.propertiesdialog.textBrowser_2.append(txt)
         else:
@@ -179,7 +179,7 @@ class PostTelemacAnimation(QObject):
         nameslf = os.path.basename(self.pluginlayer.hydraufilepath).split(".")[0]
         nameavi = os.path.normpath(os.path.join(dir, nameslf + ".avi"))
 
-        txt = time.ctime() + " - Film - création du fichier " + str(nameavi)
+        txt = "Film - création du fichier " + str(nameavi)
         if self.outputtype:
             self.pluginlayer.propertiesdialog.textBrowser_2.append(txt)
         else:
@@ -242,7 +242,7 @@ class PostTelemacAnimation(QObject):
                     composeurimage.setPicturePath(matplotlibimagepath)
 
                 self.pluginlayer.changeTime(i)
-                txt = time.ctime() + " - Film - iteration n " + str(self.pluginlayer.time_displayed)
+                txt = "Film - iteration n " + str(self.pluginlayer.time_displayed)
                 if self.outputtype:
                     self.pluginlayer.propertiesdialog.textBrowser_2.append(txt)
                 else:
@@ -264,10 +264,8 @@ class PostTelemacAnimation(QObject):
 
                 if compt == 0:
                     image.save(os.path.join(dir, nameslf + "_preview." + formatcomposer))
-                    txt = (
-                        time.ctime()
-                        + " - Film - previsulation du film ici : "
-                        + str(os.path.join(dir, nameslf + "_preview." + formatcomposer))
+                    txt = "Film - previsulation du film ici : " + str(
+                        os.path.join(dir, nameslf + "_preview." + formatcomposer)
                     )
                     if self.outputtype:
                         self.pluginlayer.propertiesdialog.textBrowser_2.append(txt)
@@ -283,15 +281,14 @@ class PostTelemacAnimation(QObject):
             output_file = nameavi
             ffmpeg_res, logfile = self.images_to_video(tmp_img_dir, output_file, fps)
             if ffmpeg_res:
-                txt = time.ctime() + " - Film - fichier cree " + str(nameavi)
+                txt = "Film - fichier cree " + str(nameavi)
                 if self.outputtype:
                     self.pluginlayer.propertiesdialog.textBrowser_2.append(txt)
                 else:
                     self.status.emit(txt)
 
             else:
-                txt = time.ctime() + " - Film - erreur "
-
+                txt = "Film - erreur "
                 if self.outputtype:
                     self.pluginlayer.propertiesdialog.textBrowser_2.append(txt)
                 else:

@@ -19,9 +19,6 @@
 
 from qgis.core import QgsProcessingProvider
 
-# from processing.core.ProcessingConfig import Setting, ProcessingConfig
-
-from ExampleAlgorithm import ExampleAlgorithm
 from .shp_contour_Algorithm import ShpContourAlgorithm
 
 # ExampleAlgorithmProvider

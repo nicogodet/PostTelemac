@@ -34,7 +34,6 @@ from ..meshlayerparsers.libs_telemac.other.Class_Serafin import Serafin
 
 import sys
 import numpy as np
-import time
 import math
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "ExtractMaxTool.ui"))
@@ -161,7 +160,7 @@ class runGetMax(QObject):
             for timeslf in self.selafinlayer.hydrauparser.getTimes()[itermin:iterfin]:
                 num_time = np.where(self.selafinlayer.hydrauparser.getTimes() == timeslf)[0][0]
                 if (num_time - itermin) % 10 == 0:
-                    self.status.emit(time.ctime() + " - Maximum creation - time " + str(timeslf))
+                    self.status.emit("Maximum creation - time " + str(timeslf))
                 if initialisation:  ## Ce else permet de d'initialiser notre variable max avec le premier pas de temps
                     var_max = self.selafinlayer.hydrauparser.getValues(num_time)
                     if self.submersion > -1 and self.selafinlayer.hydrauparser.parametreh != None:
