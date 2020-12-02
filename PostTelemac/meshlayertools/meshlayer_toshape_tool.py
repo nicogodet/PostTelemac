@@ -123,7 +123,7 @@ class ToShapeTool(AbstractMeshLayerTool, FORM_CLASS):
 
         self.initclass.start(
             0,  # 0 : thread inside qgis (plugin) - 1 : thread processing - 2 : modeler (no thread) - 3 : modeler + shpouput - 4: outsideqgis
-            os.path.normpath(self.meshlayer.hydraufilepath),  # path to selafin file
+            self.meshlayer,
             self.meshlayer.time_displayed,  # time to process (selafin time in interation if int, or second if str)
             self.spinBox.value(),  # space step
             self.checkBox_5.isChecked(),  # bool for comuting velocity
@@ -166,7 +166,7 @@ class ToShapeTool(AbstractMeshLayerTool, FORM_CLASS):
 
         self.initclass.start(
             0,  # 0 : thread inside qgis (plugin) - 1 : thread processing - 2 : modeler (no thread) - 3 : modeler + shpouput - 4: outsideqgis
-            os.path.normpath(self.meshlayer.hydraufilepath),
+            self.meshlayer,
             int(self.meshlayer.time_displayed),
             self.meshlayer.hydrauparser.parametres[self.meshlayer.param_displayed][1],
             self.meshlayer.meshrenderer.lvl_contour,
@@ -193,7 +193,7 @@ class ToShapeTool(AbstractMeshLayerTool, FORM_CLASS):
         self.propertiesdialog.normalMessage(self.tr("2Shape - mesh creation launched - watch progress on log tab"))
         self.initclass.start(
             0,  # 0 : thread inside qgis (plugin) - 1 : thread processing - 2 : modeler (no thread) - 3 : modeler + shpouput - 4: outsideqgis
-            os.path.normpath(self.meshlayer.hydraufilepath),  # path to selafin file
+            self.meshlayer,
             int(self.meshlayer.time_displayed),  # time to process (selafin time iteration)
             parameter=str(self.meshlayer.hydrauparser.parametres[self.meshlayer.hydrauparser.parambottom][1])
             if self.checkBox_3.isChecked()

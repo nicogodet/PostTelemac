@@ -84,7 +84,7 @@ class SelafinContour2Shp(QObject):
     def __init__(
         self,
         processtype,  # 0 : thread inside qgis plugin) - 1 : thread processing - 2 : modeler (no thread) - 3 : modeler + shpouput - 4: outsideqgis
-        selafinfilepath,  # path to selafin file
+        meshlayer,
         time,  # time to process (selafin time in iteration)
         parameter,  # parameter to process name (string) or id (int)
         facteurz=None,  # z amplify
@@ -102,10 +102,9 @@ class SelafinContour2Shp(QObject):
         QObject.__init__(self)
         # donnees process
         self.processtype = processtype
-        # donnes delafin
-        self.parserhydrau = PostTelemacSelafinParser()
-        self.parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
-
+        # données delafin
+        self.meshlayer = meshlayer
+        self.parserhydrau = self.meshlayer.hydrauparser
         slf = self.parserhydrau.hydraufile
         self.slf_x, self.slf_y = self.parserhydrau.getFacesNodes()
         self.slf_x = self.slf_x + translatex
@@ -132,16 +131,16 @@ class SelafinContour2Shp(QObject):
 
         # donnees shp - outside qgis
         if not outputshpname:
-            outputshpname = os.path.basename(os.path.normpath(selafinfilepath)).split(".")[0] + "_mesh" + str(".shp")
+            outputshpname = os.path.basename(os.path.normpath(self.meshlayer.hydraufilepath)).split(".")[0] + "_mesh" + str(".shp")
         else:
             outputshpname = (
-                os.path.basename(os.path.normpath(selafinfilepath)).split(".")[0]
+                os.path.basename(os.path.normpath(self.meshlayer.hydraufilepath)).split(".")[0]
                 + "_"
                 + str(outputshpname)
                 + str(".shp")
             )
         if not outputshppath:
-            outputshppath = os.path.dirname(os.path.normpath(selafinfilepath))
+            outputshppath = os.path.dirname(os.path.normpath(self.meshlayer.hydraufilepath))
         self.outputshpfile = os.path.join(outputshppath, outputshpname)
 
         if isFileLocked(self.outputshpfile, True):
@@ -308,7 +307,7 @@ class InitSelafinMesh2Shp(QObject):
     def start(
         self,
         processtype,  # 0 : thread inside qgis (plugin) - 1 : thread processing - 2 : modeler (no thread) - 3 : modeler + shpouput - 4: outsideqgis
-        selafinfilepath,  # path to selafin file
+        meshlayer,
         time,  # time to process (selafin time in interation if int, or second if str)
         parameter=None,  # parameter to process name (string) or id (int) for hillsahde, none if not hillshade
         facteurz=None,  # z amplify
@@ -325,14 +324,8 @@ class InitSelafinMesh2Shp(QObject):
 
         # Check validity
         self.processtype = processtype
-
-        try:
-            parserhydrau = PostTelemacSelafinParser()
-            parserhydrau.loadHydrauFile(os.path.normpath(selafinfilepath))
-            slf = parserhydrau.hydraufile
-        except:
-            self.raiseError("fichier selafin n existe pas")
-
+        self.meshlayer = meshlayer
+        parserhydrau = self.meshlayer.hydrauparser
         times = parserhydrau.getTimes()
         if isinstance(time, int):  # cas des plugins et scripts
             if not time in range(len(times)):
@@ -355,7 +348,7 @@ class InitSelafinMesh2Shp(QObject):
 
         self.worker = SelafinContour2Shp(
             processtype,
-            selafinfilepath,
+            meshlayer,
             time,
             parameter,
             facteurz=facteurz,
