@@ -287,10 +287,10 @@ class InitSelafinMesh2Pts(QObject):
 
         self.processtype = processtype
         self.meshlayer = meshlayer
-        parserhydrau = self.meshlayer.hydrauparser
+        self.parserhydrau = self.meshlayer.hydrauparser
 
         # check time
-        times = parserhydrau.getTimes()
+        times = self.parserhydrau.getTimes()
         if isinstance(time, int):  # cas des plugins et scripts
             if not time in range(len(times)):
                 self.raiseError("Time non trouve dans  " + str(times))
