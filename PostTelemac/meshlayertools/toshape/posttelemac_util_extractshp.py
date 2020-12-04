@@ -117,8 +117,8 @@ class SelafinContour2Shp(QObject):
         self.parserhydrau = self.meshlayer.hydrauparser
         slf = self.parserhydrau.hydraufile
         self.slf_x, self.slf_y = self.parserhydrau.getFacesNodes()
-        self.slf_x = self.slf_x + translatex
-        self.slf_y = self.slf_y + translatey
+        #self.slf_x = self.slf_x + translatex
+        #self.slf_y = self.slf_y + translatey
 
         self.slf_mesh = np.array(self.parserhydrau.getElemFaces())
 

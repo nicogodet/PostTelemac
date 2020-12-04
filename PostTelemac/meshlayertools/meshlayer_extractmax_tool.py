@@ -74,6 +74,7 @@ class ExtractMaxTool(AbstractMeshLayerTool, FORM_CLASS):
             self,
             self.checkBox_11.isChecked(),
             self.checkBox_11.isChecked(),
+            self.checkBox_alea.isChecked(),
             self.doubleSpinBox_4.value() if self.checkBox_9.isChecked() else -1,
             self.doubleSpinBox_5.value() if self.checkBox_10.isChecked() else -1,
         )
@@ -88,7 +89,7 @@ class ExtractMaxTool(AbstractMeshLayerTool, FORM_CLASS):
 
 
 class runGetMax(QObject):
-    def __init__(self, selafinlayer, tool, intensite=False, direction=False, submersion=-1, duree=-1):
+    def __init__(self, selafinlayer, tool, intensite=False, direction=False, alea=False, submersion=-1, duree=-1):
         QObject.__init__(self)
         self.selafinlayer = selafinlayer
         self.tool = tool
@@ -96,6 +97,7 @@ class runGetMax(QObject):
         self.name_res_out = self.selafinlayer.hydraufilepath.rsplit(".", maxsplit=1)[0] + "_Max.res"
         self.intensite = intensite
         self.direction = direction
+        self.alea = alea
         self.submersion = submersion
         self.duree = duree
 
@@ -137,6 +139,14 @@ class runGetMax(QObject):
                 if param[4]:  # for virtual parameter
                     resout.nbvar += 1
                     resout.nomvar.append(str(param[1]))
+            if (
+                self.alea
+                and self.selafinlayer.hydrauparser.parametreh != None
+                and self.selafinlayer.hydrauparser.parametrevx != None
+                and self.selafinlayer.hydrauparser.parametrevy != None
+            ):
+                resout.nbvar += 1
+                resout.nomvar.append("Alea")
             if self.intensite:
                 resout.nbvar += 1
                 resout.nomvar.append("intensite")
@@ -156,26 +166,34 @@ class runGetMax(QObject):
             ## Boucle sur tous les temps et récuperation des variables
             itermin = self.tool.spinBox_max_start.value()
             iterfin = self.tool.spinBox_max_end.value()
+
             initialisation = True
             for timeslf in self.selafinlayer.hydrauparser.getTimes()[itermin:iterfin]:
                 num_time = np.where(self.selafinlayer.hydrauparser.getTimes() == timeslf)[0][0]
+
                 if (num_time - itermin) % 10 == 0:
                     self.status.emit("Maximum creation - time " + str(timeslf))
+
                 if initialisation:  ## Ce else permet de d'initialiser notre variable max avec le premier pas de temps
                     var_max = self.selafinlayer.hydrauparser.getValues(num_time)
+
+                    if self.alea:
+                        var_alea = np.array([0.0] * self.selafinlayer.hydrauparser.facesnodescount)
+                        var_alea_max = np.array([0.0] * self.selafinlayer.hydrauparser.facesnodescount)
+
                     if self.submersion > -1 and self.selafinlayer.hydrauparser.parametreh != None:
-                        # var_sub = np.array([np.nan]*self.selafinlayer.hydrauparser.pointcount)
                         var_sub = np.array([np.nan] * self.selafinlayer.hydrauparser.facesnodescount)
-                        pos_sub = np.where(var_max[self.selafinlayer.hydrauparser.parametreh] >= 0.05)[
-                            0
-                        ]  # la ou h est sup a 0.05 m
+                        pos_sub = np.where(var_max[self.selafinlayer.hydrauparser.parametreh] >= self.submersion)[0]
                         var_sub[pos_sub] = timeslf
+
                     if self.duree > -1 and self.selafinlayer.hydrauparser.parametreh != None:
                         var_dur = np.array([0.0] * self.selafinlayer.hydrauparser.facesnodescount)
                         previoustime = timeslf
+
                     initialisation = False
                 else:
                     var = self.selafinlayer.hydrauparser.getValues(num_time)
+
                     for num_var, val_var in enumerate(var):
                         if (
                             self.selafinlayer.hydrauparser.parametrevx != None
@@ -188,21 +206,24 @@ class runGetMax(QObject):
                             # On recherche tous les indicides du tableau ou les nouvelles valeurs sont supérieurs aux anciennes
                             pos_max = np.where(var[num_var] > var_max[num_var])[0]
                             var_max[num_var][pos_max] = val_var[pos_max]
+
                         else:
                             if (
                                 (self.submersion > -1 or self.duree > -1)
                                 and self.selafinlayer.hydrauparser.parametreh != None
                                 and num_var == self.selafinlayer.hydrauparser.parametreh
                             ):
-                                pos_sub = np.where(var[num_var] >= 0.05)[0]  # la ou h est sup a 0.05 m
                                 if self.duree > -1:
-                                    var_dur[pos_sub] += timeslf - previoustime
+                                    pos_dur = np.where(var[num_var] >= self.duree)[0]
+                                    var_dur[pos_dur] += timeslf - previoustime
                                     previoustime = timeslf
                                 if self.submersion > -1:
+                                    pos_sub = np.where(var[num_var] >= self.submersion)[0]
                                     possubpreced = np.where(np.isnan(var_sub))[0]  # on cherche les valeurs encore a nan
                                     goodnum = np.intersect1d(pos_sub, possubpreced)  # on intersecte les deux
                                     var_sub[goodnum] = timeslf
-                            # On recherche tous les indicides du tableau ou les nouvelles valeurs sont supérieurs aux anciennes
+
+                            # On recherche tous les indices du tableau ou les nouvelles valeurs sont supérieures aux anciennes
                             pos_max = np.where(var[num_var] > var_max[num_var])[0]
                             var_max[num_var][pos_max] = val_var[pos_max]
 
@@ -221,6 +242,7 @@ class runGetMax(QObject):
                             + np.power(var_max[self.selafinlayer.hydrauparser.parametrevy], 2),
                             0.5,
                         )
+
                         pos_vmax = np.where(vit > vit_max)[0]
                         var_max[self.selafinlayer.hydrauparser.parametrevx][pos_vmax] = var[
                             self.selafinlayer.hydrauparser.parametrevx
@@ -229,9 +251,98 @@ class runGetMax(QObject):
                             self.selafinlayer.hydrauparser.parametrevy
                         ][pos_vmax]
 
-            if self.submersion > -1 and self.selafinlayer.hydrauparser.parametreh != None:
-                var_sub = np.nan_to_num(var_sub)
+                    if (
+                        self.alea
+                        and self.selafinlayer.hydrauparser.parametrevx != None
+                        and self.selafinlayer.hydrauparser.parametrevy != None
+                        and self.selafinlayer.hydrauparser.parametreh != None
+                    ):
+                        posFaible = np.where(
+                            np.logical_and(
+                                np.logical_and(
+                                    np.greater(var_max[self.selafinlayer.hydrauparser.parametreh], 0),
+                                    np.greater(vit, 0),
+                                ),
+                                np.logical_and(
+                                    np.less(var_max[self.selafinlayer.hydrauparser.parametreh], 0.5), np.less(vit, 0.5)
+                                ),
+                            )
+                        )[0]
+                        posModere = np.where(
+                            np.logical_and(
+                                np.logical_and(
+                                    np.greater(var_max[self.selafinlayer.hydrauparser.parametreh], 0),
+                                    np.greater(vit, 0),
+                                ),
+                                np.logical_or(
+                                    np.logical_and(
+                                        np.less(var_max[self.selafinlayer.hydrauparser.parametreh], 1),
+                                        np.logical_and(np.greater_equal(vit, 0.5), np.less(vit, 1)),
+                                    ),
+                                    np.logical_and(
+                                        np.less(vit, 0.5),
+                                        np.logical_and(
+                                            np.greater_equal(var_max[self.selafinlayer.hydrauparser.parametreh], 0.5),
+                                            np.less(var_max[self.selafinlayer.hydrauparser.parametreh], 1),
+                                        ),
+                                    ),
+                                ),
+                            )
+                        )[0]
+                        posFort = np.where(
+                            np.logical_and(
+                                np.logical_and(
+                                    np.greater(var_max[self.selafinlayer.hydrauparser.parametreh], 0),
+                                    np.greater(vit, 0),
+                                ),
+                                np.logical_or(
+                                    np.logical_and(
+                                        np.less(var_max[self.selafinlayer.hydrauparser.parametreh], 1),
+                                        np.greater_equal(vit, 1),
+                                    ),
+                                    np.logical_and(
+                                        np.less(vit, 1),
+                                        np.logical_and(
+                                            np.greater_equal(var_max[self.selafinlayer.hydrauparser.parametreh], 1),
+                                            np.less(var_max[self.selafinlayer.hydrauparser.parametreh], 2),
+                                        ),
+                                    ),
+                                ),
+                            )
+                        )[0]
+                        posTresFort = np.where(
+                            np.logical_and(
+                                np.logical_and(
+                                    np.greater(var_max[self.selafinlayer.hydrauparser.parametreh], 0),
+                                    np.greater(vit, 0),
+                                ),
+                                np.logical_or(
+                                    np.logical_and(
+                                        np.greater_equal(vit, 1),
+                                        np.logical_and(
+                                            np.greater_equal(var_max[self.selafinlayer.hydrauparser.parametreh], 1),
+                                            np.less(var_max[self.selafinlayer.hydrauparser.parametreh], 2),
+                                        ),
+                                    ),
+                                    np.greater_equal(var_max[self.selafinlayer.hydrauparser.parametreh], 2),
+                                ),
+                            )
+                        )[0]
+                        var_alea[posFaible] = 1
+                        var_alea[posModere] = 2
+                        var_alea[posFort] = 3
+                        var_alea[posTresFort] = 4
 
+                        pos_aleaMax = np.where(var_alea > var_alea_max)[0]
+                        var_alea_max[pos_aleaMax] = var_alea[pos_aleaMax]
+
+            if (
+                self.alea
+                and self.selafinlayer.hydrauparser.parametrevx != None
+                and self.selafinlayer.hydrauparser.parametrevy != None
+                and self.selafinlayer.hydrauparser.parametreh != None
+            ):
+                var_max = np.vstack((var_max, var_alea_max))
             ## Une fois sortie de la boucle le max a ete calculer
             ## On recalcule les directions et les intensites sur le dernier pas de temps
 
@@ -260,6 +371,7 @@ class runGetMax(QObject):
                     var_max = np.vstack((var_max, val_direction))
 
             if self.submersion > -1 and self.selafinlayer.hydrauparser.parametreh != None:
+                var_sub = np.nan_to_num(var_sub)
                 var_max = np.vstack((var_max, var_sub))
             if self.duree > -1 and self.selafinlayer.hydrauparser.parametreh != None:
                 var_max = np.vstack((var_max, var_dur))
@@ -289,9 +401,9 @@ class initRunGetMax(QObject):
         self.thread = QThread()
         self.worker = None
 
-    def start(self, selafinlayer, tool, intensite, direction, submersion, duree):
+    def start(self, selafinlayer, tool, intensite, direction, alea, submersion, duree):
         # Launch worker
-        self.worker = runGetMax(selafinlayer, tool, intensite, direction, submersion, duree)
+        self.worker = runGetMax(selafinlayer, tool, intensite, direction, alea, submersion, duree)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         self.worker.status.connect(self.writeOutput)

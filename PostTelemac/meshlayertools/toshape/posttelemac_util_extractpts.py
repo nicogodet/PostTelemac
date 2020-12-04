@@ -102,8 +102,8 @@ class SelafinContour2Pts(QObject):
         self.parserhydrau = self.meshlayer.hydrauparser
         slf = self.parserhydrau.hydraufile
         self.x, self.y = self.parserhydrau.getFacesNodes()
-        self.x = self.x + translatex
-        self.y = self.y + translatey
+        #self.x = self.x + translatex
+        #self.y = self.y + translatey
         self.mesh = np.array(self.parserhydrau.getElemFaces())
 
         self.time = time
@@ -188,7 +188,7 @@ class SelafinContour2Pts(QObject):
                     if k % 5000 == 0:
                         strtxt = str("Thread - noeud n " + str(k) + "/" + str(noeudcount))
                         self.writeOutput(strtxt)
-
+                    
                     fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(self.x[k]), float(self.y[k]))))
 
                     tabattr = []
