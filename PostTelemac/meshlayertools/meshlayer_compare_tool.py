@@ -295,5 +295,5 @@ class getCompareValue(QObject):
                 self.layer.value = self.values[self.layer.param_displayed]
 
         except Exception as e:
-            self.status.emit("updateSelafinValue :" + str(e))
+            self.layer.propertiesdialog.textBrowser_2.append("updateSelafinValue :" + str(e))
             self.values = None

@@ -310,13 +310,14 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
                             pass
             except Exception as e:
                 self.errorMessage("Error importing tool - " + str(x) + " : " + str(e))
+        self.stackedWidget.setCurrentIndex(0)
         self.normalMessage("Tools loaded")
 
     def unloadTools(self):
         # clear tools tab
         try:
             self.treeWidget_utils.clear()
-            for i in range(self.stackedWidget.count()):
+            for i in range(1, self.stackedWidget.count()):
                 widg = self.stackedWidget.widget(i)
                 self.stackedWidget.removeWidget(widg)
             self.tools = []

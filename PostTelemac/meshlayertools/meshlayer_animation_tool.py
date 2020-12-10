@@ -26,7 +26,13 @@ Versions :
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import QEvent, QObject, pyqtSignal
 
-from qgis.core import QgsProject, QgsLayoutExporter, QgsLayoutItemPicture
+from qgis.core import (
+    QgsProject,
+    QgsLayoutExporter,
+    QgsLayoutItemMap,
+    QgsLayoutItemPicture,
+    QgsLayoutItemLegend,
+)
 
 from .meshlayer_abstract_tool import *
 
@@ -194,7 +200,7 @@ class PostTelemacAnimation(QObject):
         # Init graph things if an image is choosen **************************************************************************
         matplotlibimagepath = None
         pitem = None
-        maps = [item for item in composition.items() if isinstance(item, qgis._core.QgsLayoutItemMap) and item.scene()]
+        maps = [item for item in composition.items() if isinstance(item, QgsLayoutItemMap) and item.scene()]
         images = [item for item in composition.items() if isinstance(item, QgsLayoutItemPicture) and item.scene()]
         legends = [item for item in composition.items() if isinstance(item, QgsLayoutItemLegend) and item.scene()]
 
