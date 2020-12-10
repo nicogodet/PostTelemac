@@ -22,6 +22,7 @@ email=patrice.verchere@arteliagroup.com
 
 # Uncomment the following line and add your changelog:
 changelog= 
+	1.1.94 : Ajout tab Aléa + calcul de la vitesse de montée
 	1.1.93 : Calcul de l'aléa PPRI v2019 WIP
 	1.1.92 : Big reduction in initialization time 2Shape algs
 	1.1.90/91 : Drop Qgis2
