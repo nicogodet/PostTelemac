@@ -18,8 +18,9 @@
 """
 
 from qgis.core import QgsProcessingProvider
+from qgis.PyQt.QtGui import QIcon
 
-from .shp_contour_Algorithm import ShpContourAlgorithm
+from .ExtractMax_Algorithm import PostTelemacExtractMax
 
 # ExampleAlgorithmProvider
 
@@ -42,9 +43,7 @@ class PostTelemacProvider(QgsProcessingProvider):
         """
         Loads all algorithms belonging to this provider.
         """
-        self.addAlgorithm(ShpContourAlgorithm())
-        # add additional algorithms here
-        # self.addAlgorithm(MyOtherAlgorithm())
+        self.addAlgorithm(PostTelemacExtractMax())
 
     def id(self):
         """
@@ -61,14 +60,14 @@ class PostTelemacProvider(QgsProcessingProvider):
 
         This string should be short (e.g. "Lastools") and localised.
         """
-        return self.tr("PostTelemac")
+        return "PostTelemac"
 
     def icon(self):
         """
         Should return a QIcon which is used for your provider inside
         the Processing toolbox.
         """
-        return QgsProcessingProvider.icon(self)
+        return QIcon(":/plugins/PostTelemac/icons/posttelemac.png")
 
     def longName(self):
         """
