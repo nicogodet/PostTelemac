@@ -184,7 +184,7 @@ class runAlea(QObject):
         units.append("S")
         ## /Pour DEBUG
         variables.append("VITESSE DE MONTEE")
-        units.append("CM/MIN")
+        units.append("CM/H")
         variables.append("ALEA")
         units.append("")
         if self.intensite:
@@ -357,7 +357,7 @@ class runAlea(QObject):
             # Conversion m/s en cm/min
         else:
             var_Vmontee = (
-                (var_max[self.selafinlayer.hydrauparser.parametreh] - self.critere2) / (var_Vm1 - var_Vm2) * 6000
+                (var_max[self.selafinlayer.hydrauparser.parametreh] - self.critere2) / (var_Vm1 - var_Vm2) * 360000
             )
             # Conversion m/s en cm/min
 

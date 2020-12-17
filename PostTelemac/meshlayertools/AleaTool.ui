@@ -156,7 +156,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Le résultats est en centimètre par minute.</string>
+         <string>Le résultats est en centimètre par heure.</string>
         </property>
        </widget>
       </item>
