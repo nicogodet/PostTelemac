@@ -20,14 +20,11 @@
 from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
-    QgsProcessingMultiStepFeedback,
     QgsProcessingParameterFile,
     QgsProcessingParameterFileDestination,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterNumber,
 )
-
-from qgis.PyQt.QtCore import QVariant
 
 import processing
 
@@ -41,11 +38,11 @@ from ..meshlayerparsers.posttelemac_selafin_parser import PostTelemacSelafinPars
 
 class PostTelemacExtractMax(QgsProcessingAlgorithm):
 
-    SELAFIN_FILE = 'SELAFIN_FILE'
+    INPUT = 'INPUT'
     COMPUTE_REAL_MAX_VELOCITY = 'COMPUTE_REAL_VELOCITY'
     H_WATER_ARRIVAL = 'H_WATER_ARRIVAL'
     H_FLOOD_DURATION = 'H_FLOOD_DURATION'
-    SELAFIN_FILE_OUT = 'SELAFIN_FILE_OUT'
+    OUTPUT = 'OUTPUT'
     # SELAFIN_LVL_STD = 'SELAFIN_LVL_STD'
     # SELAFIN_LVL_SPE = 'SELAFIN_LVL_SPE'
     # SELAFIN_PARAM_STD = 'SELAFIN_PARAM_STD'
@@ -67,7 +64,7 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterFile(
-                self.SELAFIN_FILE,
+                self.INPUT,
                 'Fichier résultat TELEMAC',
                 behavior=QgsProcessingParameterFile.File,
                 fileFilter='Fichiers résultats TELEMAC (*.res)',
@@ -129,7 +126,7 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
         
     def processAlgorithm(self, parameters, context, feedback):
         
-        selafinFilePath = self.parameterAsString(parameters, self.SELAFIN_FILE, context)
+        selafinFilePath = self.parameterAsString(parameters, self.INPUT, context)
         selafinFileOutPath = selafinFilePath.rsplit(".", maxsplit=1)[0] + "_Max.res"
         intensite = self.parameterAsBoolean(parameters, self.COMPUTE_REAL_MAX_VELOCITY, context)
         direction = self.parameterAsBoolean(parameters, self.COMPUTE_REAL_MAX_VELOCITY, context)
@@ -139,12 +136,12 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
         feedback.setProgressText("Initialisation du parser SELAFIN...")
         
         ## Initialisation du parser SELAFIN
-        self.hydrauparser = PostTelemacSelafinParser()
-        self.hydrauparser.loadHydrauFile(os.path.normpath(selafinFilePath))
+        hydrauparser = PostTelemacSelafinParser()
+        hydrauparser.loadHydrauFile(os.path.normpath(selafinFilePath))
         
         feedback.setProgressText("OK\n")
         
-        total = 100.0 / len(self.hydrauparser.getTimes())
+        total = 100.0 / len(hydrauparser.getTimes())
         
         feedback.setProgressText("Initialisation du fichier de sortie...")
         
@@ -178,7 +175,7 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
         ## On ajoute les deux nouvelles variables, pour cela il faut modifier la variable
         ## nbvar et nomvar (le nom de la variable ne doit pas depasser 72 caracteres
 
-        for param in self.hydrauparser.parametres:
+        for param in hydrauparser.parametres:
             if param[4]:  # for virtual parameter
                 variables.append(str(param[1]))
                 units.append("")
@@ -189,10 +186,10 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
         if direction:
             variables.append("direction")
             units.append("")
-        if submersion > -1 and self.hydrauparser.parametreh != None:
+        if submersion > -1 and hydrauparser.parametreh != None:
             variables.append("submersion")
             units.append("S")
-        if duree > -1 and self.hydrauparser.parametreh != None:
+        if duree > -1 and hydrauparser.parametreh != None:
             variables.append("duree")
             units.append("S")
 
@@ -210,38 +207,38 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
         feedback.setProgressText("Calcul du max...")
         
         initialisation = True
-        for current, timeslf in enumerate(self.hydrauparser.getTimes()):
+        for current, timeslf in enumerate(hydrauparser.getTimes()):
             if feedback.isCanceled():
                 resOut.close()
                 break
         
-            num_time = np.where(self.hydrauparser.getTimes() == timeslf)[0][0]
+            num_time = np.where(hydrauparser.getTimes() == timeslf)[0][0]
 
             feedback.setProgress(int(current * total))
 
             if initialisation:  ## Ce else permet de d'initialiser notre variable max avec le premier pas de temps
-                var_max = self.hydrauparser.getValues(num_time)
+                var_max = hydrauparser.getValues(num_time)
 
-                if submersion > -1 and self.hydrauparser.parametreh != None:
-                    var_sub = np.array([np.nan] * self.hydrauparser.facesnodescount)
-                    pos_sub = np.where(var_max[self.hydrauparser.parametreh] >= submersion)[0]
+                if submersion > -1 and hydrauparser.parametreh != None:
+                    var_sub = np.array([np.nan] * hydrauparser.facesnodescount)
+                    pos_sub = np.where(var_max[hydrauparser.parametreh] >= submersion)[0]
                     var_sub[pos_sub] = timeslf
 
-                if duree > -1 and self.hydrauparser.parametreh != None:
-                    var_dur = np.array([0.0] * self.hydrauparser.facesnodescount)
+                if duree > -1 and hydrauparser.parametreh != None:
+                    var_dur = np.array([0.0] * hydrauparser.facesnodescount)
                     previoustime = timeslf
 
                 initialisation = False
             else:
-                var = self.hydrauparser.getValues(num_time)
+                var = hydrauparser.getValues(num_time)
 
                 for num_var, val_var in enumerate(var):
                     if (
-                        self.hydrauparser.parametrevx != None
-                        and self.hydrauparser.parametrevy != None
+                        hydrauparser.parametrevx != None
+                        and hydrauparser.parametrevy != None
                         and (
-                            num_var == self.hydrauparser.parametrevx
-                            or num_var == self.hydrauparser.parametrevy
+                            num_var == hydrauparser.parametrevx
+                            or num_var == hydrauparser.parametrevy
                         )
                     ):
                         # On recherche tous les indicides du tableau ou les nouvelles valeurs sont supérieurs aux anciennes
@@ -251,8 +248,8 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
                     else:
                         if (
                             (submersion > -1 or duree > -1)
-                            and self.hydrauparser.parametreh != None
-                            and num_var == self.hydrauparser.parametreh
+                            and hydrauparser.parametreh != None
+                            and num_var == hydrauparser.parametreh
                         ):
                             if duree > -1:
                                 pos_dur = np.where(var[num_var] >= duree)[0]
@@ -270,35 +267,35 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
 
                 ## Maintenant on s'occuppe du cas particulier des vitesses
                 if (
-                    self.hydrauparser.parametrevx != None
-                    and self.hydrauparser.parametrevy != None
+                    hydrauparser.parametrevx != None
+                    and hydrauparser.parametrevy != None
                 ):
                     vit = np.power(
-                        np.power(var[self.hydrauparser.parametrevx], 2)
-                        + np.power(var[self.hydrauparser.parametrevy], 2),
+                        np.power(var[hydrauparser.parametrevx], 2)
+                        + np.power(var[hydrauparser.parametrevy], 2),
                         0.5,
                     )
                     vit_max = np.power(
-                        np.power(var_max[self.hydrauparser.parametrevx], 2)
-                        + np.power(var_max[self.hydrauparser.parametrevy], 2),
+                        np.power(var_max[hydrauparser.parametrevx], 2)
+                        + np.power(var_max[hydrauparser.parametrevy], 2),
                         0.5,
                     )
 
                     pos_vmax = np.where(vit > vit_max)[0]
-                    var_max[self.hydrauparser.parametrevx][pos_vmax] = var[
-                        self.hydrauparser.parametrevx
+                    var_max[hydrauparser.parametrevx][pos_vmax] = var[
+                        hydrauparser.parametrevx
                     ][pos_vmax]
-                    var_max[self.hydrauparser.parametrevy][pos_vmax] = var[
-                        self.hydrauparser.parametrevy
+                    var_max[hydrauparser.parametrevy][pos_vmax] = var[
+                        hydrauparser.parametrevy
                     ][pos_vmax]
                     
         if (
-            self.hydrauparser.parametrevx != None
-            and self.hydrauparser.parametrevy != None
+            hydrauparser.parametrevx != None
+            and hydrauparser.parametrevy != None
             and (intensite or direction)
         ):
-            u = var_max[self.hydrauparser.parametrevx]
-            v = var_max[self.hydrauparser.parametrevy]
+            u = var_max[hydrauparser.parametrevx]
+            v = var_max[hydrauparser.parametrevy]
             if intensite:
                 val_intensite = np.power(np.power(u, 2) + np.power(v, 2), 0.5)
                 var_max = np.vstack((var_max, val_intensite))
@@ -316,10 +313,10 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
                 np.place(val_direction, np.isnan(val_direction), 0.0)
                 var_max = np.vstack((var_max, val_direction))
 
-        if submersion > -1 and self.hydrauparser.parametreh != None:
+        if submersion > -1 and hydrauparser.parametreh != None:
             var_sub = np.nan_to_num(var_sub)
             var_max = np.vstack((var_max, var_sub))
-        if duree > -1 and self.hydrauparser.parametreh != None:
+        if duree > -1 and hydrauparser.parametreh != None:
             var_max = np.vstack((var_max, var_dur))
 
         ## Ecriture des valeurs max dans le fichier de sortie (on met un temps à 0 dans le fichier)
@@ -327,13 +324,15 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
 
         resOut.close()
         
-        return {}
+        return {
+            self.OUTPUT: selafinFileOutPath,
+            }
         
     def name(self):
         return 'extractMax'
 
     def displayName(self):
-        return "Extraction des max d'un fichier résultat TELEMAC"
+        return "Extraction des maximums"
 
     def group(self):
         return 'Export'
@@ -343,16 +342,16 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
         
     def shortHelpString(self):
         return """
-        Pre-Processing InfoWorks pour les réseaux pluviaux.
+        Extrait le maximum de toutes les variables du fichier résultats TELEMAC d'entrée.
         
-        Permet d'assigner, à chaque canalisation, le nom et le radier des noeuds amont et aval.
-        
-        Conseils : 
-         - Utiliser l'accrochage lors de la création des lignes des canalisations.
-        
-        Limites : 
-         - Il ne peut y avoir qu'un seul noeud aux extrémités des lignes.
-         - Ne gère pas le cas où 2 canalisations démarrent ou arrivent à un noeud avec des radiers différents.
+        Optionnel :
+            - Calcul de la vitesse maximale réelle
+            - Calcul du temps d'arrivée de l'onde pour une certaine hauteur d'eau minimale
+            - Calcul de la durée de submersion pour une certaine hauteur d'eau minimale
+            
+        WIP :
+            - Variables définies par l'utilisateur non supportées
+            - Extraction sur un intervalle d'itérations 
         """
 
     def createInstance(self):
