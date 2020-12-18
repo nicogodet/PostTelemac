@@ -326,7 +326,7 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
         
         return {
             self.OUTPUT: selafinFileOutPath,
-            }
+        }
         
     def name(self):
         return 'extractMax'

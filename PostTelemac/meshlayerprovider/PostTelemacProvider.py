@@ -21,6 +21,7 @@ from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 
 from .ExtractMax_Algorithm import PostTelemacExtractMax
+from .PointsShapeTool_Algorithm import PostTelemacPointsShapeTool
 
 # ExampleAlgorithmProvider
 
@@ -44,6 +45,8 @@ class PostTelemacProvider(QgsProcessingProvider):
         Loads all algorithms belonging to this provider.
         """
         self.addAlgorithm(PostTelemacExtractMax())
+        self.addAlgorithm(PostTelemacPointsShapeTool())
+        self.addAlgorithm(PostTelemacContourShapeTool())
 
     def id(self):
         """
