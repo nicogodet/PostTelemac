@@ -505,7 +505,7 @@ class PostTelemacAbstractParser(QObject):
                     elif param[2] == 2:  # face  value
                         values.append(facevalue[param[3]])
         except Exception as e:
-            self.emitMessage.emit("Abstractparser - getValues : " + str(e))
+            self.emitMessage.emit("Abstractparser - getValues : " + str(e) + str(elemvalue) + str(facenodevalues) + str(facevalue))
         return values
 
     def getValues2(self, time):
