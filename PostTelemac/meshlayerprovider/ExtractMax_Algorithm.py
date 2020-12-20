@@ -95,34 +95,7 @@ class PostTelemacExtractMax(QgsProcessingAlgorithm):
                 minValue=-1,
                 defaultValue=0.05,
             )
-        )
-
-        # self.addParameter(ParameterSelection(self.PROCESS_TYPE,
-            # self.tr('Process type'), self.PROCESS_TYPES, 0))
-        # self.addParameter(ParameterFile(self.SELAFIN_FILE,
-            # self.tr('Selafin file'), False,False))
-        # self.addParameter(ParameterNumber(self.SELAFIN_TIME,
-            # self.tr('Selafin time'), 0.0, 99999999.0, 0.0))
-        # self.addParameter(ParameterSelection(self.SELAFIN_LVL_STD,
-            # self.tr('Levels standards'), self.SELAFIN_LVL_STDS, 0))
-        # self.addParameter(ParameterString(self.SELAFIN_LVL_SPE,
-            # self.tr('Levels specific')))
-        # self.addParameter(ParameterSelection(self.SELAFIN_PARAM_STD,
-            # self.tr('Parameters standards'), self.SELAFIN_PARAM_STDS, 0))
-        # self.addParameter(ParameterString(self.SELAFIN_PARAM_SPE,
-            # self.tr('Parameters specific')))
-        # self.addParameter(ParameterBoolean(self.QUICK_PROCESS,
-            # self.tr('Quick process'), False))
-        # self.addParameter(ParameterCrs(self.SELAFIN_CRS,
-            # self.tr('Selafin CRS'), 'EPSG:2154'))
-        # self.addParameter(ParameterBoolean(self.TRANS_CRS,
-            # self.tr('Transform CRS'), False))
-        # self.addParameter(ParameterCrs(self.SHP_CRS,
-            # self.tr('Shp CRS'), 'EPSG:2154'))
-        # self.addParameter(ParameterString(self.SHP_NAME,
-            # self.tr('Specific name')))
-        # self.addOutput(OutputVector(self.SHP_PROCESS, self.tr('Telemac layer')))
-        
+        )       
         
     def processAlgorithm(self, parameters, context, feedback):
         

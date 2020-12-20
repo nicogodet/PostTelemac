@@ -58,20 +58,6 @@ class PostTelemacPointsShapeTool(QgsProcessingAlgorithm):
     TRANSLATE_Y = "TRANSLATE_Y"
     OUTPUT_SCR = "OUTPUT_SCR"
     OUTPUT = "OUTPUT"
-    # SELAFIN_LVL_STD = 'SELAFIN_LVL_STD'
-    # SELAFIN_LVL_SPE = 'SELAFIN_LVL_SPE'
-    # SELAFIN_PARAM_STD = 'SELAFIN_PARAM_STD'
-    # SELAFIN_PARAM_SPE = 'SELAFIN_PARAM_SPE'
-    # QUICK_PROCESS = 'QUICK_PROCESS'
-    # SELAFIN_CRS = 'SELAFIN_CRS'
-    # TRANS_CRS = 'TRANS_CRS'
-    # SHP_CRS = 'SHP_CRS'
-    # SHP_NAME = 'SHP_NAME'
-    # SHP_PROCESS = 'SHP_PROCESS'
-
-    # PROCESS_TYPES = ['En arriere plan', 'Modeler', 'Modeler avec creation de fichier']
-    # SELAFIN_LVL_STDS = ['[H_simple : 0.0,0.05,0.5,1.0,2.0,,5.0,9999.0]' , '[H_complet : 0.0,0.01,0.05,0.1,0.25,0.5,1.0,1.5,2.0,5.0,9999.0]' , '[H_AMC]' , '[V_AMC_simple : 0.0,0.5,1.0,2.0,4.0]' , '[V_complet : 0,0.25,0.5,1.0,2.0,4.0,9999.0]' , '[Onde : mn : 0,5,10,15,30,h : 1, 2, 3, 6, 12, 24, >24]' , '[Delta_SL : -9999,0.5,-0.25,-0.10,-0.05,-0.02,-0.01,0.01,0.02,0.10,0.25,0.50,9999]' , '[Duree_AMC]']
-    # SELAFIN_PARAM_STDS = ['Hmax','Vmax','SLmax','?SLmax','SUBMERSION']
 
     def initAlgorithm(self, config=None):
 
@@ -84,7 +70,14 @@ class PostTelemacPointsShapeTool(QgsProcessingAlgorithm):
                 defaultValue=None,
             )
         )
-        self.addParameter(QgsProcessingParameterString(self.ITER, "ITER", multiLine=False, defaultValue="0"))
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.ITER,
+                "Itération à extraire",
+                multiLine=False,
+                defaultValue="0",
+            )
+        )
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.TRANSLATE_X,
@@ -114,32 +107,6 @@ class PostTelemacPointsShapeTool(QgsProcessingAlgorithm):
             )
         )
 
-        # self.addParameter(ParameterSelection(self.PROCESS_TYPE,
-        # self.tr('Process type'), self.PROCESS_TYPES, 0))
-        # self.addParameter(ParameterFile(self.SELAFIN_FILE,
-        # self.tr('Selafin file'), False,False))
-        # self.addParameter(ParameterNumber(self.SELAFIN_TIME,
-        # self.tr('Selafin time'), 0.0, 99999999.0, 0.0))
-        # self.addParameter(ParameterSelection(self.SELAFIN_LVL_STD,
-        # self.tr('Levels standards'), self.SELAFIN_LVL_STDS, 0))
-        # self.addParameter(ParameterString(self.SELAFIN_LVL_SPE,
-        # self.tr('Levels specific')))
-        # self.addParameter(ParameterSelection(self.SELAFIN_PARAM_STD,
-        # self.tr('Parameters standards'), self.SELAFIN_PARAM_STDS, 0))
-        # self.addParameter(ParameterString(self.SELAFIN_PARAM_SPE,
-        # self.tr('Parameters specific')))
-        # self.addParameter(ParameterBoolean(self.QUICK_PROCESS,
-        # self.tr('Quick process'), False))
-        # self.addParameter(ParameterCrs(self.SELAFIN_CRS,
-        # self.tr('Selafin CRS'), 'EPSG:2154'))
-        # self.addParameter(ParameterBoolean(self.TRANS_CRS,
-        # self.tr('Transform CRS'), False))
-        # self.addParameter(ParameterCrs(self.SHP_CRS,
-        # self.tr('Shp CRS'), 'EPSG:2154'))
-        # self.addParameter(ParameterString(self.SHP_NAME,
-        # self.tr('Specific name')))
-        # self.addOutput(OutputVector(self.SHP_PROCESS, self.tr('Telemac layer')))
-
     def processAlgorithm(self, parameters, context, feedback):
 
         selafinFilePath = os.path.normpath(self.parameterAsString(parameters, self.INPUT, context))
@@ -167,6 +134,7 @@ class PostTelemacPointsShapeTool(QgsProcessingAlgorithm):
             feedback.reportError(
                 "Itération '{}' non trouvée dans le fichier SELAFIN {}".format(time, os.path.basename(selafinFilePath))
             )
+            return {}
 
         ztri = [hydrauparser.getValues(time)[i] for i in range(len([param for param in hydrauparser.parametres]))]
 
@@ -238,16 +206,8 @@ class PostTelemacPointsShapeTool(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
         return """
-        Extrait le maximum de toutes les variables du fichier résultats TELEMAC d'entrée.
-        
-        Optionnel :
-            - Calcul de la vitesse maximale réelle
-            - Calcul du temps d'arrivée de l'onde pour une certaine hauteur d'eau minimale
-            - Calcul de la durée de submersion pour une certaine hauteur d'eau minimale
-            
-        WIP :
-            - Variables définies par l'utilisateur non supportées
-            - Extraction sur un intervalle d'itérations 
+        Extrait les noeuds de calcul du fichier résultats TELEMAC d'entrée.
+ 
         """
 
     def createInstance(self):
