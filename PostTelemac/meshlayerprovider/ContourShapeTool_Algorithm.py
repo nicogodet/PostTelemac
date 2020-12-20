@@ -204,7 +204,7 @@ class PostTelemacContourShapeTool(QgsProcessingAlgorithm):
 
         values = hydrauparser.getValues(time)[parameter]
 
-        totalLevels = 100.0 / len(levels)
+        totalLevels = 100.0 / (len(levels) - 1)
 
         fields = QgsFields()
         fields.append(QgsField("min", QVariant.Double))
@@ -391,7 +391,7 @@ class PostTelemacContourShapeTool(QgsProcessingAlgorithm):
                         if tt1 == 5 and outergeom.intersects(tab[k][1]):
                             outergeom = outergeom.difference(tab[k][1])
                 except Exception as e:
-                    feedback.pushError("Erreur creation ring : " + str(e))
+                    feedback.reportError("Erreur creation ring : " + str(e))
                     return outer
 
         if len(outergeom.validateGeometry()) != 0:
