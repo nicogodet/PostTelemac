@@ -22,6 +22,7 @@ from qgis.PyQt.QtGui import QIcon
 
 from .ExtractMax_Algorithm import PostTelemacExtractMax
 from .PointsShapeTool_Algorithm import PostTelemacPointsShapeTool
+from .ContourShapeTool_Algorithm import PostTelemacContourShapeTool
 
 # ExampleAlgorithmProvider
 
