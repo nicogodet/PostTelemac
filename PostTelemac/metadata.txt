@@ -12,7 +12,7 @@ about= Post treatment of open Telemac results (and Anuga , HECRAS 2D as experime
 qgisMinimumVersion=3.10
 qgisMaximumVersion=3.99
 description=Post Treatment for Telemac (and Anuga , HECRAS 2D as experimental)
-version=1.1.94
+version=1.1.95
 author=Artelia Eau et Environnement
 email=patrice.verchere@arteliagroup.com
 
@@ -22,6 +22,7 @@ email=patrice.verchere@arteliagroup.com
 
 # Uncomment the following line and add your changelog:
 changelog= 
+	1.1.95 : PostTelemac Processing Provider + Vitesse de montée en cm/h
 	1.1.94 : Ajout tab Aléa + calcul de la vitesse de montée
 	1.1.93 : Calcul de l'aléa PPRI v2019 WIP
 	1.1.92 : Big reduction in initialization time 2Shape algs
