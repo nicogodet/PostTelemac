@@ -49,7 +49,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         self.time = None
         self.onedvar = {}
         self.bottomvalue = None
-        self.rawvaluetotal = []
+        self.rawvaluetotal = None
         self.facenodes = None
         self.facesrawvalues = []
 
@@ -67,7 +67,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         """
         # return np.array(range(100))
 
-        if self.time == None:
+        if self.time is None:
             hdf_ds = gdal.Open(self.path, gdal.GA_ReadOnly)
             # print hdf_ds.GetSubDatasets()
             lensubdataset = len(hdf_ds.GetSubDatasets())
@@ -80,7 +80,6 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
                 str1 = str(var.split(":")[-1])
                 param = str1.split("//")[1].split("/")
                 if "Unsteady_Time_Series" in param:
-
                     band_ds = gdal.Open(var, gdal.GA_ReadOnly)
                     array = band_ds.ReadAsArray()
                     band_ds = None
@@ -153,7 +152,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         print parser.itertimecount
         """
 
-        if self.varnames == None:
+        if self.varnames is None:
 
             hdf_ds = gdal.Open(self.path, gdal.GA_ReadOnly)
             # print hdf_ds.GetSubDatasets()
@@ -223,7 +222,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
 
         rawvalue = []
 
-        if self.bottomvalue == None:
+        if self.bottomvalue is None:
 
             hdf_ds = gdal.Open(self.path, gdal.GA_ReadOnly)
             # print hdf_ds.GetSubDatasets()
@@ -278,7 +277,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
             print("fbottom value : " + str(round(time.clock() - timestart, 3)))
 
         if False:
-            if self.rawvaluetotal == None:
+            if self.rawvaluetotal is None:
 
                 for param in self.varnames:
                     if param[1] == 0:
@@ -448,7 +447,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         """
         # print 'getElemRawTimeSerie'
 
-        if self.rawvaluetotal == None:
+        if self.rawvaluetotal is None:
             self.getElemRawValue(0)
 
         result = []
@@ -481,7 +480,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         return (np.array(x), np.array(y) )
 
         """
-        if self.facenodes == None:
+        if self.facenodes is None:
             FacePoints_Coordinate = []
 
             hdf_ds = gdal.Open(self.path, gdal.GA_ReadOnly)
@@ -515,7 +514,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
 
         return np.array([facenodeindex linked with the elem ])
         """
-        if self.elemfacesindex == None:
+        if self.elemfacesindex is None:
             Cells_FacePoint_Indexes = []
             hdf_ds = gdal.Open(self.path, gdal.GA_ReadOnly)
             # print hdf_ds.GetSubDatasets()
@@ -624,7 +623,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         """
         return np.array([facenodeindex linked with the face ])
         """
-        if self.facesindex == None:
+        if self.facesindex is None:
             Faces_FacePoint_Indexes = []
 
             hdf_ds = gdal.Open(self.path, gdal.GA_ReadOnly)
@@ -768,7 +767,7 @@ class PostTelemacHDFParser(PostTelemacAbstractParser):
         """
         # print 'getElemRawTimeSerie'
 
-        if self.facesrawvalues == None:
+        if self.facesrawvalues is None:
             self.getElemRawValue(0)
 
         result = []
