@@ -156,7 +156,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Le résultats est en centimètre par heure.</string>
+         <string>Le résultat est en centimètre par heure.</string>
         </property>
        </widget>
       </item>
@@ -293,7 +293,7 @@
               <property name="title">
                <string>Méthode old-school</string>
               </property>
-              <layout class="QVBoxLayout" name="verticalLayout">
+              <layout class="QGridLayout" name="gridLayout_8" rowstretch="0,1" columnstretch="3,1">
                <property name="leftMargin">
                 <number>5</number>
                </property>
@@ -306,7 +306,30 @@
                <property name="bottomMargin">
                 <number>5</number>
                </property>
-               <item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_7">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Critère de hauteur d'eau minimale</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QDoubleSpinBox" name="doubleSpinBox_alea_Haleamin">
+                 <property name="singleStep">
+                  <double>0.050000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>0.050000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0" colspan="2">
                 <widget class="QTextBrowser" name="textBrowser">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">

@@ -119,6 +119,7 @@ class runAlea(QObject):
         self.tool = tool
         self.critere1 = self.tool.doubleSpinBox_alea_H1.value() if self.tool.doubleSpinBox_alea_H1.isEnabled() else -1
         self.critere2 = self.tool.doubleSpinBox_alea_H2.value()
+        self.critereHAlea = self.tool.doubleSpinBox_alea_Haleamin.value()
         self.intensite = True
         self.direction = True
         self.submersion = self.tool.doubleSpinBox_alea_H2.value()
@@ -307,8 +308,8 @@ class runAlea(QObject):
                 posFaible = np.where(
                     np.logical_and(
                         np.logical_and(
-                            np.greater(var_max[self.selafinlayer.hydrauparser.parametreh], 0),
-                            np.greater(vit, 0),
+                            np.greater(var_max[self.selafinlayer.hydrauparser.parametreh], self.critereHAlea),
+                            np.greater(vit, self.critereHAlea),
                         ),
                         np.logical_and(
                             np.less(var_max[self.selafinlayer.hydrauparser.parametreh], 0.5), np.less(vit, 0.5)
@@ -318,8 +319,8 @@ class runAlea(QObject):
                 posModere = np.where(
                     np.logical_and(
                         np.logical_and(
-                            np.greater(var_max[self.selafinlayer.hydrauparser.parametreh], 0),
-                            np.greater(vit, 0),
+                            np.greater(var_max[self.selafinlayer.hydrauparser.parametreh], self.critereHAlea),
+                            np.greater(vit, self.critereHAlea),
                         ),
                         np.logical_or(
                             np.logical_and(
@@ -351,9 +352,7 @@ class runAlea(QObject):
                 var_alea_max[pos_aleaMax] = var_alea[pos_aleaMax]
 
         if self.critere1 > -1:
-            print(self.critere1)
-            print(self.critere2)
-            var_Vmontee = (self.critere1 - self.critere2) / (var_Vm1 - var_Vm2) * 6000
+            var_Vmontee = (self.critere1 - self.critere2) / (var_Vm1 - var_Vm2) * 360000
             # Conversion m/s en cm/min
         else:
             var_Vmontee = (
