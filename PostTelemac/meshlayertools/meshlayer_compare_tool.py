@@ -24,7 +24,7 @@ Versions :
 """
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtCore import QObject
+from qgis.PyQt.QtCore import Qt, QObject
 
 from .meshlayer_abstract_tool import *
 
@@ -196,7 +196,7 @@ class CompareTool(AbstractMeshLayerTool, FORM_CLASS):
                 self.meshlayer.updateSelafinValuesEmit()
                 self.meshlayer.triggerRepaint()
         except Exception as e:
-            self.status.emit("compare tool : " + str(e))
+            self.propertiesdialog.errorMessage("compare tool : " + str(e))
 
 
 class getCompareValue(QObject):
