@@ -38,6 +38,7 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from qgis.core import (
+    QgsApplication,
     QgsCoordinateReferenceSystem,
     QgsStyle,
     QgsSymbolLayerUtils,
@@ -98,8 +99,8 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
         self.debugtoprint = False  # for test - enable dialog out in console if set True
 
         # setup user dir in home
-        homedir = os.path.expanduser("~")
-        self.posttelemacdir = os.path.join(homedir, ".PostTelemac")
+        profiledir = os.path.normpath(QgsApplication.qgisSettingsDirPath())
+        self.posttelemacdir = os.path.join(profiledir, "PostTelemac")
         if not os.path.isdir(self.posttelemacdir):
             shutil.copytree(os.path.join(os.path.dirname(__file__), "..", "config"), self.posttelemacdir)
 
