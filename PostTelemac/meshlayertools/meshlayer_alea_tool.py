@@ -94,11 +94,16 @@ class AleaTool(AbstractMeshLayerTool, FORM_CLASS):
         self.initclass.status.connect(self.propertiesdialog.logMessage)
         self.initclass.finished1.connect(self.chargerSelafin)
         self.initclass.start(self.meshlayer, self)
-
+        
+        self.propertiesdialog.normalMessage("Méthode de calcul choisie : {}".format(self.comboBox_alea_calcul.currentText()))
         self.propertiesdialog.normalMessage("Le calcul de l'aléa a débuté... - Progression onglet Log")
 
     def methodeCalculChanged(self, index):
         self.stackedWidget.setCurrentIndex(index)
+        if index == 0:
+            self.Haleamin = self.doubleSpinBox_aleaclassique_Haleamin
+        elif index == 2:
+            self.Haleamin = self.doubleSpinBox_venues_Haleamin
 
     def critereChanged(self, index):
         self.doubleSpinBox_alea_H1.setEnabled(index)
@@ -117,9 +122,10 @@ class runAlea(QObject):
         QObject.__init__(self)
         self.selafinlayer = selafinlayer
         self.tool = tool
+        self.methodeCalcul = self.tool.comboBox_alea_calcul.currentIndex()
         self.critere1 = self.tool.doubleSpinBox_alea_H1.value() if self.tool.doubleSpinBox_alea_H1.isEnabled() else -1
         self.critere2 = self.tool.doubleSpinBox_alea_H2.value()
-        self.critereHAlea = self.tool.doubleSpinBox_alea_Haleamin.value()
+        self.critereHAlea = self.tool.Haleamin.value()
         self.intensite = True
         self.direction = True
         self.submersion = self.tool.doubleSpinBox_alea_H2.value()
@@ -225,6 +231,7 @@ class runAlea(QObject):
                 var_max = self.selafinlayer.hydrauparser.getValues(num_time)
 
                 var_alea = np.array([0.0] * self.selafinlayer.hydrauparser.facesnodescount)
+                var_alea_max = np.array([0.0] * self.selafinlayer.hydrauparser.facesnodescount)
 
                 var_Vmontee = np.array([0.0] * self.selafinlayer.hydrauparser.facesnodescount)
 
@@ -236,8 +243,6 @@ class runAlea(QObject):
                 var_Vm2 = np.array([np.nan] * self.selafinlayer.hydrauparser.facesnodescount)
                 pos_Vm2 = np.where(var_max[self.selafinlayer.hydrauparser.parametreh] >= self.critere2)[0]
                 var_Vm2[pos_Vm2] = timeslf
-
-                var_alea_max = np.array([0.0] * self.selafinlayer.hydrauparser.facesnodescount)
 
                 if self.submersion > -1:
                     var_sub = np.array([np.nan] * self.selafinlayer.hydrauparser.facesnodescount)
@@ -305,51 +310,24 @@ class runAlea(QObject):
                 ][pos_vmax]
 
                 ## Aléa
-                posFaible = np.where(
-                    np.logical_and(
-                        np.logical_and(
-                            np.greater(var_max[self.selafinlayer.hydrauparser.parametreh], self.critereHAlea),
-                            np.greater(vit, self.critereHAlea),
-                        ),
-                        np.logical_and(
-                            np.less(var_max[self.selafinlayer.hydrauparser.parametreh], 0.5), np.less(vit, 0.5)
-                        ),
+                if self.methodeCalcul == 0:  ## Méthode classique
+                    var_alea_max = self.calculAleaClassique(
+                        var_alea,
+                        var_alea_max,
+                        self.critereHAlea,
+                        var_max[self.selafinlayer.hydrauparser.parametreh],
+                        vit,
                     )
-                )[0]
-                posModere = np.where(
-                    np.logical_and(
-                        np.logical_and(
-                            np.greater(var_max[self.selafinlayer.hydrauparser.parametreh], self.critereHAlea),
-                            np.greater(vit, self.critereHAlea),
-                        ),
-                        np.logical_or(
-                            np.logical_and(
-                                np.less(var_max[self.selafinlayer.hydrauparser.parametreh], 1),
-                                np.logical_and(np.greater_equal(vit, 0.5), np.less(vit, 1)),
-                            ),
-                            np.logical_and(
-                                np.less(vit, 0.5),
-                                np.logical_and(
-                                    np.greater_equal(var_max[self.selafinlayer.hydrauparser.parametreh], 0.5),
-                                    np.less(var_max[self.selafinlayer.hydrauparser.parametreh], 1),
-                                ),
-                            ),
-                        ),
+                elif self.methodeCalcul == 1:  ## Méthode PPRI 2019
+                    continue  ## Pas implémentée pour le moment
+                elif self.methodeCalcul == 2:  ## Calcul des venues d'eau dangereuse pour EDD
+                    var_alea_max = self.calculVenuesEauDangereuses(
+                        var_alea,
+                        var_alea_max,
+                        self.critereHAlea,
+                        var_max[self.selafinlayer.hydrauparser.parametreh],
+                        vit,
                     )
-                )[0]
-                posFort = np.where(
-                    np.logical_or(
-                        np.greater_equal(var_max[self.selafinlayer.hydrauparser.parametreh], 1),
-                        np.greater_equal(vit, 1),
-                    )
-                )[0]
-
-                var_alea[posFaible] = 1
-                var_alea[posModere] = 2
-                var_alea[posFort] = 3
-
-                pos_aleaMax = np.where(var_alea > var_alea_max)[0]
-                var_alea_max[pos_aleaMax] = var_alea[pos_aleaMax]
 
         if self.critere1 > -1:
             var_Vmontee = (self.critere1 - self.critere2) / (var_Vm1 - var_Vm2) * 360000
@@ -408,6 +386,107 @@ class runAlea(QObject):
         resOut.close()
 
         self.finished.emit(self.name_res_out)
+
+    def calculAleaClassique(self, var_alea, var_alea_max, critereHAlea, h, v):
+        posFaible = np.where(
+            np.logical_and(
+                np.logical_and(
+                    np.greater(h, critereHAlea),
+                    np.greater(v, critereHAlea),
+                ),
+                np.logical_and(np.less(h, 0.5), np.less(v, 0.5)),
+            )
+        )[0]
+        posModere = np.where(
+            np.logical_and(
+                np.logical_and(
+                    np.greater(h, critereHAlea),
+                    np.greater(v, critereHAlea),
+                ),
+                np.logical_or(
+                    np.logical_and(
+                        np.less(h, 1),
+                        np.logical_and(np.greater_equal(v, 0.5), np.less(v, 1)),
+                    ),
+                    np.logical_and(
+                        np.less(v, 0.5),
+                        np.logical_and(
+                            np.greater_equal(h, 0.5),
+                            np.less(h, 1),
+                        ),
+                    ),
+                ),
+            )
+        )[0]
+        posFort = np.where(
+            np.logical_or(
+                np.greater_equal(h, 1),
+                np.greater_equal(v, 1),
+            )
+        )[0]
+
+        var_alea[posFaible] = 1
+        var_alea[posModere] = 2
+        var_alea[posFort] = 3
+
+        pos_aleaMax = np.where(var_alea > var_alea_max)[0]
+        var_alea_max[pos_aleaMax] = var_alea[pos_aleaMax]
+
+        return var_alea_max
+
+    def calculVenuesEauDangereuses(self, var_alea, var_alea_max, critereHAlea, h, v):
+        posNonDanger = np.where(
+            np.logical_and(
+                np.logical_and(
+                    np.greater(h, critereHAlea),
+                    np.greater(v, critereHAlea),
+                ),
+                np.logical_and(np.less(h, 0.5), np.less(v, 0.5)),
+            )
+        )[0]
+        posMDanger = np.where(
+            np.logical_and(
+                np.logical_and(
+                    np.greater(h, critereHAlea),
+                    np.greater(v, critereHAlea),
+                ),
+                np.logical_and(
+                    np.logical_and(
+                        np.greater_equal(h, 0.5),
+                        np.less(h, 1),
+                    ),
+                    np.less(v, 0.5),
+                ),
+            )
+        )[0]
+        posDanger = np.where(
+            np.logical_or(
+                np.logical_and(
+                    np.less(h, 2),
+                    np.greater_equal(h, 1),
+                ),
+                np.logical_and(
+                    np.less(v, 2),
+                    np.greater_equal(v, 0.5),
+                ),
+            ),
+        )[0]
+        posPartDanger = np.where(
+            np.logical_or(
+                np.greater_equal(h, 2),
+                np.greater_equal(v, 2),
+            )
+        )[0]
+
+        var_alea[posNonDanger] = 1
+        var_alea[posMDanger] = 2
+        var_alea[posDanger] = 3
+        var_alea[posPartDanger] = 4
+
+        pos_aleaMax = np.where(var_alea > var_alea_max)[0]
+        var_alea_max[pos_aleaMax] = var_alea[pos_aleaMax]
+
+        return var_alea_max
 
     status = pyqtSignal(str)
     finished = pyqtSignal(str)
