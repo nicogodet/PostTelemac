@@ -173,8 +173,8 @@ class MeshRenderer(AbstractMeshRenderer):
 
         self.cmap_contour_leveled = self.colormanager.fromColorrampAndLevels(self.lvl_contour, cm_raw)
 
-        if iface is not None:
-            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        # if iface is not None:
+            # iface.layerTreeView().refreshLayerLegend()(self.meshlayer.id())
 
         if isinstance(self.cmap_contour_leveled, list) and len(self.lvl_contour) > 0:
             colortemp = np.array(self.cmap_contour_leveled)
@@ -212,10 +212,10 @@ class MeshRenderer(AbstractMeshRenderer):
     def change_cm_vel(self, cm_raw):
         cm = self.colormanager.arrayStepRGBAToCmap(cm_raw)
         self.cmap_mpl_vel, self.norm_mpl_vel, self.color_mpl_vel = self.colormanager.changeColorMap(cm, self.lvl_vel)
-        try:
-            iface.legendInterface().refreshLayerSymbology(self.meshlayer)
-        except Exception as e:
-            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        # try:
+            # iface.legendInterface().refreshLayerSymbology(self.meshlayer)
+        # except Exception as e:
+            # iface.layerTreeView().refreshLayerLegend()(self.meshlayer.id())
         # transparency - alpha changed
         if self.color_mpl_vel.any() != None:
             colortemp = np.array(self.color_mpl_vel.tolist())
@@ -227,8 +227,8 @@ class MeshRenderer(AbstractMeshRenderer):
         if self.meshlayer.draw:
             self.meshlayer.triggerRepaint()
         self.cmap_vel_leveled = self.colormanager.fromColorrampAndLevels(self.lvl_vel, cm_raw)
-        if iface is not None:
-            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        # if iface is not None:
+            # iface.layerTreeView().refreshLayerLegend()(self.meshlayer.id())
 
         if isinstance(self.cmap_vel_leveled, list) and len(self.lvl_vel) > 0:
             colortemp = np.array(self.cmap_vel_leveled)

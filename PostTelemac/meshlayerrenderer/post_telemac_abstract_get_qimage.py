@@ -155,8 +155,8 @@ class AbstractMeshRenderer(QObject):
         """
         self.lvl_contour = tab
         self.change_cm_contour(self.cmap_contour_raw)
-        if not iface is None:
-            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        # if not iface is None:
+            # iface.layerTreeView().refreshLayerLegend()(self.meshlayer.id())
 
         self.meshlayer.propertiesdialog.lineEdit_levelschoosen.setText(str(self.lvl_contour))
         self.meshlayer.triggerRepaint()
@@ -167,8 +167,8 @@ class AbstractMeshRenderer(QObject):
         """
         self.lvl_vel = tab
         self.change_cm_vel(self.cmap_vel_raw)
-        if not iface is None:
-            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        # if not iface is None:
+            # iface.layerTreeView().refreshLayerLegend()(self.meshlayer.id())
 
         self.meshlayer.propertiesdialog.lineEdit_levelschoosen.setText(str(self.lvl_vel))
         self.meshlayer.triggerRepaint()

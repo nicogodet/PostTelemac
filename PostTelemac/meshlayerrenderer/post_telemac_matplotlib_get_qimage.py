@@ -83,8 +83,8 @@ class MeshRenderer(AbstractMeshRenderer):
         self.cmap_mpl_contour, self.norm_mpl_contour, self.cmap_contour_leveled = self.colormanager.changeColorMap(
             cm, self.lvl_contour
         )
-        if iface is not None:
-            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        # if iface is not None:
+            # iface.layerTreeView().refreshLayerLegend()(self.meshlayer.id())
         if isinstance(self.cmap_contour_leveled, np.ndarray):
             colortemp = np.array(self.cmap_contour_leveled)
             for i in range(len(colortemp)):
@@ -103,8 +103,8 @@ class MeshRenderer(AbstractMeshRenderer):
         """
         cm = self.colormanager.arrayStepRGBAToCmap(cm_raw)
         self.cmap_mpl_vel, self.norm_mpl_vel, self.cmap_vel_leveled = self.colormanager.changeColorMap(cm, self.lvl_vel)
-        if iface is not None:
-            iface.layerTreeView().refreshLayerSymbology(self.meshlayer.id())
+        # if iface is not None:
+            # iface.layerTreeView().refreshLayerLegend()(self.meshlayer.id())
         if isinstance(self.cmap_vel_leveled, np.ndarray):
             colortemp = np.array(self.cmap_vel_leveled.tolist())
             for i in range(len(colortemp)):

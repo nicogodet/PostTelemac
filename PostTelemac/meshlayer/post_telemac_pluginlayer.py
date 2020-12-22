@@ -346,8 +346,8 @@ class SelafinPluginLayer(QgsPluginLayer):
         # legend = SelafinPluginLegend(self)
         # self.setLegend(legend)
 
-        if iface is not None:  # toujours utile ?
-            iface.layerTreeView().refreshLayerSymbology(self.id())
+        # if iface is not None:  # toujours utile ?
+            # iface.layerTreeView().refreshLayerLegend()(self.id())
 
         self.canvas.setExtent(self.extent())
 
@@ -756,53 +756,85 @@ class SelafinPluginLayer(QgsPluginLayer):
         pass
 
 
-# class SelafinPluginLegend(qgis.core.QgsMapLayerLegend): #C'est la façon de faire
-# def __init__(self, meshlayer, parent=None):
-# qgis.core.QgsMapLayerLegend.__init__(self, parent)
-# self.nodes = []
-# self.meshlayer = meshlayer
+class SelafinPluginLegend(QgsMapLayerLegend): #C'est la façon de faire
+    def __init__(self, meshlayer, parent=None):
+        QgsMapLayerLegend.__init__(self, parent)
+        self.nodes = []
+        self.meshlayer = meshlayer
 
-# def createLayerTreeModelLegendNodes(self, nodeLayer):
-# # return [QgsSimpleLegendNode(nodeLayer, self.text, self.icon, self)]
-# #    def generateSymbologyItems(self, iconSize): #NEED FIX API BREAK
-# try:
-# if (
-# self.meshlayer.hydrauparser != None
-# and self.meshlayer.hydrauparser.hydraufile != None
-# and self.meshlayer.meshrenderer.cmap_contour_leveled != None
-# ):
-# self.nodes.append(qgis.core.QgsLayerTreeModelLegendNode(nodeLayer))
-# for i in range(len(self.meshlayer.meshrenderer.lvl_contour) - 1):
-# pix = QtGui.QPixmap()
-# text = str(self.meshlayer.meshrenderer.lvl_contour[i]) + "/" + str(self.meshlayer.meshrenderer.lvl_contour[i + 1])
-# r, g, b, a = (
-# self.meshlayer.meshrenderer.cmap_contour_leveled[i][0] * 255,
-# self.meshlayer.meshrenderer.cmap_contour_leveled[i][1] * 255,
-# self.meshlayer.meshrenderer.cmap_contour_leveled[i][2] * 255,
-# self.meshlayer.meshrenderer.cmap_contour_leveled[i][3] * 255,
-# )
-# pix.fill(QtGui.QColor(r, g, b, a))
-# #node = qgis.core.QgsRasterSymbolLegendNode(nodeLayer, QtGui.QColor(r, g, b, a), text)
-# node = qgis.core.QgsSimpleLegendNode(nodeLayer, text, QtGui.QIcon(pix))
-# self.nodes.append(node)
+    def createLayerTreeModelLegendNodes(self, nodeLayer):
+        pass
+        # return [QgsSimpleLegendNode(nodeLayer, self.text, self.icon, self)]
+        
+    def generateSymbologyItems(self, iconSize): #NEED FIX API BREAK
+        try:
+            if (
+                self.meshlayer.hydrauparser != None
+                and self.meshlayer.hydrauparser.hydraufile != None
+                and self.meshlayer.meshrenderer.cmap_contour_leveled != None
+            ):
+                self.nodes.append(qgis.core.QgsLayerTreeModelLegendNode(nodeLayer))
+                for i in range(len(self.meshlayer.meshrenderer.lvl_contour) - 1):
+                    pix = QtGui.QPixmap()
+                    text = str(self.meshlayer.meshrenderer.lvl_contour[i]) + "/" + str(self.meshlayer.meshrenderer.lvl_contour[i + 1])
+                    r, g, b, a = (
+                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][0] * 255,
+                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][1] * 255,
+                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][2] * 255,
+                        self.meshlayer.meshrenderer.cmap_contour_leveled[i][3] * 255,
+                    )
+                    pix.fill(QtGui.QColor(r, g, b, a))
+                    #node = qgis.core.QgsRasterSymbolLegendNode(nodeLayer, QtGui.QColor(r, g, b, a), text)
+                    node = qgis.core.QgsSimpleLegendNode(nodeLayer, text, QtGui.QIcon(pix))
+                    self.nodes.append(node)
 
-# # if self.meshlayer.propertiesdialog.groupBox_schowvel.isChecked() :
-# # lst.append((self.tr("VELOCITY"), QtGui.QPixmap()))
-# # for i in range(len(self.meshrenderer.lvl_vel) - 1):
-# # pix = QtGui.QPixmap(iconSize)
-# # r, g, b, a = (
-# # self.meshlayer.meshrenderer.cmap_vel_leveled[i][0] * 255,
-# # self.meshlayer.meshrenderer.cmap_vel_leveled[i][1] * 255,
-# # self.meshlayer.meshrenderer.cmap_vel_leveled[i][2] * 255,
-# # self.meshlayer.meshrenderer.cmap_vel_leveled[i][3] * 255,
-# # )
-# # pix.fill(QtGui.QColor(r, g, b, a))
-# # lst.append(
-# # (str(self.meshrenderer.lvl_vel[i]) + "/" + str(self.meshrenderer.lvl_vel[i + 1]), pix)
-# # )
-# return self.nodes
-# else:
-# return []
-# except Exception as e:
-# self.meshlayer.propertiesdialog.errorMessage("SelafinPluginLegend : " + str(e))
-# return []
+                return self.nodes
+            else:
+                return []
+        except Exception as e:
+            self.meshlayer.propertiesdialog.errorMessage("SelafinPluginLegend : " + str(e))
+            return []
+
+class SelafinPluginLegendNode(QgsLayerTreeModelLegendNode):
+    def __init__(self, nodeLayer, parent, legend):
+        QgsLayerTreeModelLegendNode.__init__(self, nodeLayer, parent)
+        self.text = ""
+        self.__legend = legend
+    
+    def data(self, role):
+        if role == Qt.DisplayRole or role == Qt.EditRole:
+            return self.text
+        elif role  == Qt.DecorationRole:
+            return self.__legend.image()
+        else:
+            return None
+
+    def draw(self, settings, ctx):
+        symbolLabelFont = settings.style(QgsComposerLegendStyle.SymbolLabel).font()
+        textHeight = settings.fontHeightCharacterMM(symbolLabelFont, '0');
+
+        im = QgsLayerTreeModelLegendNode.ItemMetrics()
+        context = QgsRenderContext()
+        context.setScaleFactor( settings.dpi() / 25.4 )
+        context.setRendererScale( settings.mapScale() )
+        context.setMapToPixel( QgsMapToPixel( 1 / ( settings.mmPerMapUnit() * context.scaleFactor() ) ) )
+
+        sz = self.__legend.sceneRect().size()
+        aspect = sz.width() / sz.height()
+        h = textHeight*16
+        w = aspect*h
+        im.symbolSize = QSizeF(w, h)
+        im.labeSize =  QSizeF(0, 0)
+        if ctx:
+            currentXPosition = ctx.point.x()
+            currentYCoord = ctx.point.y() #\
+                    #+ settings.symbolSize().height()/2;
+            ctx.painter.save()
+            ctx.painter.translate(currentXPosition, currentYCoord)
+            rect = QRectF()
+            rect.setSize(QSizeF(im.symbolSize))
+            self.__legend.render(ctx.painter, rect)
+            #ctx.painter.drawImage(0, 0, self.image)
+            ctx.painter.restore()
+        return im
+
