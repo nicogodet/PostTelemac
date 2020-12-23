@@ -57,6 +57,9 @@ class AleaTool(AbstractMeshLayerTool, FORM_CLASS):
         self.spinBox_alea_start.setMaximum(maxiter)
         self.spinBox_alea_end.setMaximum(maxiter)
         self.spinBox_alea_end.setValue(maxiter)
+        
+        self.methodeCalculChanged(self.comboBox_alea_calcul.currentIndex())
+        self.critereChanged(self.comboBox_alea_Vmontee.currentIndex())
 
         try:
             self.comboBox_alea_calcul.currentIndexChanged.disconnect()
@@ -184,13 +187,7 @@ class runAlea(QObject):
                 variables.append(str(param[1]))
                 units.append("")
 
-        ## Pour DEBUG
-        variables.append("T1")
-        units.append("S")
-        variables.append("T2")
-        units.append("S")
-        ## /Pour DEBUG
-        variables.append("VITESSE DE MONTEE")
+        variables.append("VIT DE MONTEE")
         units.append("CM/H")
         variables.append("ALEA")
         units.append("")
@@ -344,10 +341,6 @@ class runAlea(QObject):
             0.0,
         )
 
-        ## Pour DEBUG
-        var_max = np.vstack((var_max, np.nan_to_num(var_Vm1)))
-        var_max = np.vstack((var_max, np.nan_to_num(var_Vm2)))
-        ## /Pour DEBUB
         var_max = np.vstack((var_max, var_Vmontee))
         var_max = np.vstack((var_max, var_alea_max))
 
