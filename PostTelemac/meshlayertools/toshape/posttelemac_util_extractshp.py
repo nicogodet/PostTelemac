@@ -373,40 +373,45 @@ class SelafinContour2Shp(QObject):
             if len(f2geom.validateGeometry()) != 0:
                 f2geom = f2geom.buffer(0.00, 5)
             tab.append([f2geom.area(), f2geom])
-
-        if len(tab) > 0:
-            tab.sort(reverse=True)
-            # Iteration pour enlever les inner des outers - coeur du script
-            for k in range(len(tab)):
-                try:
-                    if int(k) % 100 == 0 and k != 0:
-                        self.verboseOutput(self.slf_param[1], lvltemp1, outer.id(), counttotal, k, len(ids))
-                    if tab[k][0] >= fet1surface:
-                        continue
-                    else:
-                        ring = self.do_ring(tab[k][1])
-                        tt1 = outergeom.addRing(ring)
-                        if tt1 == 5 and outergeom.intersects(tab[k][1]):
-                            outergeom = outergeom.difference(tab[k][1])
-                except Exception as e:
-                    self.writeOutput("Erreur creation ring : " + str(e))
-                    return outer
-
-        if len(outergeom.validateGeometry()) != 0:
-            outergeomtemp = outergeom.buffer(0.01, 5)
-            if outergeomtemp.area() > outergeom.area():
-                outergeom = outergeomtemp
-            else:
-                self.writeOutput("Warning : geometry " + str(outer.id()) + " not valid after inserting rings")
-
-        if self.xform:
-            outergeom.transform(self.xform)
-
-        fet = QgsFeature()
-        fet.setGeometry(outergeom)
-        fet.setAttributes([lvltemp1[0], lvltemp1[1]])
-
-        return fet
+        try:
+            if len(tab) > 0:
+                tab.sort(reverse=True)
+                # Iteration pour enlever les inner des outers - coeur du script
+                for k in range(len(tab)):
+                    try:
+                        if int(k) % 100 == 0 and k != 0:
+                            self.verboseOutput(self.slf_param[1], lvltemp1, outer.id(), counttotal, k, len(ids))
+                        if tab[k][0] >= fet1surface:
+                            continue
+                        else:
+                            ring = self.do_ring(tab[k][1])
+                            tt1 = outergeom.addRing(ring)
+                            if tt1 == 5 and outergeom.intersects(tab[k][1]):
+                                outergeom = outergeom.difference(tab[k][1])
+                    except Exception as e:
+                        self.writeOutput("Erreur creation ring : " + str(e))
+                        return outer
+    
+            if len(outergeom.validateGeometry()) != 0:
+                outergeomtemp = outergeom.buffer(0.01, 5)
+                if outergeomtemp.area() > outergeom.area():
+                    outergeom = outergeomtemp
+                else:
+                    self.writeOutput("Warning : geometry " + str(outer.id()) + " not valid after inserting rings")
+    
+            if self.xform:
+                outergeom.transform(self.xform)
+    
+            fet = QgsFeature()
+            fet.setGeometry(outergeom)
+            fet.setAttributes([lvltemp1[0], lvltemp1[1]])
+    
+            return fet
+            
+        except Exception as e:
+            print(tab)
+            self.raiseError(e)
+            return outer
 
     def do_ring(self, geom3):
         ring = []
