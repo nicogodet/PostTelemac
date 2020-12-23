@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>492</width>
-    <height>686</height>
+    <height>723</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -54,6 +54,18 @@
     </size>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_4">
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
+    <property name="topMargin">
+     <number>5</number>
+    </property>
+    <property name="rightMargin">
+     <number>5</number>
+    </property>
+    <property name="bottomMargin">
+     <number>5</number>
+    </property>
     <item>
      <widget class="QScrollArea" name="scrollArea">
       <property name="sizePolicy">
@@ -73,8 +85,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>472</width>
-         <height>644</height>
+         <width>480</width>
+         <height>689</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -1713,7 +1725,7 @@ translation</string>
                </property>
                <widget class="QTreeWidget" name="treeWidget_utils">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -1721,13 +1733,13 @@ translation</string>
                 <property name="minimumSize">
                  <size>
                   <width>150</width>
-                  <height>0</height>
+                  <height>200</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
                   <width>150</width>
-                  <height>550</height>
+                  <height>1000</height>
                  </size>
                 </property>
                 <property name="acceptDrops">
@@ -1792,7 +1804,7 @@ translation</string>
                </widget>
                <widget class="QStackedWidget" name="stackedWidget">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -1806,7 +1818,7 @@ translation</string>
                 <property name="maximumSize">
                  <size>
                   <width>16777215</width>
-                  <height>550</height>
+                  <height>1000</height>
                  </size>
                 </property>
                 <property name="frameShape">
