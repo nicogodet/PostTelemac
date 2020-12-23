@@ -310,23 +310,24 @@ class SelafinPluginLayer(QgsPluginLayer):
 
         # Apply renderer
 
-        if self.propertiesdialog.comboBox_levelstype.currentIndex() == 0:
-            self.propertiesdialog.color_palette_changed(type="contour")  # initialize colors in renderer
-            self.propertiesdialog.color_palette_changed(type="velocity")  # initialize colors in renderer
-            self.meshrenderer.change_lvl_contour(self.meshrenderer.lvl_contour)
-            self.meshrenderer.change_lvl_vel(self.meshrenderer.lvl_vel)
+        # if self.propertiesdialog.comboBox_levelstype.currentIndex() == 0:
+            # self.propertiesdialog.color_palette_changed(type="contour")  # initialize colors in renderer
+            # self.propertiesdialog.color_palette_changed(type="velocity")  # initialize colors in renderer
+            # self.meshrenderer.change_lvl_contour(self.meshrenderer.lvl_contour)
+            # self.meshrenderer.change_lvl_vel(self.meshrenderer.lvl_vel)
 
-        elif self.propertiesdialog.comboBox_levelstype.currentIndex() == 1:
-            self.propertiesdialog.createstepclass()
-            self.propertiesdialog.color_palette_changed(type="contour")  # initialize colors in renderer
+        # elif self.propertiesdialog.comboBox_levelstype.currentIndex() == 1:
+            # self.propertiesdialog.createstepclass()
+            # self.propertiesdialog.color_palette_changed(type="contour")  # initialize colors in renderer
 
-        elif self.propertiesdialog.comboBox_levelstype.currentIndex() == 2:
-            self.propertiesdialog.loadMapRamp(self.parametrestoload["renderer"][3])
+        # elif self.propertiesdialog.comboBox_levelstype.currentIndex() == 2:
+            # print(self.parametrestoload["renderer"])
+            # self.propertiesdialog.loadMapRamp(self.parametrestoload["renderer"][3])
 
         # reset parametrestoload
-        self.parametrestoload["renderer"] = None
+        # self.parametrestoload["renderer"] = None
 
-        """
+        self.propertiesdialog.comboBox_levelstype.setCurrentIndex(0)
         # change colors
         self.propertiesdialog.color_palette_changed(type='contour')  # initialize colors in renderer
         self.propertiesdialog.color_palette_changed(type='velocity')  # initialize colors in renderer
@@ -334,7 +335,7 @@ class SelafinPluginLayer(QgsPluginLayer):
         # change levels
         self.meshrenderer.change_lvl_contour(self.meshrenderer.lvl_contour)
         self.meshrenderer.change_lvl_vel(self.meshrenderer.lvl_vel)
-        """
+        
 
         # final update
         self.triggerRepaint()
