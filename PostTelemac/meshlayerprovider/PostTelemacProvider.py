@@ -23,6 +23,7 @@ from qgis.PyQt.QtGui import QIcon
 from .ExtractMax_Algorithm import PostTelemacExtractMax
 from .PointsShapeTool_Algorithm import PostTelemacPointsShapeTool
 from .ContourShapeTool_Algorithm import PostTelemacContourShapeTool
+from .PostControlSections_Algorithm import PostTelemacControlSections
 
 # ExampleAlgorithmProvider
 
@@ -48,6 +49,7 @@ class PostTelemacProvider(QgsProcessingProvider):
         self.addAlgorithm(PostTelemacExtractMax())
         self.addAlgorithm(PostTelemacPointsShapeTool())
         self.addAlgorithm(PostTelemacContourShapeTool())
+        self.addAlgorithm(PostTelemacControlSections())
 
     def id(self):
         """
