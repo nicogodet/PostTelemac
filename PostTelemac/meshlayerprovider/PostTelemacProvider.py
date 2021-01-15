@@ -24,6 +24,7 @@ from .ExtractMax_Algorithm import PostTelemacExtractMax
 from .PointsShapeTool_Algorithm import PostTelemacPointsShapeTool
 from .ContourShapeTool_Algorithm import PostTelemacContourShapeTool
 from .PostControlSections_Algorithm import PostTelemacControlSections
+from .ExtractTSFromSortie_Algorithm import ExtractTSFromSortie
 
 # ExampleAlgorithmProvider
 
@@ -50,6 +51,7 @@ class PostTelemacProvider(QgsProcessingProvider):
         self.addAlgorithm(PostTelemacPointsShapeTool())
         self.addAlgorithm(PostTelemacContourShapeTool())
         self.addAlgorithm(PostTelemacControlSections())
+        self.addAlgorithm(ExtractTSFromSortie())
 
     def id(self):
         """
