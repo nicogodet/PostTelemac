@@ -74,6 +74,7 @@ category=Plugins
 icon=icons/posttelemac.png
 # experimental flag
 experimental=True
+hasProcessingProvider=yes
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
