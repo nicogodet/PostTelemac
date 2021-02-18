@@ -344,7 +344,11 @@ class PostTelemacContourShapeTool(QgsProcessingAlgorithm):
 
             for i in range(len(geom)):
                 geomtemp2.append(QgsPointXY(geom[i][0], geom[i][1]))
-            geomtemp1.append(QgsGeometry.fromPolygonXY([geomtemp2]))
+
+            geomcheck = QgsGeometry.fromPolygonXY([geomtemp2])
+            if len(geomcheck.validateGeometry()) != 0:
+                geomcheck = geomcheck.buffer(0.01, 5)
+            geomtemp1.append(geomcheck)
 
         return geomtemp1
 
@@ -377,7 +381,7 @@ class PostTelemacContourShapeTool(QgsProcessingAlgorithm):
 
         if tabLen > 0:
             totalInner = 100.0 / len(tab)
-            tab.sort(reverse=True)
+            tab.sort(reverse=True, key=lambda area: area[0])
             # Iteration pour enlever les inner des outers - coeur du script
             for k in range(tabLen):
                 try:

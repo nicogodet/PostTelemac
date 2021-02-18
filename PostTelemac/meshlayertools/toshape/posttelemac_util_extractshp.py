@@ -117,8 +117,8 @@ class SelafinContour2Shp(QObject):
         self.parserhydrau = self.meshlayer.hydrauparser
         slf = self.parserhydrau.hydraufile
         self.slf_x, self.slf_y = self.parserhydrau.getFacesNodes()
-        #self.slf_x = self.slf_x + translatex
-        #self.slf_y = self.slf_y + translatey
+        # self.slf_x = self.slf_x + translatex
+        # self.slf_y = self.slf_y + translatey
 
         self.slf_mesh = np.array(self.parserhydrau.getElemFaces())
 
@@ -346,7 +346,11 @@ class SelafinContour2Shp(QObject):
 
             for i in range(len(geom)):
                 geomtemp2.append(QgsPointXY(geom[i][0], geom[i][1]))
-            geomtemp1.append(QgsGeometry.fromPolygonXY([geomtemp2]))
+
+            geomcheck = QgsGeometry.fromPolygonXY([geomtemp2])
+            if len(geomcheck.validateGeometry()) != 0:
+                geomcheck = geomcheck.buffer(0.01, 5)
+            geomtemp1.append(geomcheck)
 
         return geomtemp1
 
@@ -375,7 +379,7 @@ class SelafinContour2Shp(QObject):
             tab.append([f2geom.area(), f2geom])
         try:
             if len(tab) > 0:
-                tab.sort(reverse=True)
+                tab.sort(reverse=True, key=lambda area: area[0])
                 # Iteration pour enlever les inner des outers - coeur du script
                 for k in range(len(tab)):
                     try:
@@ -391,26 +395,25 @@ class SelafinContour2Shp(QObject):
                     except Exception as e:
                         self.writeOutput("Erreur creation ring : " + str(e))
                         return outer
-    
+
             if len(outergeom.validateGeometry()) != 0:
                 outergeomtemp = outergeom.buffer(0.01, 5)
                 if outergeomtemp.area() > outergeom.area():
                     outergeom = outergeomtemp
                 else:
                     self.writeOutput("Warning : geometry " + str(outer.id()) + " not valid after inserting rings")
-    
+
             if self.xform:
                 outergeom.transform(self.xform)
-    
+
             fet = QgsFeature()
             fet.setGeometry(outergeom)
             fet.setAttributes([lvltemp1[0], lvltemp1[1]])
-    
+
             return fet
-            
+
         except Exception as e:
-            print(tab)
-            self.raiseError(e)
+            self.raiseError("InsertRinginFeature : " + str(e))
             return outer
 
     def do_ring(self, geom3):
