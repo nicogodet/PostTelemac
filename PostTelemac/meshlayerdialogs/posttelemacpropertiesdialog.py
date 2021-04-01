@@ -213,7 +213,7 @@ class PostTelemacPropertiesDialog(QDockWidget, FORM_CLASS):
             self.comboBox_time.setCurrentIndex(tempstemp)
             # transparency
             self.horizontalSlider_transp.setEnabled(True)
-            self.horizontalSlider_transp.setValue(alphatemp)
+            self.horizontalSlider_transp.setValue(int(alphatemp))
             # crs
             if self.meshlayer.crs().authid():
                 self.label_selafin_crs.setText(self.meshlayer.crs().authid())
